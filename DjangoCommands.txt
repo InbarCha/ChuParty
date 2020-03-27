@@ -6,3 +6,12 @@ start Django project:
 start Django app (inside Django project):
     cd {Chuparty_server directory}
     python manage.py startapp {app_name}
+
+//-------------------------------------
+When changing something in frontend:
+    cd frontend
+    npm run dev
+
+To start server:
+    (from frontend folder)
+    python .\..\manage.py runserver
