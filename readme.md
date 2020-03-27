@@ -2,5 +2,5 @@
 College of Management - Academic Studies
 
 Client: React Javascript <br/>
-Server: Django <br/>
+Server: Django (python 3.7) <br/>
 DB: MongoDB 

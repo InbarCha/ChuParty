@@ -1,4 +1,4 @@
- pip install Django
+pip install Django
 
 start Django project:
     django-admin startproject ChuParty_server
