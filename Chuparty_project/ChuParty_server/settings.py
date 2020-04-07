@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
-import mongoengine
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -75,22 +74,12 @@ WSGI_APPLICATION = 'ChuParty_server.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
-
 DATABASES = {
-    'default' : {
-        'ENGINE': '',
-    },
+    'default': {
+        'ENGINE': 'djongo',
+        'NAME': 'chuparty_db',
+    }
 }
-MONGO_DATABASE_HOST = 'mongodb+srv://Chuparty_Admin:1234QA5678@chupartycluster-qqxd1.mongodb.net/chuparty_db?retryWrites=true&w=majority'
-mongoengine.connect(host=MONGO_DATABASE_HOST)
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators

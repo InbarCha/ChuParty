@@ -1,0 +1,2 @@
+mongodump --db chuparty_db --gzip -o C:\Users\Inbar\Desktop\Final_Year_Project\ChuPartyGit\DB
+mongorestore --gzip --db --drop chuparty_db C:\Users\Inbar\Desktop\Final_Year_Project\ChuPartyGit\DB\chuparty_db
