@@ -8,18 +8,18 @@ DB: MongoDB
 ## Django Commands
 pip install Django
 
-<h2> start Django project: </h2>
+**start Django project:** <br/>
     django-admin startproject ChuParty_server
 
-start Django app (inside Django project):<br/>
+**start Django app (inside Django project):**<br/>
     cd {Chuparty_server directory}<br/>
     python manage.py startapp {app_name}
 
 //-------------------------------------
-When changing something in frontend:<br/>
+**When changing something in frontend:**<br/>
     cd frontend<br/>
     npm run dev
 
-To start server:<br/>
+**To start server:**<br/>
     (from frontend folder)<br/>
     python .\..\manage.py runserver
