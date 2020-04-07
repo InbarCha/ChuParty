@@ -15,7 +15,6 @@ pip install Django
     cd {Chuparty_server directory}<br/>
     python manage.py startapp {app_name}
 
-//-------------------------------------
 **When changing something in frontend:**<br/>
     cd frontend<br/>
     npm run dev
