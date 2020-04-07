@@ -8,7 +8,7 @@ DB: MongoDB
 ## Django Commands
 pip install Django
 
-start Django project:<br/>
+<h2> start Django project: <h2>
     django-admin startproject ChuParty_server
 
 start Django app (inside Django project):<br/>
