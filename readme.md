@@ -6,7 +6,7 @@ Server: Django (python 3.7) <br/>
 DB: MongoDB 
 
 ## Django Commands
-'''pip install Django'''
+pip install Django
 
 start Django project:<br/>
     django-admin startproject ChuParty_server
