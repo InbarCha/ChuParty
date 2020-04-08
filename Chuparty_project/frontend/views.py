@@ -4,10 +4,21 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
 
+
+def parseRequestBody(request):
+    body_unicode = request.body.decode('utf-8')
+    return json.loads(body_unicode)
+
+
 # Create your views here.
 def index(request):                
     return render(request, 'frontend/index.html')
 
+######################################################
+# getSubjects()
+# method: GET
+# Returns all the existing subjects in the DB
+#####################################################
 def getSubjects(request):
     if request.method == "GET": 
         subjectsList = list(Subject.objects.values())
@@ -120,6 +131,18 @@ def setCourse(request):
         return render(request, 'frontend/index.html')
 
 
-def parseRequestBody(request):
-    body_unicode = request.body.decode('utf-8')
-    return json.loads(body_unicode)
+######################################################
+# getCourses()
+# method: GET
+# Returns all the existing subjects in the DB
+#
+# DOESN'T WORK YET, NEED TO FIND HOW TO JSON-SERIALIZE 'SUBJECTS' QUERYSET INSIDE THE COURSE
+#####################################################
+def getCourses(request):
+    if request.method == "GET": 
+        coursesList = list(Course.objects.values())
+        print (coursesList)
+        #return JsonResponse(coursesList, safe=False)
+
+    return render(request, 'frontend/index.html')
+
