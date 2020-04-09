@@ -174,6 +174,41 @@ def getCourses(request):
                 )
 
 
+
+
+######################################################
+# setSchool()
+# method: POST
+# POST body example:
+# {
+# 	"name": "Colman",
+# 	"courses": [
+# 		{
+# 			"name" : "Advanced Programming",
+# 			"subjects": [
+# 				{
+# 					"name": "Java"
+# 				},
+# 				{
+# 					"name": "Design Patterns"
+# 				}
+# 			]
+# 		},
+# 		{
+# 			"name" : "OOP",
+# 			"subjects": [
+# 				{
+# 					"name": "C++"
+# 				},
+# 				{
+# 					"name": "Polymorphism"
+# 				}
+# 			]
+# 		}
+# 	]
+	
+# }
+#####################################################
 @csrf_exempt
 def setSchool(request):
     if request.method == "POST":
