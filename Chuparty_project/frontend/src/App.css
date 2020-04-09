@@ -13,10 +13,11 @@
   font-weight: bold;
   color: rgba(30, 30, 30, 1);
   text-shadow: black 1px 3px;
-  
+  padding-bottom: 7px;
 }
 
 .title span{
+  padding-left: 7px;
   color: rgb(50, 50, 150);
 }
 
