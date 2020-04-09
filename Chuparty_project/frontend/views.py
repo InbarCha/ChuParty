@@ -98,37 +98,14 @@ def setCourse(request):
         # decode request body
         body = parseRequestBody(request)
 
-        # get Subjects' names and course name from request body
-        courseName = body['name']
-        subjects = body['subjects']
-
-        try:
-            Course.objects.get(name=courseName)
-            print(f"course {courseName} already exists")
+        isNewCourseCreated = createCourse(body)[0]
+        if isNewCourseCreated == False:
             return JsonResponse(
                 {
                     "Status": "Course Already Exists",
                 }
             )
-        except:
-            subjectsList = []
-
-            # iterate over subjects given in the request body
-            # for each subject, if it doesn't exist in the db, create it
-            for doc in subjects:
-                subjectName = doc['name']
-                try:  # subject exists in DB, only save it in subjectsList
-                    subjectNameFromDb = Subject.objects.get(name=subjectName)
-                    subjectsList.append(subjectNameFromDb)
-                    print(f"subject {subjectName} exists in DB:")
-                except: # subject doesn't exist in DB, create it and save it in subjectsList
-                    print(f"subject {subjectName} doesn't exist in DB")
-                    newSubject = Subject(name=subjectName)
-                    newSubject.save()
-                    subjectsList.append(newSubject)
-            
-            newCourse = Course(name=courseName, subjects=subjectsList)
-            newCourse.save()
+        else:
             return JsonResponse(
                     {
                         "Status": "Added Course",
@@ -141,6 +118,40 @@ def setCourse(request):
                         "Status": "setCourse() only accepts POST calls",
                     }
                 )
+
+#######################################
+# createCourse(courseName, subject)
+# help function
+######################################
+def createCourse(requestBody):
+    # get Subjects' names and course name from request body
+    courseName = requestBody['name']
+    subjects = requestBody['subjects']
+    
+    try:
+        courseFromDB = Course.objects.get(name=courseName)
+        print(f"course {courseName} already exists")
+        return (False, courseFromDB)
+    except:
+        subjectsList = []
+
+        # iterate over subjects given in the request body
+        # for each subject, if it doesn't exist in the db, create it
+        for doc in subjects:
+            subjectName = doc['name']
+            try:  # subject exists in DB, only save it in subjectsList
+                subjectFromDb = Subject.objects.get(name=subjectName)
+                subjectsList.append(subjectFromDb)
+                print(f"subject {subjectName} exists in DB:")
+            except: # subject doesn't exist in DB, create it and save it in subjectsList
+                print(f"subject {subjectName} doesn't exist in DB")
+                newSubject = Subject(name=subjectName)
+                newSubject.save()
+                subjectsList.append(newSubject)
+        
+        newCourse = Course(name=courseName, subjects=subjectsList)
+        newCourse.save()
+        return (True, newCourse)
 
 
 ######################################################
@@ -159,5 +170,50 @@ def getCourses(request):
         return JsonResponse(
                     {
                         "Status": "getCourses() only accepts GET requests",
+                    }
+                )
+
+
+@csrf_exempt
+def setSchool(request):
+    if request.method == "POST":
+        # decode request body
+        body = parseRequestBody(request)
+
+        # get school name and courses' names from request body
+        schoolName = body['name']
+        courses = body['courses']
+
+        try:
+            School.objects.get(name=schoolName)
+            print(f"school {schoolName} already exists")
+            return JsonResponse(
+                {
+                    "Status": "School Already Exists",
+                }
+            )
+        except:
+            coursesList = []
+
+            # iterate over courses given in the request body
+            # for each course, if it doesn't exist in the db, create it
+            for doc in courses:
+                ret_tuple = createCourse(doc)
+                isNewCourseCreated = ret_tuple[0]
+                course = ret_tuple[1]
+
+                if isNewCourseCreated == False:
+                    print(f"course {doc} already exists in DB")
+                else:
+                    print(f"course {doc} created in DB")
+                
+                coursesList.append(course)
+
+            
+            newShool = School(name=schoolName, courses=coursesList)
+            newShool.save()
+            return JsonResponse(
+                    {
+                        "Status": "Added Course",
                     }
                 )

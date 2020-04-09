@@ -111,9 +111,22 @@ class Course(models.Model):
 # # School
 # # Computer Science, Law, etc...
 # ###################################################
-# class School(Document):
-#     name = StringField(required=True)
-#     Courses = ListField(ReferenceField(Course))
+class School(models.Model):
+    name = models.CharField(max_length=30)
+    courses = models.ArrayField(
+        model_container=Course,
+    )
+    objects = models.DjongoManager()
+
+    def as_json(self):
+        json_dict = dict(
+            name = self.name,
+            courses = list()
+        )
+
+        for course in list(self.courses):
+            json_dict['courses'].append(course.as_json())
+        return json_dict
 
 
 # ###################################################

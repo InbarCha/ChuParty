@@ -8,4 +8,5 @@ urlpatterns = [
     path('setSubject/', views.setSubject),
     path('setCourse/', views.setCourse),
     path('getCourses/', views.getCourses),
+    path('setSchool/', views.setSchool),
 ]
