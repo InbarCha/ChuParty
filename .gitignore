@@ -1,4 +1,4 @@
 Chuparty_project/Pipfile
 Chuparty_project/Pipfile.lock
 Chuparty_project/frontend/build
-Chuparty_project/frontend/node_modules
+**/node_modules
