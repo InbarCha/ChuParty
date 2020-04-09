@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'frontend.apps.FrontendConfig',
+    # 'frontend.apps.FrontendConfig',
     'rest_framework_mongoengine'
 ]
 
@@ -56,7 +56,9 @@ ROOT_URLCONF = 'ChuParty_server.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'frontend','build')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,7 +79,7 @@ WSGI_APPLICATION = 'ChuParty_server.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
-        'NAME': 'chuparty_db',
+        'NAME': 'chuparty_db'
     }
 }
 
@@ -117,9 +119,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/frontend/static/'
+# STATIC_URL = '/frontend/static/'
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-    '/var/www/static/',
+    os.path.join(BASE_DIR, 'frontend','build','static')
+    # os.path.join(BASE_DIR, "static"),
+    # '/var/www/static/',
 ]

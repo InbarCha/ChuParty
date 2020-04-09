@@ -18,7 +18,7 @@ def checkIfPermissionValid(permission):
                                      the following enum values: {PermissionEnum.choices()}")
 
 class Permission(models.Model):
-    permission = models.CharField(max_length=20, validators=[checkIfPermissionValid])
+    _p = models.CharField(max_length=20, validators=[checkIfPermissionValid])
 
     class Meta:
         managed = False # don't create a collection in the database
@@ -38,7 +38,7 @@ class User(models.Model):
 ###################################################
 # Student
 # To add new student:
-#       student = Student(first_name="David", last_name="Shaulov", email="david@gmail.com", permissions=[Permission(permission=PermissionEnum.deleteExam.value)])
+#       student = Student(first_name="David", last_name="Shaulov", email="david@gmail.com", permissions = [ Permission(_p = PermissionEnum.deleteExam.value) ])
 #       student.save()
 ###################################################
 class Student(User):
