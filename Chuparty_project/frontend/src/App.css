@@ -29,6 +29,7 @@
   color: black;
   padding-top: 15px;
   padding-left: 10px;
+  padding-right: 10px;
   padding-bottom: 15px;
 }
 
@@ -57,5 +58,5 @@
 }
 
 #content_container{
-  margin-left: 3vw;
+  margin-left: 4vw;
 }
