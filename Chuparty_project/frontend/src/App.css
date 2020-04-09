@@ -16,6 +16,10 @@
   
 }
 
+.title span{
+  color: rgb(50, 50, 150);
+}
+
 .sidebar {
   position: fixed;
   background-color: dimgray;
@@ -58,5 +62,5 @@
 }
 
 #content_container{
-  margin-left: 4vw;
+  margin-left: 100px;
 }
