@@ -144,5 +144,5 @@ def getCourses(request):
         print (coursesList)
         #return JsonResponse(coursesList, safe=False)
 
-    return render(request, 'frontend/index.html')
-
+    else: # request.method isn't POST
+        return render(request, 'frontend/index.html')

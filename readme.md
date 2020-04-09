@@ -28,4 +28,4 @@ pip install Django
     mongodump --db chuparty_db --gzip -o C:\Users\Inbar\Desktop\Final_Year_Project\ChuPartyGit\Chuparty\DB
 
 **Restore:** <br/>
-    mongorestore --gzip --db --drop chuparty_db C:\Users\Inbar\Desktop\Final_Year_Project\ChuPartyGit\Chuparty\DB\chuparty_db
+    mongorestore --gzip --drop --db chuparty_db C:\Users\Inbar\Desktop\Final_Year_Project\ChuPartyGit\Chuparty\DB\chuparty_db
