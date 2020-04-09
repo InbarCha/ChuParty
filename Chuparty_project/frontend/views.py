@@ -3,6 +3,7 @@ from frontend.models import *
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
+from django.forms.models import model_to_dict
 
 
 def parseRequestBody(request):
@@ -10,7 +11,6 @@ def parseRequestBody(request):
     return json.loads(body_unicode)
 
 
-# Create your views here.
 def index(request):                
     return render(request, 'frontend/index.html')
 
@@ -24,7 +24,11 @@ def getSubjects(request):
         subjectsList = list(Subject.objects.values())
         return JsonResponse(subjectsList, safe=False)
 
-    return render(request, 'frontend/index.html')
+    return JsonResponse(
+                    {
+                        "Status": "getSubjects() only accepts GET requests",
+                    }
+                )
 
 
 ######################################################
@@ -53,7 +57,7 @@ def setSubject(request):
                     "Status": "Subject already exists",
                 }
             )
-        except:  # save subject to DB
+        except:  # save subject to DBng
             subject = Subject(name=subjectName)
             subject.save()
 
@@ -64,7 +68,11 @@ def setSubject(request):
             )
 
     else: # request.method isn't POST
-        return render(request, 'frontend/index.html')
+        return JsonResponse(
+                    {
+                        "Status": "setSubject() only accepts POST requests",
+                    }
+                )
 
 
 
@@ -128,21 +136,28 @@ def setCourse(request):
                 )
 
     else: # request.method isn't POST
-        return render(request, 'frontend/index.html')
+        return JsonResponse(
+                    {
+                        "Status": "setCourse() only accepts POST calls",
+                    }
+                )
 
 
 ######################################################
 # getCourses()
 # method: GET
 # Returns all the existing subjects in the DB
-#
-# DOESN'T WORK YET, NEED TO FIND HOW TO JSON-SERIALIZE 'SUBJECTS' QUERYSET INSIDE THE COURSE
 #####################################################
 def getCourses(request):
     if request.method == "GET": 
-        coursesList = list(Course.objects.values())
-        print (coursesList)
-        #return JsonResponse(coursesList, safe=False)
+        courses = Course.objects.all()
+        coursesList = [course.as_json() for course in courses]
+
+        return JsonResponse(list(coursesList), safe=False)
 
     else: # request.method isn't POST
-        return render(request, 'frontend/index.html')
+        return JsonResponse(
+                    {
+                        "Status": "getCourses() only accepts GET requests",
+                    }
+                )

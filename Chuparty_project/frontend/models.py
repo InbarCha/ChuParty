@@ -77,6 +77,11 @@ class Subject(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+    def as_json(self):
+        return dict(
+            name = self.name
+        )
+
 ###################################################
 # Course
 # Algorithms, Object-Oriented Programming, etc...
@@ -91,6 +96,16 @@ class Course(models.Model):
         model_container=Subject,
     )
     objects = models.DjongoManager()
+
+    def as_json(self):
+        json_dict = dict (
+            name = self.name,
+            subjects=list ()
+        )
+
+        for subject in list(self.subjects):
+            json_dict['subjects'].append(subject.as_json())
+        return json_dict
 
 # ###################################################
 # # School
