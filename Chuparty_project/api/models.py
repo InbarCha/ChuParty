@@ -4,14 +4,6 @@ from enum import Enum
 from django.core.exceptions import ValidationError
 from django.core.validators import *
 
-class String(models.Model):
-    _s = models.CharField(max_length=200)
-
-    class Meta:
-        managed = False # don't create a collection in the database
-
-#########################################
-
 class PermissionEnum(Enum):
     createExam = "Create Exam"
     deleteExam = "Delete Exam"
@@ -26,11 +18,6 @@ def checkIfPermissionValid(permission):
         raise ValidationError(f"Permission parameter can only be one of \
                                      the following enum values: {PermissionEnum.choices()}")
 
-class Permission(models.Model):
-    _p = models.CharField(max_length=20, validators=[checkIfPermissionValid])
-
-    class Meta:
-        managed = False # don't create a collection in the database
 
 
 ###################################################
@@ -52,25 +39,26 @@ class User(models.Model):
 ###################################################
 class Student(User):
     name = models.CharField(max_length=50)
-    permissions = models.ArrayField(
-        model_container=Permission
+    permissions = models.ListField(
+        models.CharField(max_length=20, validators=[checkIfPermissionValid])
     )
-    objects = models.DjongoManager()
+    objects = models.DjongoManager() 
     # more fields unique to students
+
 
 class Lecturer(User):
     name = models.CharField(max_length=50)
-    permissions = models.ArrayField(
-        model_container=Permission
+    permissions = models.ListField(
+        models.CharField(max_length=20, validators=[checkIfPermissionValid])
     )
     objects = models.DjongoManager()
     # more fields unique to lecturers
 
 class Admin(User):
     name = models.CharField(max_length=50)
-    permissions = models.ArrayField(
-        model_container=Permission
-    )
+    permissions = models.ListField(
+        models.CharField(max_length=20, validators=[checkIfPermissionValid])
+    ),
     objects = models.DjongoManager()
     # more fields unique to admins
 
