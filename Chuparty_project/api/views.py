@@ -48,7 +48,7 @@ def setSubject(request):
         subjectName = body['name']
         print(subjectName)
 
-        try: #subject exists in DB, don't create it again
+        try: # subject exists in DB, don't create it again
             subjectFromDb = Subject.objects.get(name=subjectName)
             print("subject already exists")
             return JsonResponse(
@@ -56,7 +56,7 @@ def setSubject(request):
                     "Status": "Subject already exists",
                 }
             )
-        except:  # save subject to DBng
+        except: # subject doesn't exist in the db, save it
             subject = Subject(name=subjectName)
             subject.save()
 
@@ -156,7 +156,7 @@ def createCourse(requestBody):
 ######################################################
 # getCourses()
 # method: GET
-# Returns all the existing subjects in the DB
+# Returns all the existing courses in the DB
 #####################################################
 def getCourses(request):
     if request.method == "GET": 
@@ -248,5 +248,25 @@ def setSchool(request):
             return JsonResponse(
                     {
                         "Status": "Added School",
+                    }
+                )
+
+
+######################################################
+# getSchools()
+# method: GET
+# Returns all the existing schools in the DB
+#####################################################
+def getSchools(request):
+    if request.method == "GET": 
+        schools = School.objects.all()
+        schoolsList = [school.as_json() for school in schools]
+
+        return JsonResponse(list(schoolsList), safe=False)
+
+    else: # request.method isn't POST
+        return JsonResponse(
+                    {
+                        "Status": "getSchools() only accepts GET requests",
                     }
                 )
