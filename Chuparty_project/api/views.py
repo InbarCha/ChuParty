@@ -131,7 +131,7 @@ def setCourse(request):
                 )
 
 #######################################
-# createCourse(courseName, subject)
+# createCourse(requestBody)
 # help function
 ######################################
 def createCourse(requestBody):
@@ -140,27 +140,42 @@ def createCourse(requestBody):
     
     try:
         courseFromDB = Course.objects.get(name=courseName)
-        print(f"course {courseName} already exists")
-        return (False, courseFromDB)
-    except:
-        if 'subjects' in requestBody.keys():
-            subjects = requestBody['subjects']
-            subjectsList = []
+        print(f"course {courseName} already exists, checking if subjects needs to be updated")
 
-            # iterate over subjects given in the request body
-            # for each subject, if it doesn't exist in the db, create it
-            for doc in subjects:
-                subject = createSubject(doc)[1]
-                subjectsList.append(subject)
+        # create subjectsList from requestBody
+        subjectsList = appendSubjectsToList(requestBody)
+
+        # update the course object in the DB with the new subjectsList
+        Course.objects.filter(name=courseName).update(subjects=subjectsList)
+
+        # get the updated course object from DB and return it
+        courseFromDB = Course.objects.get(name=courseName)
+        return (False, courseFromDB)
         
-            newCourse = Course(name=courseName, subjects=subjectsList)
-        
-        else: # 'subject' is not in requestBody.keys()
-            newCourse = Course(name=courseName, subjects=[])
+    except:
+        subjectsList = appendSubjectsToList(requestBody)
+        newCourse = Course(name=courseName, subjects=subjectsList)
 
         newCourse.save()
         return (True, newCourse)
 
+#######################################
+# appendSubjectsToList(requestBody)
+# help function
+######################################
+def appendSubjectsToList(requestBody):
+    subjectsList = []
+
+    if 'subjects' in requestBody.keys():
+        subjects = requestBody['subjects']
+
+        # iterate over subjects given in the request body
+        # for each subject, if it doesn't exist in the db, create it
+        for doc in subjects:
+            subject = createSubject(doc)[1]
+            subjectsList.append(subject)
+    
+    return subjectsList
 
 ######################################################
 # getCourses()
@@ -180,8 +195,6 @@ def getCourses(request):
                         "Status": "getCourses() only accepts GET requests",
                     }
                 )
-
-
 
 
 ######################################################
@@ -224,7 +237,6 @@ def setSchool(request):
 
         # get school name and courses' names from request body
         schoolName = body['name']
-        courses = body['courses']
 
         try:
             School.objects.get(name=schoolName)
@@ -237,19 +249,22 @@ def setSchool(request):
         except:
             coursesList = []
 
-            # iterate over courses given in the request body
-            # for each course, if it doesn't exist in the db, create it
-            for doc in courses:
-                ret_tuple = createCourse(doc)
-                isNewCourseCreated = ret_tuple[0]
-                course = ret_tuple[1]
+            if 'courses' in body.keys():
+                courses = body['courses']
 
-                if isNewCourseCreated == False:
-                    print(f"course {doc} already exists in DB")
-                else:
-                    print(f"course {doc} created in DB")
-                
-                coursesList.append(course)
+                # iterate over courses given in the request body
+                # for each course, if it doesn't exist in the db, create it
+                for doc in courses:
+                    ret_tuple = createCourse(doc)
+                    isNewCourseCreated = ret_tuple[0]
+                    course = ret_tuple[1]
+
+                    if isNewCourseCreated == False:
+                        print(f"course {doc} already exists in DB")
+                    else:
+                        print(f"course {doc} created in DB")
+                    
+                    coursesList.append(course)
 
             
             newShool = School(name=schoolName, courses=coursesList)
@@ -292,7 +307,15 @@ def getSchools(request):
 #       },          
 # 	"course": 
 # 		{
-# 			"name" : "Computer Networks"
+# 			"name" : "Computer Networks",
+# 			"subjects": [
+# 				{
+# 					"name":"HTTP"
+# 				},
+# 				{
+# 					"name":"UDP"
+# 				}
+# 			]
 # 		},
 #    "body": "What is DNS?",
 #    "answers": [
@@ -301,7 +324,7 @@ def getSchools(request):
 #           "Deduction of Native Services",
 #           "Deformation of Name Servers"
 #       ],
-#     "correntAnswer": 0
+#     "correctAnswer": 0
 # }
 #####################################################
 @csrf_exempt
@@ -329,15 +352,15 @@ def setQuestion(request):
 
             # course
             course = body['course']
-            isAppendSubjectToCourse = False
+            appendSubjectToCourse = False
             if 'subjects' not in course.keys():
                 course['subjects'] = list()
-                isAppendSubjectToCourse = True
+                appendSubjectToCourse = True
             elif subject not in course['subjects']:
-                isAppendSubjectToCourse = True
+                appendSubjectToCourse = True
             #--------------------------------------
-            if isAppendSubjectToCourse == True:
-                course['subjects'].append(createSubject(subject)[1].as_json())
+            if appendSubjectToCourse == True:
+                course['subjects'].append(subjectObj.as_json())
             #--------------------------------------
             courseObj = createCourse(course)[1]
 
@@ -370,3 +393,21 @@ def setQuestion(request):
         )
 
     
+######################################################
+# getQuestions()
+# method: GET
+# Returns all the existing schools in the DB
+#####################################################
+def getQuestions(request):
+    if request.method == "GET": 
+        questions = Question.objects.all()
+        questionsList = [questions.as_json() for questions in questions]
+
+        return JsonResponse(list(questionsList), safe=False)
+
+    else: # request.method isn't POST
+        return JsonResponse(
+                    {
+                        "Status": "getSchools() only accepts GET requests",
+                    }
+                )

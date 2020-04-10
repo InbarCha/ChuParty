@@ -10,4 +10,5 @@ urlpatterns = [
     path('setSchool/', views.setSchool),
     path('getSchools/', views.getSchools),
     path('setQuestion/', views.setQuestion),
+    path('getQuestions/', views.getQuestions),
 ]

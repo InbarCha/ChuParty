@@ -149,6 +149,17 @@ class Question(models.Model):
 
     objects = models.DjongoManager()
 
+    def as_json(self):
+        json_dict = dict(
+            subject = self.subject.as_json(), # pylint: disable=maybe-no-member
+            course = self.course.as_json(), # pylint: disable=maybe-no-member
+            body = self.body,
+            answers = self.answers,
+            correctAnswer = self.correctAnswer
+        )
+
+        return json_dict
+
 # ###################################################
 # # Exam
 # # Including:
