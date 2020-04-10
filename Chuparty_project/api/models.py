@@ -2,6 +2,15 @@ from djongo import models
 from django import forms
 from enum import Enum
 from django.core.exceptions import ValidationError
+from django.core.validators import *
+
+class String(models.Model):
+    _s = models.CharField(max_length=200)
+
+    class Meta:
+        managed = False # don't create a collection in the database
+
+#########################################
 
 class PermissionEnum(Enum):
     createExam = "Create Exam"
@@ -129,21 +138,28 @@ class School(models.Model):
         return json_dict
 
 
-# ###################################################
-# # Exam Question
-# # Including: 
-# #       subject (TCP, DFS, etc...)
-# #       answers (python list: [answer0, answer1, answer2, answer3, answer4])
-# #       correctAnswer (index of the correct answer in the python list)
-# ###################################################
-# class Question(Document):
-#     name = StringField(required=True)
-#     subject = ReferenceField(Subject)
-#     course = ReferenceField(Course)
-#     body = StringField(required=True)
-#     answers = ListField(StringField, max_length=5)
-#     correctAnswer = IntField(required=True, min_value=0, max_value=4)
+###################################################
+# Exam Question
+# Including: 
+#       subject (TCP, DFS, etc...)
+#       answers (python list: [answer0, answer1, answer2, answer3, answer4])
+#       correctAnswer (index of the correct answer in the python list)
+###################################################
+class Question(models.Model):
+    subject = models.EmbeddedField(
+        model_container = Subject
+    )
+    course = models.EmbeddedField(
+        model_container = Course
+    )
+    body = models.CharField(max_length=100)
+    answers = models.ListField(
+        models.CharField(max_length=50),
+        max_length = 5
+    )
+    correctAnswer = models.IntegerField(validators=[MinValueValidator(limit_value=0), MaxValueValidator(limit_value=4)])
 
+    objects = models.DjongoManager()
 
 # ###################################################
 # # Exam

@@ -43,28 +43,22 @@ def setSubject(request):
     if request.method == "POST": 
         # decode request body
         body = parseRequestBody(request)
+
+        ret_tuple = createSubject(body)
+        isNewSubjectCreated = ret_tuple[0]
         
-        # get subjectName from request body
-        subjectName = body['name']
-        print(subjectName)
-
-        try: # subject exists in DB, don't create it again
-            subjectFromDb = Subject.objects.get(name=subjectName)
-            print("subject already exists")
+        if isNewSubjectCreated == True:
             return JsonResponse(
-                {
-                    "Status": "Subject already exists",
-                }
-            )
-        except: # subject doesn't exist in the db, save it
-            subject = Subject(name=subjectName)
-            subject.save()
-
+                    { 
+                        "Status": "Created Subject",
+                    }
+                )
+        else:
             return JsonResponse(
-                {
-                    "Status": "Added Subject",
-                }
-            )
+                    {
+                        "Status": "Subject Already Exists",
+                    }
+                )
 
     else: # request.method isn't POST
         return JsonResponse(
@@ -73,6 +67,24 @@ def setSubject(request):
                     }
                 )
 
+#####################################
+# createSubject
+# help function
+###################################
+def createSubject(requestBody):
+    # get subjectName from request body
+    subjectName = requestBody['name']
+    print(subjectName)
+
+    try: # subject exists in DB, don't create it again
+        subjectFromDb = Subject.objects.get(name=subjectName)
+        print("subject already exists")
+        return (False, subjectFromDb)
+
+    except: # subject doesn't exist in the db, save it
+        subject = Subject(name=subjectName)
+        subject.save()
+        return (True, subject)
 
 
 ######################################################
@@ -125,30 +137,27 @@ def setCourse(request):
 def createCourse(requestBody):
     # get Subjects' names and course name from request body
     courseName = requestBody['name']
-    subjects = requestBody['subjects']
     
     try:
         courseFromDB = Course.objects.get(name=courseName)
         print(f"course {courseName} already exists")
         return (False, courseFromDB)
     except:
-        subjectsList = []
+        if 'subjects' in requestBody.keys():
+            subjects = requestBody['subjects']
+            subjectsList = []
 
-        # iterate over subjects given in the request body
-        # for each subject, if it doesn't exist in the db, create it
-        for doc in subjects:
-            subjectName = doc['name']
-            try:  # subject exists in DB, only save it in subjectsList
-                subjectFromDb = Subject.objects.get(name=subjectName)
-                subjectsList.append(subjectFromDb)
-                print(f"subject {subjectName} exists in DB:")
-            except: # subject doesn't exist in DB, create it and save it in subjectsList
-                print(f"subject {subjectName} doesn't exist in DB")
-                newSubject = Subject(name=subjectName)
-                newSubject.save()
-                subjectsList.append(newSubject)
+            # iterate over subjects given in the request body
+            # for each subject, if it doesn't exist in the db, create it
+            for doc in subjects:
+                subject = createSubject(doc)[1]
+                subjectsList.append(subject)
         
-        newCourse = Course(name=courseName, subjects=subjectsList)
+            newCourse = Course(name=courseName, subjects=subjectsList)
+        
+        else: # 'subject' is not in requestBody.keys()
+            newCourse = Course(name=courseName, subjects=[])
+
         newCourse.save()
         return (True, newCourse)
 
@@ -270,3 +279,94 @@ def getSchools(request):
                         "Status": "getSchools() only accepts GET requests",
                     }
                 )
+
+
+######################################################
+# setQuestion()
+# method: POST
+# POST body example:
+# {
+#   "subject":
+#       {
+#           "name": "DNS"    
+#       },          
+# 	"course": 
+# 		{
+# 			"name" : "Computer Networks"
+# 		},
+#    "body": "What is DNS?",
+#    "answers": [
+#           "Domain Name Server",
+#           "Desturction of Name Servers",
+#           "Deduction of Native Services",
+#           "Deformation of Name Servers"
+#       ],
+#     "correntAnswer": 0
+# }
+#####################################################
+@csrf_exempt
+def setQuestion(request):
+    if request.method == "POST":
+        # decode request body
+        body = parseRequestBody(request)
+
+        # get Question parans
+        # questionBody
+        questionBody = body['body']
+
+        try:
+            Question.objects.get(body=questionBody)
+            print(f"question {questionBody} already exists")
+            return JsonResponse(
+                {
+                    "Status": "Question Already Exists",
+                }
+            )
+        except:
+            # subject
+            subject = body['subject']
+            subjectObj = createSubject(subject)[1]
+
+            # course
+            course = body['course']
+            isAppendSubjectToCourse = False
+            if 'subjects' not in course.keys():
+                course['subjects'] = list()
+                isAppendSubjectToCourse = True
+            elif subject not in course['subjects']:
+                isAppendSubjectToCourse = True
+            #--------------------------------------
+            if isAppendSubjectToCourse == True:
+                course['subjects'].append(createSubject(subject)[1].as_json())
+            #--------------------------------------
+            courseObj = createCourse(course)[1]
+
+            # answers
+            answers = list(body['answers'])
+
+            # correntAnswer
+            correctAnswer = int(body['correctAnswer'])
+
+            questionObj = Question(
+                subject=subjectObj,
+                course=courseObj, 
+                body=questionBody,
+                answers=answers,
+                correctAnswer=correctAnswer
+            )
+            questionObj.save()
+
+            return JsonResponse(
+                {
+                    "Status": "Added Question"
+                }
+            )
+    
+    else:
+        return JsonResponse(
+            {
+                "Status": "setQuestion() only accepts POST requests"
+            }
+        )
+
+    
