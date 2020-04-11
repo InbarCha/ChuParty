@@ -143,7 +143,7 @@ def createCourse(requestBody):
         print(f"course {courseName} already exists, checking if subjects needs to be updated")
 
         # create subjectsList from requestBody
-        subjectsList = appendSubjectsToList(requestBody)
+        subjectsList = appendSubjectsToList(requestBody, courseFromDB)
 
         # update the course object in the DB with the new subjectsList
         Course.objects.filter(name=courseName).update(subjects=subjectsList)
@@ -153,19 +153,22 @@ def createCourse(requestBody):
         return (False, courseFromDB)
         
     except:
-        subjectsList = appendSubjectsToList(requestBody)
+        subjectsList = appendSubjectsToList(requestBody, None)
         newCourse = Course(name=courseName, subjects=subjectsList)
 
         newCourse.save()
         return (True, newCourse)
 
 #######################################
-# appendSubjectsToList(requestBody)
+# appendSubjectsToList(requestBody, courseFromDB)
 # help function
 ######################################
-def appendSubjectsToList(requestBody):
-    subjectsList = []
-
+def appendSubjectsToList(requestBody, courseFromDB):
+    if (courseFromDB is None) or (not courseFromDB.subjects):
+        subjectsList = []
+    else:
+        subjectsList = courseFromDB.subjects
+    
     if 'subjects' in requestBody.keys():
         subjects = requestBody['subjects']
 
@@ -174,8 +177,10 @@ def appendSubjectsToList(requestBody):
         for doc in subjects:
             subject = createSubject(doc)[1]
             subjectsList.append(subject)
-    
+
     return subjectsList
+    
+    
 
 ######################################################
 # getCourses()
@@ -274,7 +279,6 @@ def setSchool(request):
                         "Status": "Added School",
                     }
                 )
-
 
 ######################################################
 # getSchools()
@@ -424,6 +428,14 @@ def getQuestions(request):
 # 	"permissions": [
 # 		"Create Exam",
 # 		"Delete Exam"
+# 	],
+# 	"relevantCourses":[
+# 		{
+# 			"name": "Advanced Programming"
+# 		},
+# 		{
+# 			"name": "OOP"
+# 		}
 # 	]
 # }
 #####################################################
@@ -448,7 +460,26 @@ def setStudent(request):
             )
 
         except:
-            newStudent = Student(first_name=first_name, last_name=last_name, email=email, permissions=permissions)
+            coursesList = []
+
+            if 'relevantCourses' in body.keys():
+                relevantCourses = body['relevantCourses']
+
+                # iterate over courses given in the request body
+                # for each course, if it doesn't exist in the db, create it
+                for doc in relevantCourses:
+                    ret_tuple = createCourse(doc)
+                    isNewCourseCreated = ret_tuple[0]
+                    course = ret_tuple[1]
+
+                    if isNewCourseCreated == False:
+                        print(f"course {doc} already exists in DB")
+                    else:
+                        print(f"course {doc} created in DB")
+                    
+                    coursesList.append(course)
+
+            newStudent = Student(first_name=first_name, last_name=last_name, email=email, permissions=permissions, relevantCourses=coursesList)
             newStudent.save()
 
             return JsonResponse(
@@ -481,5 +512,176 @@ def getStudents(request):
         return JsonResponse(
                     {
                         "Status": "getStudents() only accepts GET requests",
+                    }
+                )
+
+
+######################################################
+# setLecturer()
+# method: POST
+# POST body example:
+# {
+# 	"first_name" : "Eliav",
+# 	"last_name" : "Menache",
+# 	"email": "Eliav@gmail.com",
+# 	"permissions": [
+# 		"Create Exam",
+# 		"Delete Exam"
+# 	],
+# 	"coursesTeaching":[
+# 		{
+# 			"name": "Computer Networks"
+# 		},
+# 		{
+# 			"name": "iOS"
+# 		}
+# 	]
+# }
+#####################################################
+@csrf_exempt
+def setLecturer(request):
+    if request.method == "POST":
+        # decode request body
+        body = parseRequestBody(request)
+
+        first_name = body['first_name']
+        last_name = body['last_name']
+        email = body['email']
+        permissions = list(body['permissions'])
+
+        try:
+            Lecturer.objects.get(email=email)
+            print(f"Lecturer {email} already exists")
+            return JsonResponse(
+                {
+                    "Status": "Lecturer Already Exists",
+                }
+            )
+
+        except:
+            coursesList = []
+
+            if 'coursesTeaching' in body.keys():
+                coursesTeaching = body['coursesTeaching']
+
+                # iterate over courses given in the request body
+                # for each course, if it doesn't exist in the db, create it
+                for doc in coursesTeaching:
+                    ret_tuple = createCourse(doc)
+                    isNewCourseCreated = ret_tuple[0]
+                    course = ret_tuple[1]
+
+                    if isNewCourseCreated == False:
+                        print(f"course {doc} already exists in DB")
+                    else:
+                        print(f"course {doc} created in DB")
+                    
+                    coursesList.append(course)
+
+            newLecturer = Lecturer(first_name=first_name, last_name=last_name, email=email, permissions=permissions, coursesTeaching=coursesList)
+            newLecturer.save()
+
+            return JsonResponse(
+                {
+                    "Status": "Added Lecturer",
+                }
+            )
+
+    else:
+        return JsonResponse(
+            {
+                "Status": "setLecturer() only accepts POST requests"
+            }
+        )
+
+
+######################################################
+# getLecturers()
+# method: GET
+# Returns all the existing lecturers in the DB
+#####################################################
+def getLecturers(request):
+    if request.method == "GET": 
+        lecturers = Lecturer.objects.all()
+        lecturersList = [lecturer.as_json() for lecturer in lecturers]
+
+        return JsonResponse(list(lecturersList), safe=False)
+
+    else: # request.method isn't GET
+        return JsonResponse(
+                    {
+                        "Status": "getLecturers() only accepts GET requests",
+                    }
+                )
+
+
+######################################################
+# setAdmin()
+# method: POST
+# POST body example:
+# {
+# 	"first_name" : "David",
+# 	"last_name" : "Shaulov",
+# 	"email": "david@gmail.com",
+# 	"permissions": [
+# 		"Create Exam",
+# 		"Delete Exam"
+# 	]
+# }
+#####################################################
+@csrf_exempt
+def setAdmin(request):
+    if request.method == "POST":
+        # decode request body
+        body = parseRequestBody(request)
+
+        first_name = body['first_name']
+        last_name = body['last_name']
+        email = body['email']
+        permissions = list(body['permissions'])
+
+        try:
+            Admin.objects.get(email=email)
+            print(f"Admin {email} already exists")
+            return JsonResponse(
+                {
+                    "Status": "Admin Already Exists",
+                }
+            )
+
+        except:
+            newAdmin = Admin(first_name=first_name, last_name=last_name, email=email, permissions=permissions)
+            newAdmin.save()
+
+            return JsonResponse(
+                {
+                    "Status": "Added Admin",
+                }
+            )
+
+    else:
+        return JsonResponse(
+            {
+                "Status": "setAdmin() only accepts POST requests"
+            }
+        )
+
+
+######################################################
+# getAdmins()
+# method: GET
+# Returns all the existing admins in the DB
+#####################################################
+def getAdmins(request):
+    if request.method == "GET": 
+        admins = Admin.objects.all()
+        adminsList = [admin.as_json() for admin in admins]
+
+        return JsonResponse(list(adminsList), safe=False)
+
+    else: # request.method isn't GET
+        return JsonResponse(
+                    {
+                        "Status": "getAdmins() only accepts GET requests",
                     }
                 )

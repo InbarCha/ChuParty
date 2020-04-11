@@ -4,77 +4,6 @@ from enum import Enum
 from django.core.exceptions import ValidationError
 from django.core.validators import *
 
-class PermissionEnum(Enum):
-    createExam = "Create Exam"
-    deleteExam = "Delete Exam"
-
-    @classmethod
-    def choices(cls):
-        return [var.value for var in cls]
-
-
-def checkIfPermissionValid(permission):
-    if permission not in PermissionEnum.choices():
-        raise ValidationError(f"Permission parameter can only be one of \
-                                     the following enum values: {PermissionEnum.choices()}")
-
-
-
-###################################################
-# Users - abstract
-###################################################
-class User(models.Model):
-    email = models.EmailField()
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-
-    def as_json(self):
-        json_dict = dict(
-            first_name = self.first_name,
-            last_name = self.last_name,
-            email = self.email
-        )
-
-        return json_dict
-
-    class Meta:
-        abstract = True
-
-###################################################
-# Student
-# To add new student:
-#       student = Student(first_name="David", last_name="Shaulov", email="david@gmail.com", permissions = [ "Create Exam", "Delete Exam" ])
-#       student.save()
-###################################################
-class Student(User):
-    permissions = models.ListField(
-        models.CharField(max_length=20, validators=[checkIfPermissionValid])
-    )
-    objects = models.DjongoManager() 
-    # more fields unique to students
-
-    def as_json(self):
-        json_dict = super().as_json()
-        json_dict['permissions'] = self.permissions
-
-        return json_dict
-
-
-class Lecturer(User):
-    permissions = models.ListField(
-        models.CharField(max_length=20, validators=[checkIfPermissionValid])
-    )
-    objects = models.DjongoManager()
-    # more fields unique to lecturers
-
-class Admin(User):
-    permissions = models.ListField(
-        models.CharField(max_length=20, validators=[checkIfPermissionValid])
-    ),
-    objects = models.DjongoManager()
-    # more fields unique to admins
-
-
 ###################################################
 # Subject
 # TCP, DFS, etc...
@@ -186,3 +115,96 @@ class Question(models.Model):
 #     course = ReferenceField(Course)
 #     questions = ListField(ReferenceField(Question)) # the subjects specified in the exam
 #     subjects = ListField(ReferenceField(Subject))
+
+
+class PermissionEnum(Enum):
+    createExam = "Create Exam"
+    deleteExam = "Delete Exam"
+
+    @classmethod
+    def choices(cls):
+        return [var.value for var in cls]
+
+
+def checkIfPermissionValid(permission):
+    if permission not in PermissionEnum.choices():
+        raise ValidationError(f"Permission parameter can only be one of \
+                                     the following enum values: {PermissionEnum.choices()}")
+
+
+
+###################################################
+# Users - abstract
+###################################################
+class User(models.Model):
+    email = models.EmailField()
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    permissions = models.ListField(
+        models.CharField(max_length=20, validators=[checkIfPermissionValid])
+    )
+
+    def as_json(self):
+        json_dict = dict(
+            first_name = self.first_name,
+            last_name = self.last_name,
+            email = self.email,
+            permissions = self.permissions
+        )
+
+        return json_dict
+
+    class Meta:
+        abstract = True
+
+###################################################
+# Student
+# To add new student:
+#       student = Student(first_name="David", last_name="Shaulov", email="david@gmail.com", permissions = [ "Create Exam", "Delete Exam" ])
+#       student.save()
+###################################################
+class Student(User):
+    objects = models.DjongoManager() 
+    
+    # more fields unique to students
+    relevantCourses = models.ArrayField(
+        model_container=Course,
+    )
+
+    def as_json(self):
+        json_dict = super().as_json()
+        json_dict['relevantCourses'] = list()
+
+        for course in list(self.relevantCourses):
+            json_dict['relevantCourses'].append(course.as_json())
+
+        return json_dict
+
+
+class Lecturer(User):
+    objects = models.DjongoManager()
+
+    # more fields unique to lecturers
+    coursesTeaching = models.ArrayField(
+        model_container=Course,
+    )
+
+    def as_json(self):
+        json_dict = super().as_json()
+        json_dict['coursesTeaching'] = list()
+        
+        for course in list(self.coursesTeaching):
+            json_dict['coursesTeaching'].append(course.as_json())
+
+        return json_dict
+
+class Admin(User):
+    objects = models.DjongoManager()
+
+    # more fields unique to admins
+
+    def as_json(self):
+        json_dict = super().as_json()
+
+        return json_dict
+

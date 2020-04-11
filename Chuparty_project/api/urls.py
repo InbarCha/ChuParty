@@ -13,4 +13,8 @@ urlpatterns = [
     path('getQuestions/', views.getQuestions),
     path('setStudent/', views.setStudent),
     path('getStudents/', views.getStudents),
+    path('setLecturer/', views.setLecturer),
+    path('getLecturers/', views.getLecturers),
+    path('setAdmin/', views.setAdmin),
+    path('getAdmins/', views.getAdmins),
 ]
