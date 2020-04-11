@@ -3,7 +3,7 @@ from api.models import *
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
-
+from datetime import datetime
 
 def parseRequestBody(request):
     body_unicode = request.body.decode('utf-8')
@@ -18,6 +18,7 @@ def index(request):
 # method: GET
 # Returns all the existing subjects in the DB
 #####################################################
+@csrf_exempt
 def getSubjects(request):
     if request.method == "GET": 
         subjectsList = list(Subject.objects.values())
@@ -137,7 +138,8 @@ def setCourse(request):
 def createCourse(requestBody):
     # get Subjects' names and course name from request body
     courseName = requestBody['name']
-    
+    print(courseName)
+
     try:
         courseFromDB = Course.objects.get(name=courseName)
         print(f"course {courseName} already exists, checking if subjects needs to be updated")
@@ -153,6 +155,7 @@ def createCourse(requestBody):
         return (False, courseFromDB)
         
     except:
+        print(f"course {courseName} doesn't exist, create it")
         subjectsList = appendSubjectsToList(requestBody, None)
         newCourse = Course(name=courseName, subjects=subjectsList)
 
@@ -176,7 +179,9 @@ def appendSubjectsToList(requestBody, courseFromDB):
         # for each subject, if it doesn't exist in the db, create it
         for doc in subjects:
             subject = createSubject(doc)[1]
-            subjectsList.append(subject)
+
+            if subject.name not in [currentSubject.name for currentSubject in subjectsList]:
+                subjectsList.append(subject)
 
     return subjectsList
     
@@ -187,6 +192,7 @@ def appendSubjectsToList(requestBody, courseFromDB):
 # method: GET
 # Returns all the existing courses in the DB
 #####################################################
+@csrf_exempt
 def getCourses(request):
     if request.method == "GET": 
         courses = Course.objects.all()
@@ -285,6 +291,7 @@ def setSchool(request):
 # method: GET
 # Returns all the existing schools in the DB
 #####################################################
+@csrf_exempt
 def getSchools(request):
     if request.method == "GET": 
         schools = School.objects.all()
@@ -337,57 +344,20 @@ def setQuestion(request):
         # decode request body
         body = parseRequestBody(request)
 
-        # get Question parans
-        # questionBody
-        questionBody = body['body']
-
-        try:
-            Question.objects.get(body=questionBody)
-            print(f"question {questionBody} already exists")
+        # create Question if it doesn't already exist in DB
+        isNewQuestionCreated = createQuestion(body)[0]
+        if isNewQuestionCreated == True:
             return JsonResponse(
-                {
-                    "Status": "Question Already Exists",
-                }
-            )
-        except:
-            # subject
-            subject = body['subject']
-            subjectObj = createSubject(subject)[1]
-
-            # course
-            course = body['course']
-            appendSubjectToCourse = False
-            if 'subjects' not in course.keys():
-                course['subjects'] = list()
-                appendSubjectToCourse = True
-            elif subject not in course['subjects']:
-                appendSubjectToCourse = True
-            #--------------------------------------
-            if appendSubjectToCourse == True:
-                course['subjects'].append(subjectObj.as_json())
-            #--------------------------------------
-            courseObj = createCourse(course)[1]
-
-            # answers
-            answers = list(body['answers'])
-
-            # correntAnswer
-            correctAnswer = int(body['correctAnswer'])
-
-            questionObj = Question(
-                subject=subjectObj,
-                course=courseObj, 
-                body=questionBody,
-                answers=answers,
-                correctAnswer=correctAnswer
-            )
-            questionObj.save()
-
+            {
+                "Status": "Question Created"
+            }
+        )
+        else:
             return JsonResponse(
-                {
-                    "Status": "Added Question"
-                }
-            )
+            {
+                "Status": "Question Already Exists"
+            }
+        )
     
     else:
         return JsonResponse(
@@ -396,12 +366,61 @@ def setQuestion(request):
             }
         )
 
+
+def createQuestion(requestBody):
+    # get Question parans
+    # questionBody
+    questionBody = requestBody['body']
+
+    try:
+        questionFromDB = Question.objects.get(body=questionBody)
+        print(f"question {questionBody} already exists")
+        return (False, questionFromDB)
+    except:
+        # subject
+        subject = requestBody['subject']
+        subjectObj = createSubject(subject)[1]
+
+        # course
+        course = requestBody['course']
+        appendSubjectToCourse = False
+
+        if 'subjects' not in course.keys():
+            course['subjects'] = list()
+            appendSubjectToCourse = True
+
+        elif subject not in course['subjects']:
+            appendSubjectToCourse = True
+        #--------------------------------------
+        if appendSubjectToCourse == True:
+            course['subjects'].append(subjectObj.as_json())
+        #--------------------------------------
+        courseObj = createCourse(course)[1]
+
+        # answers
+        answers = list(requestBody['answers'])
+
+        # correntAnswer
+        correctAnswer = requestBody['correctAnswer']
+    
+        questionObj = Question(
+            subject=subjectObj,
+            course=courseObj, 
+            body=questionBody,
+            answers=answers,
+            correctAnswer=correctAnswer
+        )
+
+        questionObj.save()
+
+        return (True, questionObj)
     
 ######################################################
 # getQuestions()
 # method: GET
 # Returns all the existing questions in the DB
 #####################################################
+@csrf_exempt
 def getQuestions(request):
     if request.method == "GET": 
         questions = Question.objects.all()
@@ -501,6 +520,7 @@ def setStudent(request):
 # method: GET
 # Returns all the existing students in the DB
 #####################################################
+@csrf_exempt
 def getStudents(request):
     if request.method == "GET": 
         students = Student.objects.all()
@@ -567,16 +587,8 @@ def setLecturer(request):
                 # iterate over courses given in the request body
                 # for each course, if it doesn't exist in the db, create it
                 for doc in coursesTeaching:
-                    ret_tuple = createCourse(doc)
-                    isNewCourseCreated = ret_tuple[0]
-                    course = ret_tuple[1]
-
-                    if isNewCourseCreated == False:
-                        print(f"course {doc} already exists in DB")
-                    else:
-                        print(f"course {doc} created in DB")
-                    
-                    coursesList.append(course)
+                    courseObj = createCourse(doc)[1]
+                    coursesList.append(courseObj)
 
             newLecturer = Lecturer(first_name=first_name, last_name=last_name, email=email, permissions=permissions, coursesTeaching=coursesList)
             newLecturer.save()
@@ -600,6 +612,7 @@ def setLecturer(request):
 # method: GET
 # Returns all the existing lecturers in the DB
 #####################################################
+@csrf_exempt
 def getLecturers(request):
     if request.method == "GET": 
         lecturers = Lecturer.objects.all()
@@ -672,6 +685,7 @@ def setAdmin(request):
 # method: GET
 # Returns all the existing admins in the DB
 #####################################################
+@csrf_exempt
 def getAdmins(request):
     if request.method == "GET": 
         admins = Admin.objects.all()
@@ -683,5 +697,138 @@ def getAdmins(request):
         return JsonResponse(
                     {
                         "Status": "getAdmins() only accepts GET requests",
+                    }
+                )
+
+
+######################################################
+# setExam()
+# method: POST
+# POST body example:
+# {
+#     "name": "OOP Exam",
+#     "date": "15/07/19",
+#     "writers": [
+#     "Eliyahu Khelsatzchi",
+#     "Haim Shafir"
+#     ],
+#     "course": 
+#         {
+#         "name" : "OOP"
+#         },
+#     "questions": [
+#         {
+#             "subject":
+#                 {
+#                     "name": "Object-Oriented Principles"
+#                 },          
+#             "body": "What is encapsulation?",
+#             "answers": [
+#                     "blah blah",
+#                     "bleh beh",
+#                     "bundling of data with the methods that operate on that data",
+#                     "blu blue"
+#                 ],
+#             "correctAnswer": 2
+#         }
+#         ],
+#         "subjects":[
+#             {
+#                 "name": "Object-Oriented Principles"
+#             }
+#         ]
+#     }
+# TODO: no need to add 'subjects' to the request body,
+#       need to parse exam questions and add each question subject to the exam subjects array
+#####################################################
+@csrf_exempt
+def setExam(request):
+    if request.method == "POST":
+        # decode request body
+        body = parseRequestBody(request)
+
+        # name
+        name = body['name']
+
+        # date
+        date = body['date']
+        dateObj = datetime.strptime(date, "%d/%m/%y")
+
+        # writers
+        writers = list(body['writers'])
+
+        # course
+        course = body['course'] 
+        courseObj = createCourse(course)[1]
+        print(courseObj.as_json())
+
+        # questions
+        questionsObjList = []
+        
+        if 'questions' in body.keys():
+            questions = body['questions']
+            
+            # for every question in the requestBody, check if it exists in the DB
+            # if it doesn't, create it
+            for question in questions:
+                if 'course' not in question.keys():
+                    question['course'] = courseObj.as_json()
+
+                print(question)
+                questionObj = createQuestion(question)[1]
+                questionsObjList.append(questionObj)
+
+        # subjects
+        subjectsObjList = []
+        
+        if 'subjects' in body.keys():
+            subjects = body['subjects']
+            
+            # for every subject in the requestBody, check if it exists in the DB
+            # if it doesn't, create it
+            for subject in subjects:
+                subjectObj = createSubject(subject)[1]
+                subjectsObjList.append(subjectObj)
+        
+        newExam = Exam(
+            name=name,
+            date=dateObj, 
+            writers = writers,
+            course = courseObj,
+            questions = questionsObjList,
+            subjects = subjectsObjList
+        )
+        newExam.save()
+
+        return JsonResponse(
+            {
+                "Status": "Created Exam",
+            }
+        )
+
+    else:
+        return JsonResponse(
+            {
+                "Status": "setExam() only accepts POST requests"
+            }
+        )
+
+######################################################
+# getExams()
+# method: GET
+# Returns all the existing exams in the DB
+#####################################################
+@csrf_exempt
+def getExams(request):
+    if request.method == "GET": 
+        exams = Exam.objects.all()
+        examsList = [exam.as_json() for exam in exams]
+
+        return JsonResponse(list(examsList), safe=False)
+
+    else: # request.method isn't GET
+        return JsonResponse(
+                    {
+                        "Status": "getExams() only accepts GET requests",
                     }
                 )

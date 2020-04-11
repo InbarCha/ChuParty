@@ -73,6 +73,8 @@ class School(models.Model):
 #       subject (TCP, DFS, etc...)
 #       answers (python list: [answer0, answer1, answer2, answer3, answer4])
 #       correctAnswer (index of the correct answer in the python list)
+# TODO: change minVal to 1 and maxval to 5
+# TODO: check if validations (minVal and maxVal) work
 ###################################################
 class Question(models.Model):
     subject = models.EmbeddedField(
@@ -101,22 +103,56 @@ class Question(models.Model):
 
         return json_dict
 
-# ###################################################
-# # Exam
-# # Including:
-# #     writers (a list of the lectures/tutors who wrote the exam)
-# #     questions (a list of the exam questions)
-# #     subjects (a list of all the the exam's questions' subjects)
-# ###################################################
-# class Exam(Document):
-#     name = StringField(required=True)
-#     date = StringField()
-#     writers = ListField(StringField) # who wrote the exam
-#     course = ReferenceField(Course)
-#     questions = ListField(ReferenceField(Question)) # the subjects specified in the exam
-#     subjects = ListField(ReferenceField(Subject))
+###################################################
+# Exam
+# Including:
+#     writers (a list of the lectures/tutors who wrote the exam)
+#     questions (a list of the exam questions)
+#     subjects (a list of all the the exam's questions' subjects)
+###################################################
+class Exam(models.Model):
+    name = models.CharField(max_length=50)
+    date = models.DateField()
+
+     # who wrote the exam
+    writers = models.ListField(
+        models.CharField(max_length=30)
+    )
+
+    course = models.EmbeddedField(
+        model_container=Course
+    )
+
+    # the subjects specified in the exam
+    questions = models.ArrayField(
+        model_container=Question
+    ) 
+
+    subjects = models.ArrayField(
+        model_container=Subject
+    ) 
+
+    objects = models.DjongoManager()
+
+    def as_json(self):
+        json_dict = dict(
+            name = self.name,
+            date = self.date,
+            writers = self.writers,
+            course = self.course.as_json(),  # pylint: disable=maybe-no-member
+            questions = list(),
+            subjects = list()
+        )
+
+        for question in list(self.questions):
+            json_dict['questions'].append(question.as_json())
+        for subject in list(self.subjects):
+            json_dict['subjects'].append(subject.as_json())
+
+        return json_dict
 
 
+##################################################
 class PermissionEnum(Enum):
     createExam = "Create Exam"
     deleteExam = "Delete Exam"
