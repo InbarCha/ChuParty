@@ -189,7 +189,7 @@ def getCourses(request):
 
         return JsonResponse(list(coursesList), safe=False)
 
-    else: # request.method isn't POST
+    else: # request.method isn't GET
         return JsonResponse(
                     {
                         "Status": "getCourses() only accepts GET requests",
@@ -288,7 +288,7 @@ def getSchools(request):
 
         return JsonResponse(list(schoolsList), safe=False)
 
-    else: # request.method isn't POST
+    else: # request.method isn't GET
         return JsonResponse(
                     {
                         "Status": "getSchools() only accepts GET requests",
@@ -396,7 +396,7 @@ def setQuestion(request):
 ######################################################
 # getQuestions()
 # method: GET
-# Returns all the existing schools in the DB
+# Returns all the existing questions in the DB
 #####################################################
 def getQuestions(request):
     if request.method == "GET": 
@@ -405,9 +405,81 @@ def getQuestions(request):
 
         return JsonResponse(list(questionsList), safe=False)
 
-    else: # request.method isn't POST
+    else: # request.method isn't GET
         return JsonResponse(
                     {
                         "Status": "getSchools() only accepts GET requests",
+                    }
+                )
+
+
+######################################################
+# setStudent()
+# method: POST
+# POST body example:
+# {
+# 	"first_name" : "David",
+# 	"last_name" : "Shaulov",
+# 	"email": "david@gmail.com",
+# 	"permissions": [
+# 		"Create Exam",
+# 		"Delete Exam"
+# 	]
+# }
+#####################################################
+@csrf_exempt
+def setStudent(request):
+    if request.method == "POST":
+        # decode request body
+        body = parseRequestBody(request)
+
+        first_name = body['first_name']
+        last_name = body['last_name']
+        email = body['email']
+        permissions = list(body['permissions'])
+
+        try:
+            Student.objects.get(email=email)
+            print(f"Student {email} already exists")
+            return JsonResponse(
+                {
+                    "Status": "Student Already Exists",
+                }
+            )
+
+        except:
+            newStudent = Student(first_name=first_name, last_name=last_name, email=email, permissions=permissions)
+            newStudent.save()
+
+            return JsonResponse(
+                {
+                    "Status": "Added Student",
+                }
+            )
+
+    else:
+        return JsonResponse(
+            {
+                "Status": "setStudent() only accepts POST requests"
+            }
+        )
+
+
+######################################################
+# getStudents()
+# method: GET
+# Returns all the existing students in the DB
+#####################################################
+def getStudents(request):
+    if request.method == "GET": 
+        students = Student.objects.all()
+        studentsList = [student.as_json() for student in students]
+
+        return JsonResponse(list(studentsList), safe=False)
+
+    else: # request.method isn't GET
+        return JsonResponse(
+                    {
+                        "Status": "getStudents() only accepts GET requests",
                     }
                 )

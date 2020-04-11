@@ -28,26 +28,39 @@ class User(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
 
+    def as_json(self):
+        json_dict = dict(
+            first_name = self.first_name,
+            last_name = self.last_name,
+            email = self.email
+        )
+
+        return json_dict
+
     class Meta:
         abstract = True
 
 ###################################################
 # Student
 # To add new student:
-#       student = Student(first_name="David", last_name="Shaulov", email="david@gmail.com", permissions = [ Permission(_p = PermissionEnum.deleteExam.value) ])
+#       student = Student(first_name="David", last_name="Shaulov", email="david@gmail.com", permissions = [ "Create Exam", "Delete Exam" ])
 #       student.save()
 ###################################################
 class Student(User):
-    name = models.CharField(max_length=50)
     permissions = models.ListField(
         models.CharField(max_length=20, validators=[checkIfPermissionValid])
     )
     objects = models.DjongoManager() 
     # more fields unique to students
 
+    def as_json(self):
+        json_dict = super().as_json()
+        json_dict['permissions'] = self.permissions
+
+        return json_dict
+
 
 class Lecturer(User):
-    name = models.CharField(max_length=50)
     permissions = models.ListField(
         models.CharField(max_length=20, validators=[checkIfPermissionValid])
     )
@@ -55,7 +68,6 @@ class Lecturer(User):
     # more fields unique to lecturers
 
 class Admin(User):
-    name = models.CharField(max_length=50)
     permissions = models.ListField(
         models.CharField(max_length=20, validators=[checkIfPermissionValid])
     ),
