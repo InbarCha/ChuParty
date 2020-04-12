@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
 from datetime import datetime
+from urllib.parse import unquote
 
 def parseRequestBody(request):
     body_unicode = request.body.decode('utf-8')
@@ -241,6 +242,31 @@ def getCourses(request):
         return JsonResponse(
                     {
                         "Status": "getCourses() only accepts GET requests",
+                    },
+                    status=500
+                )
+
+######################################################
+# getCourseByName()
+# method: GET
+# Returns course by name (if it exists in DB)
+#####################################################
+@csrf_exempt
+def getCourseByName(request):
+    if request.method == "GET": 
+        courseName = request.GET.get("name")    
+        print(courseName)
+
+        try:
+            courseObj = Course.objects.get(name=courseName)
+            return JsonResponse(courseObj.as_json())
+
+        except:
+            return JsonResponse({"Status": f"Course {courseName} doesn't exist in DB"}, status=500)
+
+    return JsonResponse(
+                    {
+                        "Status": "getCourseByName() only accepts GET requests",
                     },
                     status=500
                 )
