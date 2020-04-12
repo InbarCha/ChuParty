@@ -738,8 +738,9 @@ def getAdmins(request):
 #             }
 #         ]
 #     }
-# TODO: no need to add 'subjects' to the request body,
-#       need to parse exam questions and add each question subject to the exam subjects array
+#       
+#       no need to add 'subjects' to the request body,
+#       server parses exam questions and adds each question subject to the exam subjects array
 #####################################################
 @csrf_exempt
 def setExam(request):
@@ -762,6 +763,18 @@ def setExam(request):
         courseObj = createCourse(course)[1]
         print(courseObj.as_json())
 
+        # subjects
+        subjectsObjList = []
+        
+        if 'subjects' in body.keys():
+            subjects = body['subjects']
+            
+            # for every subject in the requestBody, check if it exists in the DB
+            # if it doesn't, create it
+            for subject in subjects:
+                subjectObj = createSubject(subject)[1]
+                subjectsObjList.append(subjectObj)
+
         # questions
         questionsObjList = []
         
@@ -774,21 +787,14 @@ def setExam(request):
                 if 'course' not in question.keys():
                     question['course'] = courseObj.as_json()
 
-                print(question)
                 questionObj = createQuestion(question)[1]
                 questionsObjList.append(questionObj)
 
-        # subjects
-        subjectsObjList = []
-        
-        if 'subjects' in body.keys():
-            subjects = body['subjects']
-            
-            # for every subject in the requestBody, check if it exists in the DB
-            # if it doesn't, create it
-            for subject in subjects:
-                subjectObj = createSubject(subject)[1]
-                subjectsObjList.append(subjectObj)
+                # for every question, if its subject is not in the exam subjects, add it
+                questionSubject = questionObj.subject
+                if questionSubject.name not in [subject.name for subject in subjectsObjList]:
+                    subjectsObjList.append(questionSubject)
+
         
         newExam = Exam(
             name=name,
