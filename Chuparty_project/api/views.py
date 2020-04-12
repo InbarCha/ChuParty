@@ -116,7 +116,7 @@ def setCourse(request):
         # decode request body
         body = parseRequestBody(request)
 
-        ret_tuple = createCourse(body)
+        ret_tuple = createOrUpdateCourse(body)
         isNewCourseCreated = ret_tuple[0]
 
         if isNewCourseCreated is None:
@@ -145,10 +145,10 @@ def setCourse(request):
                 )
 
 #######################################
-# createCourse(requestBody)
+# createOrUpdateCourse(requestBody)
 # help function
 ######################################
-def createCourse(requestBody):
+def createOrUpdateCourse(requestBody):
     # get Subjects' names and course name from request body
     if 'name' not in requestBody.keys():
         return (None, "Can't Create Course: 'name' field in not in request body")
@@ -282,7 +282,7 @@ def setSchool(request):
                 # iterate over courses given in the request body
                 # for each course, if it doesn't exist in the db, create it
                 for doc in courses:
-                    course = createCourse(doc)[1]
+                    course = createOrUpdateCourse(doc)[1]
                     coursesList.append(course)
 
             
@@ -416,7 +416,7 @@ def createQuestion(requestBody):
         if appendSubjectToCourse == True:
             course['subjects'].append(subjectObj.as_json())
         #--------------------------------------
-        courseObj = createCourse(course)[1]
+        courseObj = createOrUpdateCourse(course)[1]
 
         # answers
         if 'answers' not in requestBody.keys():
@@ -520,7 +520,7 @@ def setStudent(request):
                 # iterate over courses given in the request body
                 # for each course, if it doesn't exist in the db, create it
                 for doc in relevantCourses:
-                    course = createCourse(doc)[1]
+                    course = createOrUpdateCourse(doc)[1]
                     coursesList.append(course)
             
             for permission in permissions:
@@ -624,7 +624,7 @@ def setLecturer(request):
                 # iterate over courses given in the request body
                 # for each course, if it doesn't exist in the db, create it
                 for doc in coursesTeaching:
-                    courseObj = createCourse(doc)[1]
+                    courseObj = createOrUpdateCourse(doc)[1]
                     coursesList.append(courseObj)
 
             for permission in permissions:
@@ -815,10 +815,7 @@ def getAdmins(request):
 #     }
 #       
 #       no need to add 'subjects' to the request body,
-#       server parses exam questions and adds each question subject to the exam subjects array
-#
-# TODO: for every question, also check if its subject is in the course subjects.
-#       If not, update course accordingly 
+#       server parses exam questions and adds each question subject to the exam subjects array 
 #####################################################
 @csrf_exempt
 def setExam(request):
@@ -859,8 +856,12 @@ def setExam(request):
             # course
             if 'course' not in body.keys():
                 return JsonResponse({ "Status": "Can't Create Exam - 'course' not specified"},status=500)
+
             course = body['course'] 
-            courseObj = createCourse(course)[1]
+            if 'subjects' not in course.keys():
+                course['subjects'] = list()
+
+            courseObj = createOrUpdateCourse(course)[1]
 
             # subjects
             subjectsObjList = []
@@ -893,6 +894,10 @@ def setExam(request):
                     questionSubject = questionObj.subject
                     if questionSubject.name not in [subject.name for subject in subjectsObjList]:
                         subjectsObjList.append(questionSubject)
+                    if questionSubject.name not in [subject for subject in courseObj.subjects]:
+                        course['subjects'].append(questionSubject.as_json())
+                
+                courseObj = createOrUpdateCourse(course)[1]
 
             
             newExam = Exam(
