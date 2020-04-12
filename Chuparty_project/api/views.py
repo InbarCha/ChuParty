@@ -48,7 +48,10 @@ def setSubject(request):
         ret_tuple = createSubject(body)
         isNewSubjectCreated = ret_tuple[0]
         
-        if isNewSubjectCreated == True:
+        if isNewSubjectCreated is None:
+            return JsonResponse({ "Status": ret_tuple[1] })
+
+        elif isNewSubjectCreated == True:
             return JsonResponse(
                     { 
                         "Status": "Created Subject",
@@ -74,12 +77,12 @@ def setSubject(request):
 ###################################
 def createSubject(requestBody):
     # get subjectName from request body
+    if 'name' not in requestBody.keys():
+        return (None, "Can't Create Subject: 'name' field is not in request body")
     subjectName = requestBody['name']
-    print(subjectName)
 
     try: # subject exists in DB, don't create it again
         subjectFromDb = Subject.objects.get(name=subjectName)
-        print("subject already exists")
         return (False, subjectFromDb)
 
     except: # subject doesn't exist in the db, save it
@@ -110,8 +113,13 @@ def setCourse(request):
         # decode request body
         body = parseRequestBody(request)
 
-        isNewCourseCreated = createCourse(body)[0]
-        if isNewCourseCreated == False:
+        ret_tuple = createCourse(body)
+        isNewCourseCreated = ret_tuple[0]
+
+        if isNewCourseCreated is None:
+             return JsonResponse({ "Status": ret_tuple[1] })
+
+        elif isNewCourseCreated == False:
             return JsonResponse(
                 {
                     "Status": "Course Already Exists",
@@ -137,12 +145,12 @@ def setCourse(request):
 ######################################
 def createCourse(requestBody):
     # get Subjects' names and course name from request body
+    if 'name' not in requestBody.keys():
+        return (None, "Can't Create Course: 'name' field in not in request body")
     courseName = requestBody['name']
-    print(courseName)
 
     try:
         courseFromDB = Course.objects.get(name=courseName)
-        print(f"course {courseName} already exists, checking if subjects needs to be updated")
 
         # create subjectsList from requestBody
         subjectsList = appendSubjectsToList(requestBody, courseFromDB)
@@ -155,7 +163,6 @@ def createCourse(requestBody):
         return (False, courseFromDB)
         
     except:
-        print(f"course {courseName} doesn't exist, create it")
         subjectsList = appendSubjectsToList(requestBody, None)
         newCourse = Course(name=courseName, subjects=subjectsList)
 
@@ -247,6 +254,8 @@ def setSchool(request):
         body = parseRequestBody(request)
 
         # get school name and courses' names from request body
+        if 'name' not in body.keys():
+            return JsonResponse({"Status":"Can't Create School: 'name' field in not in request body"})
         schoolName = body['name']
 
         try:
@@ -335,7 +344,7 @@ def getSchools(request):
 #           "Deduction of Native Services",
 #           "Deformation of Name Servers"
 #       ],
-#     "correctAnswer": 0
+#     "correctAnswer": 1
 # }
 #####################################################
 @csrf_exempt
@@ -345,13 +354,19 @@ def setQuestion(request):
         body = parseRequestBody(request)
 
         # create Question if it doesn't already exist in DB
-        isNewQuestionCreated = createQuestion(body)[0]
-        if isNewQuestionCreated == True:
+        ret_tuple = createQuestion(body)
+        isNewQuestionCreated = ret_tuple[0]
+
+        if isNewQuestionCreated is None:
+            return JsonResponse({"Status": ret_tuple[1]})
+
+        elif isNewQuestionCreated == True:
             return JsonResponse(
             {
                 "Status": "Question Created"
             }
         )
+
         else:
             return JsonResponse(
             {
@@ -378,10 +393,14 @@ def createQuestion(requestBody):
         return (False, questionFromDB)
     except:
         # subject
+        if 'subject' not in requestBody.keys():
+            return (None, "Can't Create Question: 'subject' field in not in request body")
         subject = requestBody['subject']
         subjectObj = createSubject(subject)[1]
 
         # course
+        if 'course' not in requestBody.keys():
+            return (None, "Can't Create Question: 'course' field in not in request body")
         course = requestBody['course']
         appendSubjectToCourse = False
 
@@ -398,10 +417,16 @@ def createQuestion(requestBody):
         courseObj = createCourse(course)[1]
 
         # answers
+        if 'answers' not in requestBody.keys():
+            return (None, "Can't Create Question: 'answers' field in not in request body")
         answers = list(requestBody['answers'])
 
         # correntAnswer
+        if 'correctAnswer' not in requestBody.keys():
+            return (None, "Can't Create Question: 'correctAnswer' field in not in request body")
         correctAnswer = requestBody['correctAnswer']
+        if correctAnswer > 5 or correctAnswer < 1:
+            return (None, "Can't Create Question: 'correctAnswer' field value must be between 1 and 5")
     
         questionObj = Question(
             subject=subjectObj,
@@ -464,10 +489,14 @@ def setStudent(request):
         # decode request body
         body = parseRequestBody(request)
 
-        first_name = body['first_name']
-        last_name = body['last_name']
-        email = body['email']
-        permissions = list(body['permissions'])
+        ret_list = getUserFields(body)
+        if ret_list[0] is None:
+            return JsonResponse({"Status": "Can't Create Student, " + str(ret_list[1])})
+        
+        first_name = ret_list[0]
+        last_name = ret_list[1]
+        email = ret_list[2]
+        permissions = ret_list[3]
 
         try:
             Student.objects.get(email=email)
@@ -487,16 +516,13 @@ def setStudent(request):
                 # iterate over courses given in the request body
                 # for each course, if it doesn't exist in the db, create it
                 for doc in relevantCourses:
-                    ret_tuple = createCourse(doc)
-                    isNewCourseCreated = ret_tuple[0]
-                    course = ret_tuple[1]
-
-                    if isNewCourseCreated == False:
-                        print(f"course {doc} already exists in DB")
-                    else:
-                        print(f"course {doc} created in DB")
-                    
+                    course = createCourse(doc)[1]
                     coursesList.append(course)
+            
+            for permission in permissions:
+                if permission not in PermissionEnum.choices():
+                    status = f"Can't create student, permission {permission} is not allowed. Choose from PermissionEnum values"
+                    return JsonResponse({"Status": status})
 
             newStudent = Student(first_name=first_name, last_name=last_name, email=email, permissions=permissions, relevantCourses=coursesList)
             newStudent.save()
@@ -564,10 +590,14 @@ def setLecturer(request):
         # decode request body
         body = parseRequestBody(request)
 
-        first_name = body['first_name']
-        last_name = body['last_name']
-        email = body['email']
-        permissions = list(body['permissions'])
+        ret_list = getUserFields(body)
+        if ret_list[0] is None:
+            return JsonResponse({"Status": "Can't Create Lecturer, " + str(ret_list[1])})
+        
+        first_name = ret_list[0]
+        last_name = ret_list[1]
+        email = ret_list[2]
+        permissions = ret_list[3]
 
         try:
             Lecturer.objects.get(email=email)
@@ -589,6 +619,11 @@ def setLecturer(request):
                 for doc in coursesTeaching:
                     courseObj = createCourse(doc)[1]
                     coursesList.append(courseObj)
+
+            for permission in permissions:
+                if permission not in PermissionEnum.choices():
+                    status = f"Can't create Lecturer, permission {permission} is not allowed. Choose from PermissionEnum values"
+                    return JsonResponse({"Status": status})
 
             newLecturer = Lecturer(first_name=first_name, last_name=last_name, email=email, permissions=permissions, coursesTeaching=coursesList)
             newLecturer.save()
@@ -648,10 +683,14 @@ def setAdmin(request):
         # decode request body
         body = parseRequestBody(request)
 
-        first_name = body['first_name']
-        last_name = body['last_name']
-        email = body['email']
-        permissions = list(body['permissions'])
+        ret_list = getUserFields(body)
+        if ret_list[0] is None:
+            return JsonResponse({"Status": "Can't Create Admin, " + str(ret_list[1])})
+        
+        first_name = ret_list[0]
+        last_name = ret_list[1]
+        email = ret_list[2]
+        permissions = ret_list[3]
 
         try:
             Admin.objects.get(email=email)
@@ -663,6 +702,11 @@ def setAdmin(request):
             )
 
         except:
+            for permission in permissions:
+                if permission not in PermissionEnum.choices():
+                    status = f"Can't create Admin, permission {permission} is not allowed. Choose from PermissionEnum values"
+                    return JsonResponse({"Status": status})
+
             newAdmin = Admin(first_name=first_name, last_name=last_name, email=email, permissions=permissions)
             newAdmin.save()
 
@@ -679,6 +723,25 @@ def setAdmin(request):
             }
         )
 
+
+def getUserFields(requestBody):
+    if 'first_name' not in requestBody.keys():
+        return [None, "'first_name' field doesn't exist in request body"]
+    first_name = requestBody['first_name']
+
+    if 'last_name' not in requestBody.keys():
+        return [None, "'last_name' field doesn't exist in request body"]
+    last_name = requestBody['last_name']
+
+    if 'email' not in requestBody.keys():
+        return [None, "'email' field doesn't exist in request body"]
+    email = requestBody['email']
+
+    if 'permissions' not in requestBody.keys():
+        return [None, "'permissions' field doesn't exist in request body"]
+    permissions = list(requestBody['permissions'])
+
+    return [first_name, last_name, email, permissions]
 
 ######################################################
 # getAdmins()
@@ -749,9 +812,13 @@ def setExam(request):
         body = parseRequestBody(request)
 
         # name
+        if 'name' not in body.keys():
+             return JsonResponse({ "Status": "Can't Create Exam - 'name' not specified"})
         name = body['name']
 
         # date
+        if 'date' not in body.keys():
+             return JsonResponse({ "Status": "Can't Create Exam - 'date' not specified"})
         date = body['date']
         dateObj = datetime.strptime(date, "%d/%m/%y")
 
@@ -766,15 +833,18 @@ def setExam(request):
                     "Status": "Exam Already Exists",
                 }
             )
-            
+
         except:
             # writers
+            if 'date' not in body.keys():
+                return JsonResponse({ "Status": "Can't Create Exam - 'date' not specified"})
             writers = list(body['writers'])
 
             # course
+            if 'course' not in body.keys():
+                return JsonResponse({ "Status": "Can't Create Exam - 'course' not specified"})
             course = body['course'] 
             courseObj = createCourse(course)[1]
-            print(courseObj.as_json())
 
             # subjects
             subjectsObjList = []

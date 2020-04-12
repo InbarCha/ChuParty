@@ -2,8 +2,8 @@ from djongo import models
 from django import forms
 from enum import Enum
 from django.core.exceptions import ValidationError
-from django.core.validators import *
 import uuid
+
 
 ###################################################
 # Subject
@@ -74,8 +74,7 @@ class School(models.Model):
 #       subject (TCP, DFS, etc...)
 #       answers (python list: [answer0, answer1, answer2, answer3, answer4])
 #       correctAnswer (index of the correct answer in the python list)
-# TODO: change minVal to 1 and maxval to 5
-# TODO: check if validations (minVal and maxVal) work
+# taking care of validation of correctAnswer val(1 < _ < 5) in server (views.py)
 ###################################################
 class Question(models.Model):
     subject = models.EmbeddedField(
@@ -89,7 +88,7 @@ class Question(models.Model):
         models.CharField(max_length=50),
         max_length = 5
     )
-    correctAnswer = models.IntegerField(validators=[MinValueValidator(limit_value=0), MaxValueValidator(limit_value=4)])
+    correctAnswer = models.IntegerField()
 
     objects = models.DjongoManager()
 
@@ -180,7 +179,7 @@ class User(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     permissions = models.ListField(
-        models.CharField(max_length=20, validators=[checkIfPermissionValid])
+        models.CharField(max_length=20)
     )
 
     def as_json(self):
