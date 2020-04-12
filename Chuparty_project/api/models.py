@@ -3,6 +3,7 @@ from django import forms
 from enum import Enum
 from django.core.exceptions import ValidationError
 from django.core.validators import *
+import uuid
 
 ###################################################
 # Subject
@@ -113,6 +114,7 @@ class Question(models.Model):
 class Exam(models.Model):
     name = models.CharField(max_length=50)
     date = models.DateField()
+    examID = models.CharField(max_length=50)
 
      # who wrote the exam
     writers = models.ListField(
@@ -136,6 +138,7 @@ class Exam(models.Model):
 
     def as_json(self):
         json_dict = dict(
+            examID = self.examID,
             name = self.name,
             date = self.date,
             writers = self.writers,

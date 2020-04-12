@@ -755,62 +755,76 @@ def setExam(request):
         date = body['date']
         dateObj = datetime.strptime(date, "%d/%m/%y")
 
-        # writers
-        writers = list(body['writers'])
+        # id
+        examID = str(name) + "_" + str(date)
 
-        # course
-        course = body['course'] 
-        courseObj = createCourse(course)[1]
-        print(courseObj.as_json())
-
-        # subjects
-        subjectsObjList = []
-        
-        if 'subjects' in body.keys():
-            subjects = body['subjects']
+        try:
+            Exam.objects.get(examID=examID)
+            print(f"Exam {examID} already exists")
+            return JsonResponse(
+                {
+                    "Status": "Exam Already Exists",
+                }
+            )
             
-            # for every subject in the requestBody, check if it exists in the DB
-            # if it doesn't, create it
-            for subject in subjects:
-                subjectObj = createSubject(subject)[1]
-                subjectsObjList.append(subjectObj)
+        except:
+            # writers
+            writers = list(body['writers'])
 
-        # questions
-        questionsObjList = []
-        
-        if 'questions' in body.keys():
-            questions = body['questions']
+            # course
+            course = body['course'] 
+            courseObj = createCourse(course)[1]
+            print(courseObj.as_json())
+
+            # subjects
+            subjectsObjList = []
             
-            # for every question in the requestBody, check if it exists in the DB
-            # if it doesn't, create it
-            for question in questions:
-                if 'course' not in question.keys():
-                    question['course'] = courseObj.as_json()
+            if 'subjects' in body.keys():
+                subjects = body['subjects']
+                
+                # for every subject in the requestBody, check if it exists in the DB
+                # if it doesn't, create it
+                for subject in subjects:
+                    subjectObj = createSubject(subject)[1]
+                    subjectsObjList.append(subjectObj)
 
-                questionObj = createQuestion(question)[1]
-                questionsObjList.append(questionObj)
+            # questions
+            questionsObjList = []
+            
+            if 'questions' in body.keys():
+                questions = body['questions']
+                
+                # for every question in the requestBody, check if it exists in the DB
+                # if it doesn't, create it
+                for question in questions:
+                    if 'course' not in question.keys():
+                        question['course'] = courseObj.as_json()
 
-                # for every question, if its subject is not in the exam subjects, add it
-                questionSubject = questionObj.subject
-                if questionSubject.name not in [subject.name for subject in subjectsObjList]:
-                    subjectsObjList.append(questionSubject)
+                    questionObj = createQuestion(question)[1]
+                    questionsObjList.append(questionObj)
 
-        
-        newExam = Exam(
-            name=name,
-            date=dateObj, 
-            writers = writers,
-            course = courseObj,
-            questions = questionsObjList,
-            subjects = subjectsObjList
-        )
-        newExam.save()
+                    # for every question, if its subject is not in the exam subjects, add it
+                    questionSubject = questionObj.subject
+                    if questionSubject.name not in [subject.name for subject in subjectsObjList]:
+                        subjectsObjList.append(questionSubject)
 
-        return JsonResponse(
-            {
-                "Status": "Created Exam",
-            }
-        )
+            
+            newExam = Exam(
+                examID=examID,
+                name=name,
+                date=dateObj, 
+                writers = writers,
+                course = courseObj,
+                questions = questionsObjList,
+                subjects = subjectsObjList
+            )
+            newExam.save()
+
+            return JsonResponse(
+                {
+                    "Status": "Created Exam",
+                }
+            )
 
     else:
         return JsonResponse(
