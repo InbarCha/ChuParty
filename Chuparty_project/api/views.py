@@ -33,6 +33,31 @@ def getSubjects(request):
 
 
 ######################################################
+# getSubjectByName()
+# method: GET
+# Returns subject by name (if it exists in DB)
+#####################################################
+@csrf_exempt
+def getSubjectByName(request):
+    if request.method == "GET": 
+        subjectName = request.GET.get("name")
+
+        try:
+            subjectObj = Subject.objects.get(name=subjectName)
+            return JsonResponse(subjectObj.as_json())
+
+        except:
+            return JsonResponse({"Status": f"Subject {subjectName} doesn't exist in DB"}, status=500)
+
+    return JsonResponse(
+                    {
+                        "Status": "getSubjectByName() only accepts GET requests",
+                    },
+                    status=500
+                )
+
+
+######################################################
 # setSubject()
 # method: POST
 # POST body example:
@@ -806,13 +831,13 @@ def getAdmins(request):
 #                 ],
 #             "correctAnswer": 2
 #         }
-#         ],
-#         "subjects":[
-#             {
-#                 "name": "Object-Oriented Principles"
-#             }
-#         ]
-#     }
+#     ],
+#     "subjects":[ 
+#         {
+#             "name": "Object-Oriented Principles"
+#         }
+#     ]
+# }
 #       
 #       no need to add 'subjects' to the request body,
 #       server parses exam questions and adds each question subject to the exam subjects array 

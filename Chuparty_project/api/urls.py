@@ -19,4 +19,5 @@ urlpatterns = [
     path('getAdmins/', views.getAdmins),
     path('setExam/', views.setExam),
     path('getExams/', views.getExams),
+    path('getSubjectByName/', views.getSubjectByName),
 ]
