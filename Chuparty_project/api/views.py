@@ -27,7 +27,8 @@ def getSubjects(request):
     return JsonResponse(
                     {
                         "Status": "getSubjects() only accepts GET requests",
-                    }
+                    },
+                    status=500
                 )
 
 
@@ -49,7 +50,7 @@ def setSubject(request):
         isNewSubjectCreated = ret_tuple[0]
         
         if isNewSubjectCreated is None:
-            return JsonResponse({ "Status": ret_tuple[1] })
+            return JsonResponse({ "Status": ret_tuple[1] }, status=500)
 
         elif isNewSubjectCreated == True:
             return JsonResponse(
@@ -61,14 +62,16 @@ def setSubject(request):
             return JsonResponse(
                     {
                         "Status": "Subject Already Exists",
-                    }
+                    },
+                    status=500
                 )
 
     else: # request.method isn't POST
         return JsonResponse(
                     {
                         "Status": "setSubject() only accepts POST requests",
-                    }
+                    },
+                    status=500
                 )
 
 #####################################
@@ -117,13 +120,14 @@ def setCourse(request):
         isNewCourseCreated = ret_tuple[0]
 
         if isNewCourseCreated is None:
-             return JsonResponse({ "Status": ret_tuple[1] })
+             return JsonResponse({ "Status": ret_tuple[1] }, status=500)
 
         elif isNewCourseCreated == False:
             return JsonResponse(
                 {
                     "Status": "Course Already Exists",
-                }
+                }, 
+                status=500
             )
         else:
             return JsonResponse(
@@ -136,7 +140,8 @@ def setCourse(request):
         return JsonResponse(
                     {
                         "Status": "setCourse() only accepts POST calls",
-                    }
+                    },
+                    status=500
                 )
 
 #######################################
@@ -211,7 +216,8 @@ def getCourses(request):
         return JsonResponse(
                     {
                         "Status": "getCourses() only accepts GET requests",
-                    }
+                    },
+                    status=500
                 )
 
 
@@ -255,7 +261,7 @@ def setSchool(request):
 
         # get school name and courses' names from request body
         if 'name' not in body.keys():
-            return JsonResponse({"Status":"Can't Create School: 'name' field in not in request body"})
+            return JsonResponse({"Status":"Can't Create School: 'name' field in not in request body"}, status=500)
         schoolName = body['name']
 
         try:
@@ -264,7 +270,8 @@ def setSchool(request):
             return JsonResponse(
                 {
                     "Status": "School Already Exists",
-                }
+                },
+                status=500
             )
         except:
             coursesList = []
@@ -275,15 +282,7 @@ def setSchool(request):
                 # iterate over courses given in the request body
                 # for each course, if it doesn't exist in the db, create it
                 for doc in courses:
-                    ret_tuple = createCourse(doc)
-                    isNewCourseCreated = ret_tuple[0]
-                    course = ret_tuple[1]
-
-                    if isNewCourseCreated == False:
-                        print(f"course {doc} already exists in DB")
-                    else:
-                        print(f"course {doc} created in DB")
-                    
+                    course = createCourse(doc)[1]
                     coursesList.append(course)
 
             
@@ -312,7 +311,8 @@ def getSchools(request):
         return JsonResponse(
                     {
                         "Status": "getSchools() only accepts GET requests",
-                    }
+                    },
+                    status=500
                 )
 
 
@@ -358,7 +358,7 @@ def setQuestion(request):
         isNewQuestionCreated = ret_tuple[0]
 
         if isNewQuestionCreated is None:
-            return JsonResponse({"Status": ret_tuple[1]})
+            return JsonResponse({"Status": ret_tuple[1]}, status=500)
 
         elif isNewQuestionCreated == True:
             return JsonResponse(
@@ -371,14 +371,16 @@ def setQuestion(request):
             return JsonResponse(
             {
                 "Status": "Question Already Exists"
-            }
+            },
+            status=500
         )
     
     else:
         return JsonResponse(
             {
                 "Status": "setQuestion() only accepts POST requests"
-            }
+            }, 
+            status=500
         )
 
 
@@ -457,7 +459,8 @@ def getQuestions(request):
         return JsonResponse(
                     {
                         "Status": "getSchools() only accepts GET requests",
-                    }
+                    },
+                    status=500
                 )
 
 
@@ -491,7 +494,7 @@ def setStudent(request):
 
         ret_list = getUserFields(body)
         if ret_list[0] is None:
-            return JsonResponse({"Status": "Can't Create Student, " + str(ret_list[1])})
+            return JsonResponse({"Status": "Can't Create Student, " + str(ret_list[1])}, status=500)
         
         first_name = ret_list[0]
         last_name = ret_list[1]
@@ -504,7 +507,8 @@ def setStudent(request):
             return JsonResponse(
                 {
                     "Status": "Student Already Exists",
-                }
+                }, 
+                status=500
             )
 
         except:
@@ -522,7 +526,7 @@ def setStudent(request):
             for permission in permissions:
                 if permission not in PermissionEnum.choices():
                     status = f"Can't create student, permission {permission} is not allowed. Choose from PermissionEnum values"
-                    return JsonResponse({"Status": status})
+                    return JsonResponse({"Status": status}, status=500)
 
             newStudent = Student(first_name=first_name, last_name=last_name, email=email, permissions=permissions, relevantCourses=coursesList)
             newStudent.save()
@@ -537,7 +541,8 @@ def setStudent(request):
         return JsonResponse(
             {
                 "Status": "setStudent() only accepts POST requests"
-            }
+            }, 
+            status=500
         )
 
 
@@ -558,7 +563,8 @@ def getStudents(request):
         return JsonResponse(
                     {
                         "Status": "getStudents() only accepts GET requests",
-                    }
+                    }, 
+                    status=500
                 )
 
 
@@ -592,7 +598,7 @@ def setLecturer(request):
 
         ret_list = getUserFields(body)
         if ret_list[0] is None:
-            return JsonResponse({"Status": "Can't Create Lecturer, " + str(ret_list[1])})
+            return JsonResponse({"Status": "Can't Create Lecturer, " + str(ret_list[1])}, status=500)
         
         first_name = ret_list[0]
         last_name = ret_list[1]
@@ -605,7 +611,8 @@ def setLecturer(request):
             return JsonResponse(
                 {
                     "Status": "Lecturer Already Exists",
-                }
+                }, 
+                status=500
             )
 
         except:
@@ -623,7 +630,7 @@ def setLecturer(request):
             for permission in permissions:
                 if permission not in PermissionEnum.choices():
                     status = f"Can't create Lecturer, permission {permission} is not allowed. Choose from PermissionEnum values"
-                    return JsonResponse({"Status": status})
+                    return JsonResponse({"Status": status}, status=500)
 
             newLecturer = Lecturer(first_name=first_name, last_name=last_name, email=email, permissions=permissions, coursesTeaching=coursesList)
             newLecturer.save()
@@ -638,7 +645,8 @@ def setLecturer(request):
         return JsonResponse(
             {
                 "Status": "setLecturer() only accepts POST requests"
-            }
+            }, 
+            status=500
         )
 
 
@@ -659,7 +667,8 @@ def getLecturers(request):
         return JsonResponse(
                     {
                         "Status": "getLecturers() only accepts GET requests",
-                    }
+                    }, 
+                    status=500
                 )
 
 
@@ -685,7 +694,7 @@ def setAdmin(request):
 
         ret_list = getUserFields(body)
         if ret_list[0] is None:
-            return JsonResponse({"Status": "Can't Create Admin, " + str(ret_list[1])})
+            return JsonResponse({"Status": "Can't Create Admin, " + str(ret_list[1])}, status=500)
         
         first_name = ret_list[0]
         last_name = ret_list[1]
@@ -698,14 +707,15 @@ def setAdmin(request):
             return JsonResponse(
                 {
                     "Status": "Admin Already Exists",
-                }
+                }, 
+                status=500
             )
 
         except:
             for permission in permissions:
                 if permission not in PermissionEnum.choices():
                     status = f"Can't create Admin, permission {permission} is not allowed. Choose from PermissionEnum values"
-                    return JsonResponse({"Status": status})
+                    return JsonResponse({"Status": status}, status=500)
 
             newAdmin = Admin(first_name=first_name, last_name=last_name, email=email, permissions=permissions)
             newAdmin.save()
@@ -720,7 +730,8 @@ def setAdmin(request):
         return JsonResponse(
             {
                 "Status": "setAdmin() only accepts POST requests"
-            }
+            }, 
+            status=500
         )
 
 
@@ -760,7 +771,8 @@ def getAdmins(request):
         return JsonResponse(
                     {
                         "Status": "getAdmins() only accepts GET requests",
-                    }
+                    }, 
+                    status=500
                 )
 
 
@@ -804,6 +816,9 @@ def getAdmins(request):
 #       
 #       no need to add 'subjects' to the request body,
 #       server parses exam questions and adds each question subject to the exam subjects array
+#
+# TODO: for every question, also check if its subject is in the course subjects.
+#       If not, update course accordingly 
 #####################################################
 @csrf_exempt
 def setExam(request):
@@ -813,12 +828,12 @@ def setExam(request):
 
         # name
         if 'name' not in body.keys():
-             return JsonResponse({ "Status": "Can't Create Exam - 'name' not specified"})
+             return JsonResponse({ "Status": "Can't Create Exam - 'name' not specified"}, status=500)
         name = body['name']
 
         # date
         if 'date' not in body.keys():
-             return JsonResponse({ "Status": "Can't Create Exam - 'date' not specified"})
+             return JsonResponse({ "Status": "Can't Create Exam - 'date' not specified"}, status=500)
         date = body['date']
         dateObj = datetime.strptime(date, "%d/%m/%y")
 
@@ -831,18 +846,19 @@ def setExam(request):
             return JsonResponse(
                 {
                     "Status": "Exam Already Exists",
-                }
+                },
+                status=500
             )
 
         except:
             # writers
             if 'date' not in body.keys():
-                return JsonResponse({ "Status": "Can't Create Exam - 'date' not specified"})
+                return JsonResponse({ "Status": "Can't Create Exam - 'date' not specified"}, status=500)
             writers = list(body['writers'])
 
             # course
             if 'course' not in body.keys():
-                return JsonResponse({ "Status": "Can't Create Exam - 'course' not specified"})
+                return JsonResponse({ "Status": "Can't Create Exam - 'course' not specified"},status=500)
             course = body['course'] 
             courseObj = createCourse(course)[1]
 
@@ -900,7 +916,8 @@ def setExam(request):
         return JsonResponse(
             {
                 "Status": "setExam() only accepts POST requests"
-            }
+            },
+            status=500
         )
 
 ######################################################
@@ -920,5 +937,6 @@ def getExams(request):
         return JsonResponse(
                     {
                         "Status": "getExams() only accepts GET requests",
-                    }
+                    },
+                    status=500
                 )
