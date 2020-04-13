@@ -3,28 +3,38 @@ from . import views
 
 urlpatterns = [
     path('', views.index),
-    path('getSubjects', views.getSubjects),
+
+    path('getSubjects', views.getSubjects), # also edit subject
     path('setSubject', views.setSubject),
-    path('setCourse', views.setCourse),
-    path('getCourses', views.getCourses),
-    path('setSchool', views.setSchool),
+    path('getSubjectByName', views.getSubjectByName),
+
+    path('setCourse', views.setCourse), # also edit course
+    path('getCourses', views.getCourses), 
+    path('getCourseByName', views.getCourseByName),
+
+    path('setSchool', views.setSchool), 
+    path('editSchool', views.editSchool), 
     path('getSchools', views.getSchools),
+    path('getSchoolByName', views.getSchoolByName),
+
     path('setQuestion', views.setQuestion),
     path('getQuestions', views.getQuestions),
+    path('getQuestionByBody', views.getQuestionByBody),
+
     path('setStudent', views.setStudent),
     path('getStudents', views.getStudents),
+    path('getStudentByEmail', views.getStudentByEmail),
+
     path('setLecturer', views.setLecturer),
     path('getLecturers', views.getLecturers),
+    path('getLecturerByEmail', views.getLecturerByEmail),
+
     path('setAdmin', views.setAdmin),
     path('getAdmins', views.getAdmins),
+    path('getAdminByEmail', views.getAdminByEmail),
+
     path('setExam', views.setExam),
     path('getExams', views.getExams),
-    path('getSubjectByName', views.getSubjectByName),
-    path('getCourseByName', views.getCourseByName),
-    path('getSchoolByName', views.getSchoolByName),
-    path('getQuestionByBody', views.getQuestionByBody),
     path('getExamByID', views.getExamByID),
-    path('getAdminByEmail', views.getAdminByEmail),
-    path('getLecturerByEmail', views.getLecturerByEmail),
-    path('getStudentByEmail', views.getStudentByEmail),
+
 ]
