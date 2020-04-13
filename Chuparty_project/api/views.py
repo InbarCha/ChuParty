@@ -6,6 +6,11 @@ from django.http import JsonResponse
 from datetime import datetime
 from urllib.parse import unquote
 
+#TODO: take care of case-senstitive issues (for example in MongoDB queries)
+#TODO: Think of a better way to handle document IDs.
+#      For example, two courses with the same name could exist (that belong to different schools), 
+#      so handling course name as its ID is not good enough
+
 def parseRequestBody(request):
     body_unicode = request.body.decode('utf-8')
     return json.loads(body_unicode)
@@ -344,6 +349,14 @@ def setSchool(request):
                         "Status": "Added School",
                     }
                 )
+                
+    else: # request.method isn't POST
+        return JsonResponse(
+                    {
+                        "Status": "setSchool() only accepts POST requests",
+                    },
+                    status=500
+                )
 
 ######################################################
 # getSchools()
@@ -362,6 +375,32 @@ def getSchools(request):
         return JsonResponse(
                     {
                         "Status": "getSchools() only accepts GET requests",
+                    },
+                    status=500
+                )
+
+
+######################################################
+# getSchoolByName()
+# method: GET
+# Returns school by name (if it exists in DB)
+#####################################################
+@csrf_exempt
+def getSchoolByName(request):
+    if request.method == "GET": 
+        schoolName = request.GET.get("name")    
+        print(schoolName)
+
+        try:
+            schoolObj = School.objects.get(name=schoolName)
+            return JsonResponse(schoolObj.as_json())
+
+        except:
+            return JsonResponse({"Status": f"School {schoolName} doesn't exist in DB"}, status=500)
+
+    return JsonResponse(
+                    {
+                        "Status": "getSchoolByName() only accepts GET requests",
                     },
                     status=500
                 )
@@ -516,6 +555,32 @@ def getQuestions(request):
 
 
 ######################################################
+# getQuestionByBody()
+# method: GET
+# Returns question by body (if it exists in DB)
+#####################################################
+@csrf_exempt
+def getQuestionByBody(request):
+    if request.method == "GET": 
+        questionBody = request.GET.get("body")    
+        print(questionBody)
+
+        try:
+            questionObj = Question.objects.get(body=questionBody)
+            return JsonResponse(questionObj.as_json())
+
+        except:
+            return JsonResponse({"Status": f"Question {questionBody} doesn't exist in DB"}, status=500)
+
+    return JsonResponse(
+                    {
+                        "Status": "getQuestionByBody() only accepts GET requests",
+                    },
+                    status=500
+                )
+
+
+######################################################
 # setStudent()
 # method: POST
 # POST body example:
@@ -618,6 +683,30 @@ def getStudents(request):
                     status=500
                 )
 
+
+######################################################
+# getStudentByEmail()
+# method: GET
+# Returns student by its email (if it exists in DB)
+#####################################################
+@csrf_exempt
+def getStudentByEmail(request):
+    if request.method == "GET": 
+        email = request.GET.get("email")
+
+        try:
+            studentObj = Student.objects.get(email=email)
+            return JsonResponse(studentObj.as_json())
+
+        except:
+            return JsonResponse({"Status": f"Student {email} doesn't exist in DB"}, status=500)
+
+    return JsonResponse(
+                    {
+                        "Status": "getStudentByEmail() only accepts GET requests",
+                    },
+                    status=500
+                )
 
 ######################################################
 # setLecturer()
@@ -724,6 +813,31 @@ def getLecturers(request):
 
 
 ######################################################
+# getLecturerByEmail()
+# method: GET
+# Returns lecturer by its email (if it exists in DB)
+#####################################################
+@csrf_exempt
+def getLecturerByEmail(request):
+    if request.method == "GET": 
+        email = request.GET.get("email")
+
+        try:
+            lecturerObj = Lecturer.objects.get(email=email)
+            return JsonResponse(lecturerObj.as_json())
+
+        except:
+            return JsonResponse({"Status": f"Lecturer {email} doesn't exist in DB"}, status=500)
+
+    return JsonResponse(
+                    {
+                        "Status": "getLecturerByEmail() only accepts GET requests",
+                    },
+                    status=500
+                )
+
+
+######################################################
 # setAdmin()
 # method: POST
 # POST body example:
@@ -823,6 +937,30 @@ def getAdmins(request):
                     {
                         "Status": "getAdmins() only accepts GET requests",
                     }, 
+                    status=500
+                )
+
+######################################################
+# getAdminByEmail()
+# method: GET
+# Returns admin by its email (if it exists in DB)
+#####################################################
+@csrf_exempt
+def getAdminByEmail(request):
+    if request.method == "GET": 
+        email = request.GET.get("email")
+
+        try:
+            adminObj = Admin.objects.get(email=email)
+            return JsonResponse(adminObj.as_json())
+
+        except:
+            return JsonResponse({"Status": f"Admin {email} doesn't exist in DB"}, status=500)
+
+    return JsonResponse(
+                    {
+                        "Status": "getAdminByEmail() only accepts GET requests",
+                    },
                     status=500
                 )
 
@@ -993,6 +1131,30 @@ def getExams(request):
         return JsonResponse(
                     {
                         "Status": "getExams() only accepts GET requests",
+                    },
+                    status=500
+                )
+
+######################################################
+# getExamByID()
+# method: GET
+# Returns exam by its ID (if it exists in DB)
+#####################################################
+@csrf_exempt
+def getExamByID(request):
+    if request.method == "GET": 
+        examID = request.GET.get("examID")
+
+        try:
+            examObj = Exam.objects.get(examID=examID)
+            return JsonResponse(examObj.as_json())
+
+        except:
+            return JsonResponse({"Status": f"Exam {examID} doesn't exist in DB"}, status=500)
+
+    return JsonResponse(
+                    {
+                        "Status": "getExamByID() only accepts GET requests",
                     },
                     status=500
                 )
