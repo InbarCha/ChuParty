@@ -4,11 +4,13 @@ from . import views
 urlpatterns = [
     path('', views.index),
 
-    path('getSubjects', views.getSubjects), # also edit subject
+    path('getSubjects', views.getSubjects), 
+    path('editSubject', views.editSubject),
     path('setSubject', views.setSubject),
     path('getSubjectByName', views.getSubjectByName),
 
-    path('setCourse', views.setCourse), # also edit course
+    path('setCourse', views.setCourse), 
+    path('editCourse', views.editCourse),
     path('getCourses', views.getCourses), 
     path('getCourseByName', views.getCourseByName),
 
@@ -18,6 +20,7 @@ urlpatterns = [
     path('getSchoolByName', views.getSchoolByName),
 
     path('setQuestion', views.setQuestion),
+    path('editQuestion', views.editQuestion),
     path('getQuestions', views.getQuestions),
     path('getQuestionByBody', views.getQuestionByBody),
 

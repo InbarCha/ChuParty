@@ -30,6 +30,7 @@ class Subject(models.Model):
 ###################################################
 class Course(models.Model):
     name = models.CharField(max_length=50)
+
     # course subjects, for example: "Computer Networks" Course will have subjects: TCP, IP, DNS..
     subjects = models.ArrayField(
         model_container=Subject,
@@ -102,6 +103,9 @@ class Question(models.Model):
         )
 
         return json_dict
+    
+    def __str__(self):
+        return f"body: {self.body}, course: {self.course}, subject: {self.subject}, answers:{self.answers}, correctAnswer:{self.correctAnswer}"
 
 ###################################################
 # Exam

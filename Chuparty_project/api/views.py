@@ -5,6 +5,9 @@ import json
 from django.http import JsonResponse
 from datetime import datetime
 from urllib.parse import unquote
+from api.HelpFuncs_Subjects import *
+from api.HelpFuncs_Courses import *
+from api.HelpFuncs_Questions import *
 
 #TODO: take care of case-senstitive issues (for example in MongoDB queries)
 
@@ -107,24 +110,65 @@ def setSubject(request):
                     status=500
                 )
 
-#####################################
-# createSubject
-# help function
-###################################
-def createSubject(requestBody):
-    # get subjectName from request body
-    if 'name' not in requestBody.keys():
-        return (None, "Can't Create Subject: 'name' field is not in request body")
-    subjectName = requestBody['name']
+#############################################################
+# editSubject()
+# method: POST
+# POST body example:
+# {
+# 	"name": "DFS",
+#   "ChangeName": "DFS - Search Algorithms"
+# }
+#############################################################
+@csrf_exempt
+def editSubject(request):
+    if request.method == "POST":
+        changedNameFlg = False
 
-    try: # subject exists in DB, don't create it again
-        subjectFromDb = Subject.objects.get(name=subjectName)
-        return (False, subjectFromDb)
+        # decode request body
+        body = parseRequestBody(request)
+        
+        if 'name' not in body.keys():
+            return JsonResponse({"Status":"Can't Edit Subject: 'name' field in not in request body"}, status=500)
+        name = body['name']
 
-    except: # subject doesn't exist in the db, save it
-        subject = Subject(name=subjectName)
-        subject.save()
-        return (True, subject)
+        try:
+            Subject.objects.get(name=name)
+
+            if 'ChangeName' in body.keys():
+                newName = body['ChangeName']
+                Subject.objects.filter(name=name).update(name=newName)
+                changedNameFlg = True
+
+                updateSubjectsInCourses(name, newName)
+                updateSubjectsInSchools(name, newName)
+                updateSubjectsInQuestions(name,newName)
+                updateSubjectsInExams(name, newName)
+
+            # create response
+            ret_json = dict()
+
+            if changedNameFlg == True:
+                ret_json['Status Changed_Name'] = f"Changed subject name from '{name}' to '{newName}'"
+            else:
+                ret_json['Status'] = f"Changed no field in subject '{name}'"
+            
+            return JsonResponse(ret_json)
+
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": "Can't Edit Subject"
+                    }
+                )
+
+    else:
+        return JsonResponse(
+                {
+                    "Status": "editSubject() only accepts POST requests",
+                },
+                status=500
+            )
 
 
 ######################################################
@@ -149,7 +193,7 @@ def setCourse(request):
         # decode request body
         body = parseRequestBody(request)
 
-        ret_tuple = createOrUpdateCourse(body)
+        ret_tuple = createCourseOrAddSubject(body)
         isNewCourseCreated = ret_tuple[0]
 
         if isNewCourseCreated is None:
@@ -177,60 +221,125 @@ def setCourse(request):
                     status=500
                 )
 
-#######################################
-# createOrUpdateCourse(courseJson)
-# help function
-######################################
-def createOrUpdateCourse(courseJson):
-    # get Subjects' names and course name from request body
-    if 'name' not in courseJson.keys():
-        return (None, "Can't Create Course: 'name' field in not in request body")
-    courseName = courseJson['name']
 
-    try:
-        courseFromDB = Course.objects.get(name=courseName)
+#############################################################
+# editCourse()
+# method: POST
+# POST body example:
+# {
+# 	"name": "OOP",
+#   "ChangeName": "Object-Oriented Programming"
+# 	"AddToSubjects":[
+# 		{
+# 			"name": "C++"
+# 		}   
+# 	]
+# }
+#############################################################
+@csrf_exempt
+def editCourse(request):
+    if request.method == "POST":
+        changedNameFlg = False
+        addedToSubjectsFlg = False 
+        deletedFromSubjectsFlg = False
 
-        # create subjectsList from requestBody
-        subjectsList = appendSubjectsToList(courseJson, courseFromDB)
-
-        # update the course object in the DB with the new subjectsList
-        Course.objects.filter(name=courseName).update(subjects=subjectsList)
-
-        # get the updated course object from DB and return it
-        courseFromDB = Course.objects.get(name=courseName)
-        return (False, courseFromDB)
+        # decode request body
+        body = parseRequestBody(request)
         
-    except:
-        subjectsList = appendSubjectsToList(courseJson, None)
-        newCourse = Course(name=courseName, subjects=subjectsList)
+        if 'name' not in body.keys():
+            return JsonResponse({"Status":"Can't Edit Course: 'name' field in not in request body"}, status=500)
+        name = body['name']
 
-        newCourse.save()
-        return (True, newCourse)
+        try:
+            courseObj = Course.objects.get(name=name)
 
-#######################################
-# appendSubjectsToList(requestBody, courseFromDB)
-# help function
-######################################
-def appendSubjectsToList(requestBody, courseFromDB):
-    if (courseFromDB is None) or (not courseFromDB.subjects):
-        subjectsList = []
+            # add subjects to course
+            if 'AddToSubjects' in body.keys():
+                newSubjectsList = courseObj.subjects
+
+                subjectsToAdd = list(body['AddToSubjects'])
+                for subject in subjectsToAdd:
+                    ret_tuple = createSubject(subject)
+                    isSubjectReturned = ret_tuple[0]
+                    
+                    if isSubjectReturned is None:
+                        return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+
+                    subjectObj = ret_tuple[1]
+                    if subjectObj.name not in [subject.name for subject in newSubjectsList]:
+                        newSubjectsList.append(subjectObj)
+                        addedToSubjectsFlg = True
+
+                        addSubjectToCoursesInSchools(name, subjectObj)
+                        addSubjectToCourseInQuestions(name, subjectObj)
+                        addSubjectToCourseInExams(name, subjectObj)
+            
+            # delete subjects from course
+            if 'DeleteFromSubjects' in body.keys():
+                newSubjectsList = courseObj.subjects
+
+                subjectsToDelete = list(body['DeleteFromSubjects'])
+                for subject in subjectsToDelete:
+                    ret_tuple = createSubject(subject)
+                    isSubjectReturned = ret_tuple[0]
+                    
+                    if isSubjectReturned is None:
+                        return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+
+                    subjectObj = ret_tuple[1]
+                    if subjectObj.name in [subject.name for subject in newSubjectsList]:
+                        newSubjectsList = list(filter(lambda subject:subject.name != subjectObj.name, newSubjectsList))
+                        deletedFromSubjectsFlg = True
+
+                        deleteSubjectFromCoursesInSchools(name, subjectObj)
+                        deleteSubjectFromCourseInQuestions(name, subjectObj)
+                        deleteSubjectFromCourseInExams(name, subjectObj)
+            
+            # update course's subjects list 
+            if addedToSubjectsFlg == True or deletedFromSubjectsFlg == True:
+                Course.objects.filter(name=name).update(subjects=newSubjectsList)
+
+            # change course name
+            if 'ChangeName' in body.keys():
+                newName = body['ChangeName']
+                Course.objects.filter(name=name).update(name=newName)
+                changedNameFlg = True
+
+                updateCourseNameInSchools(name, newName)
+                updateCourseNameInQuestions(name, newName)
+                updateCourseNameInExams(name, newName)
+            
+            # create response
+            ret_json = dict()
+
+            if changedNameFlg == True:
+                ret_json['Status Changed_Name'] = f"Changed course name from '{name}' to '{newName}'"
+            if addedToSubjectsFlg == True:
+                ret_json['Status Added_Subject'] = f"Added to course subjects"
+            if deletedFromSubjectsFlg == True:
+                ret_json['Status Deleted_Subject'] = f"Deleted from course subjects"
+            
+            if changedNameFlg == False and addedToSubjectsFlg == False and deletedFromSubjectsFlg == False:
+                ret_json['Status'] = f"Changed no field in course '{name}'"
+            
+            return JsonResponse(ret_json)
+
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": "Can't Edit Course"
+                    }
+                )
+
     else:
-        subjectsList = courseFromDB.subjects
-    
-    if 'subjects' in requestBody.keys():
-        subjects = requestBody['subjects']
+        return JsonResponse(
+                {
+                    "Status": "editCourse() only accepts POST requests",
+                },
+                status=500
+            )
 
-        # iterate over subjects given in the request body
-        # for each subject, if it doesn't exist in the db, create it
-        for doc in subjects:
-            subject = createSubject(doc)[1]
-
-            if subject.name not in [currentSubject.name for currentSubject in subjectsList]:
-                subjectsList.append(subject)
-
-    return subjectsList
-    
-    
 
 ######################################################
 # getCourses()
@@ -340,7 +449,7 @@ def setSchool(request):
                 # iterate over courses given in the request body
                 # for each course, if it doesn't exist in the db, create it
                 for doc in courses:
-                    ret_tuple = createOrUpdateCourse(doc)
+                    ret_tuple = createCourseOrAddSubject(doc)
                     isCourseReturned = ret_tuple[0]
                     
                     if isCourseReturned is None:
@@ -377,7 +486,12 @@ def setSchool(request):
 # 		{
 # 			"name": "Computer Networks"
 # 		}
-# 	]	
+# 	],
+#   "DeleteFromCourses": [
+#       {
+#           "name": "OOP"
+#       }
+#   ]
 # }
 #############################################################
 @csrf_exempt
@@ -403,7 +517,7 @@ def editSchool(request):
 
                 coursesToAdd = list(body['AddToCourses'])
                 for course in coursesToAdd:
-                    ret_tuple = createOrUpdateCourse(course)
+                    ret_tuple = createCourseOrAddSubject(course)
                     isCourseReturned = ret_tuple[0]
                     
                     if isCourseReturned is None:
@@ -420,7 +534,7 @@ def editSchool(request):
 
                 coursesToDelete = list(body['DeleteFromCourses'])
                 for course in coursesToDelete:
-                    ret_tuple = createOrUpdateCourse(course)
+                    ret_tuple = createCourseOrAddSubject(course)
                     isCourseReturned = ret_tuple[0]
                     
                     if isCourseReturned is None:
@@ -452,6 +566,9 @@ def editSchool(request):
                 ret_json['Status Added_Courses'] = "Added to school's courses"
             if deletedFromCoursesFlg == True:
                 ret_json['Status Deleted_Courses'] = "Deleted from school's courses"
+            
+            if changedNameFlg == False and addedToCoursesFlg == False and deletedFromCoursesFlg == False:
+                ret_json['Status'] = f"Changed no field in school '{name}'"
 
             return JsonResponse(ret_json)
 
@@ -588,69 +705,26 @@ def setQuestion(request):
             status=500
         )
 
+#############################################################
+# editQuestion()
+# method: POST
+# POST body example:
+# 
+#############################################################
+@csrf_exempt
+def editQuestion(request):
+    if request.method == "POST":
+        # decode request body
+        body = parseRequestBody(request)
 
-def createQuestion(requestBody):
-    # get Question parans
-    # questionBody
-    questionBody = requestBody['body']
-
-    try:
-        questionFromDB = Question.objects.get(body=questionBody)
-        print(f"question {questionBody} already exists")
-        return (False, questionFromDB)
-    except:
-        # subject
-        if 'subject' not in requestBody.keys():
-            return (None, "Can't Create Question: 'subject' field in not in request body")
-        subject = requestBody['subject']
-        subjectObj = createSubject(subject)[1]
-
-        # course
-        if 'course' not in requestBody.keys():
-            return (None, "Can't Create Question: 'course' field in not in request body")
-        course = requestBody['course']
-        appendSubjectToCourse = False
-
-        if 'subjects' not in course.keys():
-            course['subjects'] = list()
-            appendSubjectToCourse = True
-
-        elif subject not in course['subjects']:
-            appendSubjectToCourse = True
-        #--------------------------------------
-        if appendSubjectToCourse == True:
-            course['subjects'].append(subjectObj.as_json())
-        #--------------------------------------
-        ret_tuple = createOrUpdateCourse(course)
-        isCourseReturned = ret_tuple[0]
-        if isCourseReturned is None:
-            return JsonResponse({ "Status": ret_tuple[1] }, status=500)
-        courseObj = ret_tuple[1]
-
-        # answers
-        if 'answers' not in requestBody.keys():
-            return (None, "Can't Create Question: 'answers' field in not in request body")
-        answers = list(requestBody['answers'])
-
-        # correntAnswer
-        if 'correctAnswer' not in requestBody.keys():
-            return (None, "Can't Create Question: 'correctAnswer' field in not in request body")
-        correctAnswer = requestBody['correctAnswer']
-        if correctAnswer > 5 or correctAnswer < 1:
-            return (None, "Can't Create Question: 'correctAnswer' field value must be between 1 and 5")
-    
-        questionObj = Question(
-            subject=subjectObj,
-            course=courseObj, 
-            body=questionBody,
-            answers=answers,
-            correctAnswer=correctAnswer
+    else:
+        return JsonResponse(
+            {
+                "Status": "editQuestion() only accepts POST requests"
+            }, 
+            status=500
         )
 
-        questionObj.save()
-
-        return (True, questionObj)
-    
 ######################################################
 # getQuestions()
 # method: GET
@@ -660,7 +734,7 @@ def createQuestion(requestBody):
 def getQuestions(request):
     if request.method == "GET": 
         questions = Question.objects.all()
-        questionsList = [questions.as_json() for questions in questions]
+        questionsList = [question.as_json() for question in questions]
 
         return JsonResponse(list(questionsList), safe=False)
 
@@ -755,7 +829,7 @@ def setStudent(request):
                 # iterate over courses given in the request body
                 # for each course, if it doesn't exist in the db, create it
                 for doc in relevantCourses:
-                    ret_tuple = createOrUpdateCourse(doc)
+                    ret_tuple = createCourseOrAddSubject(doc)
                     isCourseReturned = ret_tuple[0]
                     if isCourseReturned is None:
                         return JsonResponse({ "Status": ret_tuple[1] }, status=500)
@@ -887,7 +961,7 @@ def setLecturer(request):
                 # iterate over courses given in the request body
                 # for each course, if it doesn't exist in the db, create it
                 for doc in coursesTeaching:
-                    ret_tuple = createOrUpdateCourse(doc)
+                    ret_tuple = createCourseOrAddSubject(doc)
                     isCourseReturned = ret_tuple[0]
                     if isCourseReturned is None:
                         return JsonResponse({ "Status": ret_tuple[1] }, status=500)
@@ -1177,7 +1251,7 @@ def setExam(request):
             if 'subjects' not in course.keys():
                 course['subjects'] = list()
 
-            ret_tuple = createOrUpdateCourse(course)
+            ret_tuple = createCourseOrAddSubject(course)
             isCourseReturned = ret_tuple[0]
             if isCourseReturned is None:
                 return JsonResponse({ "Status": ret_tuple[1] }, status=500)
@@ -1217,7 +1291,7 @@ def setExam(request):
                     if questionSubject.name not in [subject for subject in courseObj.subjects]:
                         course['subjects'].append(questionSubject.as_json())
                 
-                ret_tuple = createOrUpdateCourse(course)
+                ret_tuple = createCourseOrAddSubject(course)
                 isCourseReturned = ret_tuple[0]
                 if isCourseReturned is None:
                     return JsonResponse({ "Status": ret_tuple[1] }, status=500)
@@ -1258,6 +1332,7 @@ def setExam(request):
 def getExams(request):
     if request.method == "GET": 
         exams = Exam.objects.all()
+        print(exams)
         examsList = [exam.as_json() for exam in exams]
 
         return JsonResponse(list(examsList), safe=False)
