@@ -8,6 +8,7 @@ from urllib.parse import unquote
 from api.HelpFuncs_Subjects import *
 from api.HelpFuncs_Courses import *
 from api.HelpFuncs_Questions import *
+from api.HelpFuncs_User import *
 
 #TODO: take care of case-senstitive issues (for example in MongoDB queries)
 
@@ -25,6 +26,37 @@ def index(request):
     return render(request, 'frontend/index.html')
 
 ######################################################
+# deleteSubject()
+# method: GET
+# GET params: name of subject to delete
+#####################################################
+@csrf_exempt
+def deleteSubject(request):
+    if request.method == "GET": 
+        subjectName = request.GET.get("name")
+    
+        try:
+            Subject.objects.filter(name=subjectName).delete()
+            return JsonResponse({"Status": f"Deleted subject '{subjectName}'"})
+
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": f"Can't delete subject {subjectName}",
+                    },
+                    status=500
+                )
+        
+    else:
+        return JsonResponse(
+                {
+                    "Status": "deleteSubject() only accepts GET requests",
+                },
+                status=500
+            )
+
+######################################################
 # getSubjects()
 # method: GET
 # Returns all the existing subjects in the DB
@@ -35,7 +67,8 @@ def getSubjects(request):
         subjectsList = list(Subject.objects.values())
         return JsonResponse(subjectsList, safe=False)
 
-    return JsonResponse(
+    else:
+        return JsonResponse(
                     {
                         "Status": "getSubjects() only accepts GET requests",
                     },
@@ -221,6 +254,36 @@ def setCourse(request):
                     status=500
                 )
 
+######################################################
+# deleteCourse()
+# method: GET
+# GET params: name of course to delete
+#####################################################
+@csrf_exempt
+def deleteCourse(request):
+    if request.method == "GET": 
+        courseName = request.GET.get("name")
+    
+        try:
+            Course.objects.filter(name=courseName).delete()
+            return JsonResponse({"Status": f"Deleted Course '{courseName}'"})
+
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": f"Can't delete course {courseName}",
+                    },
+                    status=500
+                )
+        
+    else:
+        return JsonResponse(
+                {
+                    "Status": "deleteCourse() only accepts GET requests",
+                },
+                status=500
+            )
 
 #############################################################
 # editCourse()
@@ -475,6 +538,38 @@ def setSchool(request):
                     status=500
                 )
 
+
+######################################################
+# deleteSchool()
+# method: GET
+# GET params: name of school to delete
+#####################################################
+@csrf_exempt
+def deleteSchool(request):
+    if request.method == "GET": 
+        schoolName = request.GET.get("name")
+    
+        try:
+            School.objects.filter(name=schoolName).delete()
+            return JsonResponse({"Status": f"Deleted school '{schoolName}'"})
+
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": f"Can't delete school {schoolName}",
+                    },
+                    status=500
+                )
+        
+    else:
+        return JsonResponse(
+                {
+                    "Status": "deleteSchool() only accepts GET requests",
+                },
+                status=500
+            )
+
 #############################################################
 # editSchool()
 # method: POST
@@ -705,6 +800,38 @@ def setQuestion(request):
             status=500
         )
 
+######################################################
+# deleteQuestion()
+# method: GET
+# GET params: body of question to delete
+#####################################################
+@csrf_exempt
+def deleteQuestion(request):
+    if request.method == "GET": 
+        questionBody = request.GET.get("body")
+    
+        try:
+            Question.objects.filter(body=questionBody).delete()
+            return JsonResponse({"Status": f"Deleted Question '{questionBody}'"})
+
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": f"Can't delete question {questionBody}",
+                    },
+                    status=500
+                )
+        
+    else:
+        return JsonResponse(
+                {
+                    "Status": "deleteQuestion() only accepts GET requests",
+                },
+                status=500
+            )
+
+
 #############################################################
 # editQuestion()
 # method: POST
@@ -880,6 +1007,36 @@ def getStudents(request):
                     status=500
                 )
 
+######################################################
+# deleteStudent()
+# method: GET
+# GET params: email of student to delete
+#####################################################
+@csrf_exempt
+def deleteStudent(request):
+    if request.method == "GET": 
+        email = request.GET.get("email")
+    
+        try:
+            Student.objects.filter(email=email).delete()
+            return JsonResponse({"Status": f"Deleted Student '{email}'"})
+
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": f"Can't delete student {email}",
+                    },
+                    status=500
+                )
+        
+    else:
+        return JsonResponse(
+                {
+                    "Status": "deleteStudent() only accepts GET requests",
+                },
+                status=500
+            )
 
 ######################################################
 # getStudentByEmail()
@@ -992,6 +1149,37 @@ def setLecturer(request):
 
 
 ######################################################
+# deleteLecturer()
+# method: GET
+# GET params: email of lecturer to delete
+#####################################################
+@csrf_exempt
+def deleteLecturer(request):
+    if request.method == "GET": 
+        email = request.GET.get("email")
+    
+        try:
+            Lecturer.objects.filter(email=email).delete()
+            return JsonResponse({"Status": f"Deleted Lecturer '{email}'"})
+
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": f"Can't delete lecturer {email}",
+                    },
+                    status=500
+                )
+        
+    else:
+        return JsonResponse(
+                {
+                    "Status": "deleteLecturer() only accepts GET requests",
+                },
+                status=500
+            )
+
+######################################################
 # getLecturers()
 # method: GET
 # Returns all the existing lecturers in the DB
@@ -1101,25 +1289,6 @@ def setAdmin(request):
         )
 
 
-def getUserFields(requestBody):
-    if 'first_name' not in requestBody.keys():
-        return [None, "'first_name' field doesn't exist in request body"]
-    first_name = requestBody['first_name']
-
-    if 'last_name' not in requestBody.keys():
-        return [None, "'last_name' field doesn't exist in request body"]
-    last_name = requestBody['last_name']
-
-    if 'email' not in requestBody.keys():
-        return [None, "'email' field doesn't exist in request body"]
-    email = requestBody['email']
-
-    if 'permissions' not in requestBody.keys():
-        return [None, "'permissions' field doesn't exist in request body"]
-    permissions = list(requestBody['permissions'])
-
-    return [first_name, last_name, email, permissions]
-
 ######################################################
 # getAdmins()
 # method: GET
@@ -1140,6 +1309,38 @@ def getAdmins(request):
                     }, 
                     status=500
                 )
+
+
+######################################################
+# deleteAdmin()
+# method: GET
+# GET params: email of admin to delete
+#####################################################
+@csrf_exempt
+def deleteAdmin(request):
+    if request.method == "GET": 
+        email = request.GET.get("email")
+    
+        try:
+            Admin.objects.filter(email=email).delete()
+            return JsonResponse({"Status": f"Deleted Admin '{email}'"})
+
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": f"Can't delete admin {email}",
+                    },
+                    status=500
+                )
+        
+    else:
+        return JsonResponse(
+                {
+                    "Status": "deleteAdmin() only accepts GET requests",
+                },
+                status=500
+            )
 
 ######################################################
 # getAdminByEmail()
@@ -1344,6 +1545,38 @@ def getExams(request):
                     },
                     status=500
                 )
+
+######################################################
+# deleteExam()
+# method: GET
+# GET params: examID of exam to delete
+#####################################################
+@csrf_exempt
+def deleteExam(request):
+    if request.method == "GET": 
+        examID = request.GET.get("examID")
+    
+        try:
+            Exam.objects.filter(examID=examID).delete()
+            return JsonResponse({"Status": f"Deleted Exam '{examID}'"})
+
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": f"Can't delete exam {examID}",
+                    },
+                    status=500
+                )
+        
+    else:
+        return JsonResponse(
+                {
+                    "Status": "deleteExam() only accepts GET requests",
+                },
+                status=500
+            )
+
 
 ######################################################
 # getExamByID()
