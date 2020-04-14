@@ -385,6 +385,7 @@ def editSchool(request):
     if request.method == "POST":
         changedNameFlg = False
         addedToCoursesFlg = False
+        deletedFromCoursesFlg = False
 
         # decode request body
         body = parseRequestBody(request)
@@ -412,10 +413,30 @@ def editSchool(request):
                     if courseObj.name not in [course.name for course in newCoursesList]:
                         newCoursesList.append(courseObj)
                         addedToCoursesFlg = True
-                
-                if addedToCoursesFlg == True:
-                    School.objects.filter(name=name).update(courses=newCoursesList)
             
+            # delete course from school courses
+            if 'DeleteFromCourses' in body.keys():
+                newCoursesList = schoolObj.courses
+
+                coursesToDelete = list(body['DeleteFromCourses'])
+                for course in coursesToDelete:
+                    ret_tuple = createOrUpdateCourse(course)
+                    isCourseReturned = ret_tuple[0]
+                    
+                    if isCourseReturned is None:
+                        return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+
+                    courseObj = ret_tuple[1]
+
+                    if courseObj.name in [course.name for course in newCoursesList]:
+                        newCoursesList = list(filter(lambda course:course.name != courseObj.name, newCoursesList))
+                        deletedFromCoursesFlg = True
+                
+            # update school's courses list 
+            if deletedFromCoursesFlg == True or addedToCoursesFlg == True:
+                School.objects.filter(name=name).update(courses=newCoursesList)
+
+
             # change school name
             if 'ChangeName' in body.keys():
                 newName = body['ChangeName']
@@ -423,14 +444,15 @@ def editSchool(request):
                 changedNameFlg = True
 
             # create response
-            ret_json = dict(
-                Status = str()
-            )
+            ret_json = dict()
 
             if changedNameFlg == True:
-                ret_json['Status'] = ret_json['Status'] + f"Changed school name from '{name}' to '{newName}'"
+                ret_json['Status Changed_Name'] = f"Changed school name from '{name}' to '{newName}'"
             if addedToCoursesFlg == True:
-                ret_json['Status'] = ret_json['Status'] + " and added to school's courses"
+                ret_json['Status Added_Courses'] = "Added to school's courses"
+            if deletedFromCoursesFlg == True:
+                ret_json['Status Deleted_Courses'] = "Deleted from school's courses"
+
             return JsonResponse(ret_json)
 
         except Exception as e:
