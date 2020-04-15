@@ -76,3 +76,25 @@ def createQuestion(requestBody):
 
         return (True, questionObj)
     
+
+#######################################################
+# updateQuestionInExams(newQuestionObj, questionBody)
+# help function
+#######################################################
+def updateQuestionInExams(newQuestionObj, questionBody):
+    # get all exams from DB
+    examsList = list(Exam.objects.all())
+
+    # iterate over all exams
+    # for every exam, iterate over all questions
+    # if one of the questions' "body" field == questionBody parameter, 
+    # change the questino to "newQuestionObj" parameter
+    for exam in examsList:
+        questionsList = exam.questions
+        for i in range(len(questionsList)):
+            if questionsList[i].body == questionBody:
+                questionsList[i] = newQuestionObj
+
+        Exam.objects.filter(examID=exam.examID).delete()
+        exam.save()
+    

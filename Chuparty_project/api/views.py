@@ -828,7 +828,25 @@ def deleteQuestion(request):
 # editQuestion()
 # method: POST
 # POST body example:
-# 
+# {
+# 	"body": "What Is Encapsulation?",
+# 	"ChangeCourse":
+# 			{
+# 				"name":"Computer Networks"
+# 			},
+# 	"ChangeSubject": 
+# 			{
+# 				"name": "DNS"
+# 			},
+# 	"ChangeBody": "What Is DNS?",
+# 	"ChangeAnswers":[
+# 			"bundling of data with the methods that operate on that data",
+# 			"blah blah",
+#             "bleh beh",
+#             "blu blue"
+# 		],
+# 	"ChangeCorrectAnswer": 2
+# }
 #############################################################
 @csrf_exempt
 def editQuestion(request):
@@ -848,7 +866,6 @@ def editQuestion(request):
 
         try:
             questionObj = Question.objects.get(body=body)
-            question = questionObj.as_json()
 
             # change the question's course
             if 'ChangeCourse' in requestBody.keys():
@@ -860,8 +877,10 @@ def editQuestion(request):
                 if isCourseReturned is None:
                     return JsonResponse({ "Status": ret_tuple[1] }, status=500)
 
-                question['course'] = ret_tuple[1].as_json()
-                changedCourseFlg = True
+                courseObj = ret_tuple[1]
+                if courseObj.name != questionObj.course.name:
+                    questionObj.course = courseObj
+                    changedCourseFlg = True
             
             # change the question's subject
             if 'ChangeSubject' in requestBody.keys():
@@ -873,59 +892,65 @@ def editQuestion(request):
                 if isSubjectReturned is None:
                     return JsonResponse({ "Status": ret_tuple[1] }, status=500)
 
-                question['subject'] = ret_tuple[1].as_json()
-                changedSubjectFlg = True
+                subjectObj = ret_tuple[1]
+                if subjectObj.name != questionObj.subject.name:
+                    questionObj.subject = subjectObj
+                    changedSubjectFlg = True
         
             # change the question's answers list
             if 'ChangeAnswers' in requestBody.keys():
-                question['answers'] = list(requestBody['ChangeAnswers'])
-                changedAnswersFlg = True
+                oldAnswersList = questionObj.answers
+                newAnswersList = requestBody['ChangeAnswers']
+
+                filteredList = [string for string in newAnswersList if string not in oldAnswersList]
+                if filteredList:
+                    questionObj.answers = newAnswersList
+                    changedAnswersFlg = True
 
             # change the question's correct answer
             if 'ChangeCorrectAnswer' in requestBody.keys():
-                question['correctAnswer'] = requestBody['ChangeCorrectAnswer']
-                changedCorrectAnswerFlg = True
+                newCorrectAnswer = int(requestBody['ChangeCorrectAnswer'])
+                if questionObj.correctAnswer != newCorrectAnswer:
+                    questionObj.correctAnswer = newCorrectAnswer
+                    changedCorrectAnswerFlg = True
 
             # change the question's body
             if 'ChangeBody' in requestBody.keys():
-                question['body'] = requestBody['ChangeBody']
-                changedBodyFlg = True
+                newBody = requestBody['ChangeBody']
+                if newBody != questionObj.body:
+                    questionObj.body = newBody
+                    changedBodyFlg = True
             
             # if one of the question's fileds has been changed:
             # delete the old question from db 
             # try to create the new question
             # if successful, return
             # if not successful, save the old question back to the DB and return
+            ret_json = dict()
+
             if changedCourseFlg == True or changedSubjectFlg == True or changedAnswersFlg == True or \
                 changedCorrectAnswerFlg == True or changedBodyFlg == True:
 
                 Question.objects.filter(body=body).delete()
+                questionObj.save()
 
-                ret_tuple = createQuestion(question)
-                isNewQuestionCreated = ret_tuple[0]
+                if changedCourseFlg == True:
+                    ret_json['Status Changed_Course'] = "Changed question's course"
+                if changedSubjectFlg == True:
+                    ret_json['Status Changed_Subject'] = "Changed question's subject"
+                if changedAnswersFlg == True:
+                    ret_json['Status Changed_Answers'] = "Changed question's answers"
+                if changedCorrectAnswerFlg == True:
+                    ret_json['Status Changed_CorrectAnswer'] = "Changed question's correct answer"
+                if changedBodyFlg == True:
+                    ret_json['Status Changed_Body'] = "Changed question's body"
 
-                if isNewQuestionCreated is None:
-                    questionObj.save() # save old question back to db
-                    return JsonResponse({"Status": ret_tuple[1]}, status=500)
-
-                else:
-                    ret_json = dict()
-
-                    if changedCourseFlg == True:
-                        ret_json['Status Changed_Course'] = "Changed question's course"
-                    if changedSubjectFlg == True:
-                        ret_json['Status Changed_Subject'] = "Changed question's subject"
-                    if changedAnswersFlg == True:
-                        ret_json['Status Changed_Answers'] = "Changed question's answers"
-                    if changedCorrectAnswerFlg == True:
-                        ret_json['Status Changed_CorrectAnswer'] = "Changed question's correct answer"
-                    if changedBodyFlg == True:
-                        ret_json['Status Changed_Body'] = "Changed question's body"
-                    
-                    return JsonResponse(ret_json)
+                updateQuestionInExams(questionObj, body)
             
             else:
-                return JsonResponse({"Status": f"Changed no field in question '{body}"})
+                ret_json['Status'] = f"Changed no field in question '{body}'"
+
+            return JsonResponse(ret_json)
 
         except Exception as e:
             return JsonResponse(
