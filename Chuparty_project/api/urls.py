@@ -40,18 +40,21 @@ urlpatterns = [
 
     # student
     path('setStudent', views.setStudent),
+    path('editStudent', views.editStudent),
     path('getStudents', views.getStudents),
     path('getStudentByEmail', views.getStudentByEmail),
     path('deleteStudent', views.deleteStudent),
 
     # lecturer
     path('setLecturer', views.setLecturer),
+    path('editLecturer', views.editLecturer),
     path('getLecturers', views.getLecturers),
     path('getLecturerByEmail', views.getLecturerByEmail),
     path('deleteLecturer', views.deleteLecturer),
 
     # admin
     path('setAdmin', views.setAdmin),
+    path('editAdmin', views.editAdmin),
     path('getAdmins', views.getAdmins),
     path('getAdminByEmail', views.getAdminByEmail),
     path('deleteAdmin', views.deleteAdmin),

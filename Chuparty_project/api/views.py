@@ -25,16 +25,18 @@ def parseRequestBody(request):
 def index(request):                
     return render(request, 'frontend/index.html')
 
-######################################################
-# deleteSubject()
-# method: GET
-# GET params: name of subject to delete
-#####################################################
+##################################################
+'''
+deleteSubject()
+method: GET
+GET params: name of subject to delete
+'''
+##################################################
 @csrf_exempt
 def deleteSubject(request):
     if request.method == "GET": 
         subjectName = request.GET.get("name")
-    
+        
         try:
             Subject.objects.filter(name=subjectName).delete()
             return JsonResponse({"Status": f"Deleted subject '{subjectName}'"})
@@ -56,11 +58,14 @@ def deleteSubject(request):
                 status=500
             )
 
-######################################################
-# getSubjects()
-# method: GET
-# Returns all the existing subjects in the DB
-#####################################################
+
+##################################################
+'''
+getSubjects()
+method: GET
+Returns all the existing subjects in the DB
+'''
+##################################################
 @csrf_exempt
 def getSubjects(request):
     if request.method == "GET": 
@@ -76,11 +81,13 @@ def getSubjects(request):
                 )
 
 
-######################################################
-# getSubjectByName()
-# method: GET
-# Returns subject by name (if it exists in DB)
-#####################################################
+##################################################
+'''
+getSubjectByName()
+method: GET
+Returns subject by name (if it exists in DB)
+'''
+##################################################
 @csrf_exempt
 def getSubjectByName(request):
     if request.method == "GET": 
@@ -101,14 +108,16 @@ def getSubjectByName(request):
                 )
 
 
-######################################################
-# setSubject()
-# method: POST
-# POST body example:
-# {
-# 	"name" : "Stack"
-# }
-#####################################################
+##################################################
+'''
+setSubject()
+method: POST
+POST body example:
+{
+	"name" : "Stack"
+}
+'''
+##################################################
 @csrf_exempt
 def setSubject(request):
     if request.method == "POST": 
@@ -143,15 +152,17 @@ def setSubject(request):
                     status=500
                 )
 
-#############################################################
-# editSubject()
-# method: POST
-# POST body example:
-# {
-# 	"name": "DFS",
-#   "ChangeName": "DFS - Search Algorithms"
-# }
-#############################################################
+##################################################
+'''
+editSubject()
+method: POST
+POST body example:
+{
+	"name": "DFS",
+  "ChangeName": "DFS - Search Algorithms"
+}
+'''
+##################################################
 @csrf_exempt
 def editSubject(request):
     if request.method == "POST":
@@ -181,10 +192,10 @@ def editSubject(request):
             ret_json = dict()
 
             if changedNameFlg == True:
-                ret_json['Status Changed_Name'] = f"Changed subject name from '{name}' to '{newName}'"
+                ret_json['Changed Name'] = "True"
             else:
-                ret_json['Status'] = f"Changed no field in subject '{name}'"
-            
+                ret_json['Changed Name'] = "False"
+             
             return JsonResponse(ret_json)
 
         except Exception as e:
@@ -192,7 +203,8 @@ def editSubject(request):
                     {
                         "Exception": str(e),
                         "Status": "Can't Edit Subject"
-                    }
+                    },
+                    status=500
                 )
 
     else:
@@ -204,22 +216,24 @@ def editSubject(request):
             )
 
 
-######################################################
-# setCourse()
-# method: POST
-# POST body example:
-# {
-# 	"name" : "Operating Systems",
-# 	"subjects": [
-# 		{
-# 			"name": "processes"
-# 		},
-# 		{
-# 			"name": "threads"
-# 		}
-# 	]
-# }
-#####################################################
+##################################################
+'''
+setCourse()
+method: POST
+POST body example:
+{
+	"name" : "Operating Systems",
+	"subjects": [
+		{
+			"name": "processes"
+		},
+		{
+			"name": "threads"
+		}
+	]
+}
+'''
+##################################################
 @csrf_exempt
 def setCourse(request):
     if request.method == "POST":
@@ -254,11 +268,13 @@ def setCourse(request):
                     status=500
                 )
 
-######################################################
-# deleteCourse()
-# method: GET
-# GET params: name of course to delete
-#####################################################
+##################################################
+'''
+deleteCourse()
+method: GET
+GET params: name of course to delete
+'''
+##################################################
 @csrf_exempt
 def deleteCourse(request):
     if request.method == "GET": 
@@ -285,20 +301,22 @@ def deleteCourse(request):
                 status=500
             )
 
-#############################################################
-# editCourse()
-# method: POST
-# POST body example:
-# {
-# 	"name": "OOP",
-#   "ChangeName": "Object-Oriented Programming"
-# 	"AddToSubjects":[
-# 		{
-# 			"name": "C++"
-# 		}   
-# 	]
-# }
-#############################################################
+##################################################
+'''
+editCourse()
+method: POST
+POST body example:
+{
+	"name": "OOP",
+  "ChangeName": "Object-Oriented Programming"
+	"AddToSubjects":[
+		{
+			"name": "C++"
+		}   
+	]
+}
+'''
+##################################################
 @csrf_exempt
 def editCourse(request):
     if request.method == "POST":
@@ -376,14 +394,19 @@ def editCourse(request):
             ret_json = dict()
 
             if changedNameFlg == True:
-                ret_json['Status Changed_Name'] = f"Changed course name from '{name}' to '{newName}'"
+                ret_json['Changed Name'] = "True"
+            else:
+                ret_json['Changed Name'] = "False"
+
             if addedToSubjectsFlg == True:
-                ret_json['Status Added_Subject'] = f"Added to course subjects"
+                ret_json['Added Subject'] = "True"
+            else:
+                ret_json['Added Subject'] = "False"
+
             if deletedFromSubjectsFlg == True:
-                ret_json['Status Deleted_Subject'] = f"Deleted from course subjects"
-            
-            if changedNameFlg == False and addedToSubjectsFlg == False and deletedFromSubjectsFlg == False:
-                ret_json['Status'] = f"Changed no field in course '{name}'"
+                ret_json['Deleted Subject'] = "True"
+            else:
+                ret_json['Deleted Subject'] = "False"
             
             return JsonResponse(ret_json)
 
@@ -392,7 +415,8 @@ def editCourse(request):
                     {
                         "Exception": str(e),
                         "Status": "Can't Edit Course"
-                    }
+                    },
+                    status=500
                 )
 
     else:
@@ -404,11 +428,13 @@ def editCourse(request):
             )
 
 
-######################################################
-# getCourses()
-# method: GET
-# Returns all the existing courses in the DB
-#####################################################
+##################################################
+'''
+getCourses()
+method: GET
+Returns all the existing courses in the DB
+'''
+##################################################
 @csrf_exempt
 def getCourses(request):
     if request.method == "GET": 
@@ -425,11 +451,13 @@ def getCourses(request):
                     status=500
                 )
 
-######################################################
-# getCourseByName()
-# method: GET
-# Returns course by name (if it exists in DB)
-#####################################################
+##################################################
+'''
+getCourseByName()
+method: GET
+Returns course by name (if it exists in DB)
+'''
+##################################################
 @csrf_exempt
 def getCourseByName(request):
     if request.method == "GET": 
@@ -451,38 +479,40 @@ def getCourseByName(request):
                 )
 
 
-######################################################
-# setSchool()
-# method: POST
-# POST body example:
-# {
-# 	"name": "Colman",
-# 	"courses": [
-# 		{
-# 			"name" : "Advanced Programming",
-# 			"subjects": [
-# 				{
-# 					"name": "Java"
-# 				},
-# 				{
-# 					"name": "Design Patterns"
-# 				}
-# 			]
-# 		},
-# 		{
-# 			"name" : "OOP",
-# 			"subjects": [
-# 				{
-# 					"name": "C++"
-# 				},
-# 				{
-# 					"name": "Polymorphism"
-# 				}
-# 			]
-# 		}
-# 	]
-# }
-#####################################################
+##################################################
+'''
+setSchool()
+method: POST
+POST body example:
+{
+	"name": "Colman",
+	"courses": [
+		{
+			"name" : "Advanced Programming",
+			"subjects": [
+				{
+					"name": "Java"
+				},
+				{
+					"name": "Design Patterns"
+				}
+			]
+		},
+		{
+			"name" : "OOP",
+			"subjects": [
+				{
+					"name": "C++"
+				},
+				{
+					"name": "Polymorphism"
+				}
+			]
+		}
+	]
+}
+'''
+##################################################
 @csrf_exempt
 def setSchool(request):
     if request.method == "POST":
@@ -539,11 +569,13 @@ def setSchool(request):
                 )
 
 
-######################################################
-# deleteSchool()
-# method: GET
-# GET params: name of school to delete
-#####################################################
+##################################################
+'''
+deleteSchool()
+method: GET
+GET params: name of school to delete
+'''
+##################################################
 @csrf_exempt
 def deleteSchool(request):
     if request.method == "GET": 
@@ -570,25 +602,28 @@ def deleteSchool(request):
                 status=500
             )
 
-#############################################################
-# editSchool()
-# method: POST
-# POST body example:
-# {
-# 	"name": "Colman",
-# 	"ChangeName": "College of Management - Academic Studies",
-# 	"AddToCourses":[
-# 		{
-# 			"name": "Computer Networks"
-# 		}
-# 	],
-#   "DeleteFromCourses": [
-#       {
-#           "name": "OOP"
-#       }
-#   ]
-# }
-#############################################################
+
+##################################################
+'''
+editSchool()
+method: POST
+POST body example:
+{
+	"name": "Colman",
+	"ChangeName": "College of Management - Academic Studies",
+	"AddToCourses":[
+		{
+			"name": "Computer Networks"
+		}
+	],
+  "DeleteFromCourses": [
+      {
+          "name": "OOP"
+      }
+  ]
+}
+'''
+##################################################
 @csrf_exempt
 def editSchool(request):
     if request.method == "POST":
@@ -656,14 +691,19 @@ def editSchool(request):
             ret_json = dict()
 
             if changedNameFlg == True:
-                ret_json['Status Changed_Name'] = f"Changed school name from '{name}' to '{newName}'"
+                ret_json['Changed Name'] = "True"
+            else:
+                ret_json['Changed Name'] = "False"
+
             if addedToCoursesFlg == True:
-                ret_json['Status Added_Courses'] = "Added to school's courses"
+                ret_json['Added Courses'] = "True"
+            else:
+                ret_json['Added Courses'] = "False"
+
             if deletedFromCoursesFlg == True:
-                ret_json['Status Deleted_Courses'] = "Deleted from school's courses"
-            
-            if changedNameFlg == False and addedToCoursesFlg == False and deletedFromCoursesFlg == False:
-                ret_json['Status'] = f"Changed no field in school '{name}'"
+                ret_json['Deleted Courses'] = "True"
+            else:
+                ret_json['Deleted Courses'] = "False"
 
             return JsonResponse(ret_json)
 
@@ -672,7 +712,8 @@ def editSchool(request):
                     {
                         "Exception": str(e),
                         "Status": "Can't Edit School"
-                    }
+                    },
+                    status=500
                 )
            
 
@@ -685,11 +726,13 @@ def editSchool(request):
             )
 
 
-######################################################
-# getSchools()
-# method: GET
-# Returns all the existing schools in the DB
-#####################################################
+##################################################
+'''
+getSchools()
+method: GET
+Returns all the existing schools in the DB
+'''
+##################################################
 @csrf_exempt
 def getSchools(request):
     if request.method == "GET": 
@@ -707,11 +750,13 @@ def getSchools(request):
                 )
 
 
-######################################################
-# getSchoolByName()
-# method: GET
-# Returns school by name (if it exists in DB)
-#####################################################
+##################################################
+'''
+getSchoolByName()
+method: GET
+Returns school by name (if it exists in DB)
+'''
+##################################################
 @csrf_exempt
 def getSchoolByName(request):
     if request.method == "GET": 
@@ -733,29 +778,31 @@ def getSchoolByName(request):
                 )
 
 
-######################################################
-# setQuestion()
-# method: POST
-# POST body example:
-# {
-#   "subject":
-#       {
-#           "name": "DNS"    
-#       },          
-# 	"course": 
-# 		{
-# 			"name" : "Computer Networks",
-# 		},
-#    "body": "What is DNS?",
-#    "answers": [
-#           "Domain Name Server",
-#           "Desturction of Name Servers",
-#           "Deduction of Native Services",
-#           "Deformation of Name Servers"
-#       ],
-#     "correctAnswer": 1
-# }
-#####################################################
+##################################################
+'''
+setQuestion()
+method: POST
+POST body example:
+{
+  "subject":
+      {
+          "name": "DNS"    
+      },          
+	"course": 
+		{
+			"name" : "Computer Networks",
+		},
+   "body": "What is DNS?",
+   "answers": [
+          "Domain Name Server",
+          "Desturction of Name Servers",
+          "Deduction of Native Services",
+          "Deformation of Name Servers"
+      ],
+    "correctAnswer": 1
+}
+'''
+##################################################
 @csrf_exempt
 def setQuestion(request):
     if request.method == "POST":
@@ -792,11 +839,14 @@ def setQuestion(request):
             status=500
         )
 
-######################################################
-# deleteQuestion()
-# method: GET
-# GET params: body of question to delete
-#####################################################
+
+##################################################
+'''
+deleteQuestion()
+method: GET
+GET params: body of question to delete
+'''
+##################################################
 @csrf_exempt
 def deleteQuestion(request):
     if request.method == "GET": 
@@ -824,30 +874,32 @@ def deleteQuestion(request):
             )
 
 
-#############################################################
-# editQuestion()
-# method: POST
-# POST body example:
-# {
-# 	"body": "What Is Encapsulation?",
-# 	"ChangeCourse":
-# 			{
-# 				"name":"Computer Networks"
-# 			},
-# 	"ChangeSubject": 
-# 			{
-# 				"name": "DNS"
-# 			},
-# 	"ChangeBody": "What Is DNS?",
-# 	"ChangeAnswers":[
-# 			"bundling of data with the methods that operate on that data",
-# 			"blah blah",
-#             "bleh beh",
-#             "blu blue"
-# 		],
-# 	"ChangeCorrectAnswer": 2
-# }
-#############################################################
+##################################################
+'''
+editQuestion()
+method: POST
+POST body example:
+{
+	"body": "What Is Encapsulation?",
+	"ChangeCourse":
+			{
+				"name":"Computer Networks"
+			},
+	"ChangeSubject": 
+			{
+				"name": "DNS"
+			},
+	"ChangeBody": "What Is DNS?",
+	"ChangeAnswers":[
+			"bundling of data with the methods that operate on that data",
+			"blah blah",
+            "bleh beh",
+            "blu blue"
+		],
+	"ChangeCorrectAnswer": 2
+}
+'''
+##################################################
 @csrf_exempt
 def editQuestion(request):
     if request.method == "POST":
@@ -902,8 +954,9 @@ def editQuestion(request):
                 oldAnswersList = questionObj.answers
                 newAnswersList = requestBody['ChangeAnswers']
 
-                filteredList = [string for string in newAnswersList if string not in oldAnswersList]
-                if filteredList:
+                filteredListNew = [string for string in newAnswersList if string not in oldAnswersList]
+                filteredListOld = [string for string in oldAnswersList if string not in newAnswersList]
+                if filteredListNew or filteredListOld:
                     questionObj.answers = newAnswersList
                     changedAnswersFlg = True
 
@@ -926,29 +979,40 @@ def editQuestion(request):
             # try to create the new question
             # if successful, return
             # if not successful, save the old question back to the DB and return
-            ret_json = dict()
-
             if changedCourseFlg == True or changedSubjectFlg == True or changedAnswersFlg == True or \
                 changedCorrectAnswerFlg == True or changedBodyFlg == True:
 
                 Question.objects.filter(body=body).delete()
                 questionObj.save()
 
-                if changedCourseFlg == True:
-                    ret_json['Status Changed_Course'] = "Changed question's course"
-                if changedSubjectFlg == True:
-                    ret_json['Status Changed_Subject'] = "Changed question's subject"
-                if changedAnswersFlg == True:
-                    ret_json['Status Changed_Answers'] = "Changed question's answers"
-                if changedCorrectAnswerFlg == True:
-                    ret_json['Status Changed_CorrectAnswer'] = "Changed question's correct answer"
-                if changedBodyFlg == True:
-                    ret_json['Status Changed_Body'] = "Changed question's body"
+            ret_json = dict()
 
-                updateQuestionInExams(questionObj, body)
-            
+            if changedCourseFlg == True:
+                ret_json['Changed Course'] = "True"
             else:
-                ret_json['Status'] = f"Changed no field in question '{body}'"
+                ret_json['Changed Course'] = "False"
+
+            if changedSubjectFlg == True:
+                ret_json['Changed Subject'] = "True"
+            else:
+                ret_json['Changed Subject'] = "False"
+
+            if changedAnswersFlg == True:
+                ret_json['Changed Answers'] = "True"
+            else:
+                ret_json['Changed Answers'] = "False"
+
+            if changedCorrectAnswerFlg == True:
+                ret_json['Changed Correct Answer'] = "True"
+            else:
+                ret_json['Changed Correct Answer'] = "False"
+
+            if changedBodyFlg == True:
+                ret_json['Changed Body'] = "True"
+            else:
+                ret_json['Changed Body'] = "False"
+
+            updateQuestionInExams(questionObj, body)
 
             return JsonResponse(ret_json)
 
@@ -957,7 +1021,8 @@ def editQuestion(request):
                     {
                         "Exception": str(e),
                         "Status": "Can't Edit Question"
-                    }
+                    },
+                    status=500
                 )
 
 
@@ -969,11 +1034,13 @@ def editQuestion(request):
             status=500
         )
 
-######################################################
-# getQuestions()
-# method: GET
-# Returns all the existing questions in the DB
-#####################################################
+##################################################
+'''
+getQuestions()
+method: GET
+Returns all the existing questions in the DB
+'''
+##################################################
 @csrf_exempt
 def getQuestions(request):
     if request.method == "GET": 
@@ -992,9 +1059,11 @@ def getQuestions(request):
 
 
 ######################################################
-# getQuestionByBody()
-# method: GET
-# Returns question by body (if it exists in DB)
+'''
+getQuestionByBody()
+method: GET
+Returns question by body (if it exists in DB)
+'''
 #####################################################
 @csrf_exempt
 def getQuestionByBody(request):
@@ -1018,26 +1087,28 @@ def getQuestionByBody(request):
 
 
 ######################################################
-# setStudent()
-# method: POST
-# POST body example:
-# {
-# 	"first_name" : "David",
-# 	"last_name" : "Shaulov",
-# 	"email": "david@gmail.com",
-# 	"permissions": [
-# 		"Create Exam",
-# 		"Delete Exam"
-# 	],
-# 	"relevantCourses":[
-# 		{
-# 			"name": "Advanced Programming"
-# 		},
-# 		{
-# 			"name": "OOP"
-# 		}
-# 	]
-# }
+'''
+setStudent()
+method: POST
+POST body example:
+{
+	"first_name" : "David",
+	"last_name" : "Shaulov",
+	"email": "david@gmail.com",
+	"permissions": [
+		"Create Exam",
+		"Delete Exam"
+	],
+	"relevantCourses":[
+		{
+			"name": "Advanced Programming"
+		},
+		{
+			"name": "OOP"
+		}
+	]
+}
+'''
 #####################################################
 @csrf_exempt
 def setStudent(request):
@@ -1104,9 +1175,94 @@ def setStudent(request):
 
 
 ######################################################
-# getStudents()
-# method: GET
-# Returns all the existing students in the DB
+'''
+ editStudent(request)
+ Method: POST
+ POST body example:
+{
+	"email":"inbarcha1@gmail.com",
+	"ChangeFirstName": "Inbarrrr",
+	"ChangeLastName":"Hachmonnn",
+	"ChangePermissions":[
+			"Create Exam"
+		]
+}
+'''
+######################################################
+@csrf_exempt
+def editStudent(request):
+    if request.method == "POST":
+        # decode request body
+        body = parseRequestBody(request)
+        
+        if 'email' not in body.keys():
+            return JsonResponse({"Status":"Can't Edit Student: 'email' field in not in request body"}, status=500)
+        email = body['email']
+
+        try:
+            studentObj = Student.objects.get(email=email)
+            ret_list = editUser(studentObj, body)
+
+            if ret_list[0] is None:
+                return JsonResponse({"Status": ret_list[1]})
+            
+            newStudentObj = ret_list[0]
+            changedEmailFlg = ret_list[1]
+            changedFirstNameFlg = ret_list[2]
+            changedLastNameFlg = ret_list[3]
+            changedPermissionsFlag = ret_list[4]
+
+            ret_json = dict()
+
+            if changedFirstNameFlg == True:
+                Student.objects.filter(email=email).update(first_name=newStudentObj.first_name)
+                ret_json['Changed First Name'] = "True"
+            else:
+                ret_json['Changed First Name'] = "False"
+                
+            if changedLastNameFlg == True:
+                Student.objects.filter(email=email).update(last_name=newStudentObj.last_name)
+                ret_json['Changed Last Name'] = "True"
+            else:
+                ret_json['Changed Last Name'] = "False"
+            
+            if changedPermissionsFlag == True:
+                Student.objects.filter(email=email).update(permissions=newStudentObj.permissions)
+                ret_json['Changed Permissions'] = "True"
+            else:
+                ret_json['Changed Permissions'] = "False"
+
+            if changedEmailFlg == True:
+                Student.objects.filter(email=email).update(email=newStudentObj.email)
+                ret_json['Changed Email'] = "True"
+            else:
+                ret_json['Changed Email'] = "False"
+
+            return JsonResponse(ret_json)
+
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": "Can't Edit Student"
+                    },
+                    status=500
+                )
+    
+    else:
+        return JsonResponse(
+            {
+                "Status": "editStudent() only accepts POST requests"
+            },
+            status=500
+        )
+
+######################################################
+'''
+getStudents()
+method: GET
+Returns all the existing students in the DB
+'''
 #####################################################
 @csrf_exempt
 def getStudents(request):
@@ -1125,9 +1281,11 @@ def getStudents(request):
                 )
 
 ######################################################
-# deleteStudent()
-# method: GET
-# GET params: email of student to delete
+'''
+deleteStudent()
+method: GET
+GET params: email of student to delete
+'''
 #####################################################
 @csrf_exempt
 def deleteStudent(request):
@@ -1156,9 +1314,11 @@ def deleteStudent(request):
             )
 
 ######################################################
-# getStudentByEmail()
-# method: GET
-# Returns student by its email (if it exists in DB)
+'''
+getStudentByEmail()
+method: GET
+Returns student by its email (if it exists in DB)
+'''
 #####################################################
 @csrf_exempt
 def getStudentByEmail(request):
@@ -1180,26 +1340,28 @@ def getStudentByEmail(request):
                 )
 
 ######################################################
-# setLecturer()
-# method: POST
-# POST body example:
-# {
-# 	"first_name" : "Eliav",
-# 	"last_name" : "Menache",
-# 	"email": "Eliav@gmail.com",
-# 	"permissions": [
-# 		"Create Exam",
-# 		"Delete Exam"
-# 	],
-# 	"coursesTeaching":[
-# 		{
-# 			"name": "Computer Networks"
-# 		},
-# 		{
-# 			"name": "iOS"
-# 		}
-# 	]
-# }
+'''
+setLecturer()
+method: POST
+POST body example:
+{
+	"first_name" : "Eliav",
+	"last_name" : "Menache",
+	"email": "Eliav@gmail.com",
+	"permissions": [
+		"Create Exam",
+		"Delete Exam"
+	],
+	"coursesTeaching":[
+		{
+			"name": "Computer Networks"
+		},
+		{
+			"name": "iOS"
+		}
+	]
+}
+'''
 #####################################################
 @csrf_exempt
 def setLecturer(request):
@@ -1266,9 +1428,94 @@ def setLecturer(request):
 
 
 ######################################################
-# deleteLecturer()
-# method: GET
-# GET params: email of lecturer to delete
+'''
+ editLecturer(request)
+ Method: POST
+ POST body example:
+ {
+	"email":"inbarcha1@gmail.com",
+	"ChangeFirstName": "Inbarrrr",
+	"ChangeLastName":"Hachmonnn",
+	"ChangePermissions":[
+			"Create Exam"
+		]
+}
+'''
+######################################################
+@csrf_exempt
+def editLecturer(request):
+    if request.method == "POST":
+        # decode request body
+        body = parseRequestBody(request)
+        
+        if 'email' not in body.keys():
+            return JsonResponse({"Status":"Can't Edit Lecturer: 'email' field in not in request body"}, status=500)
+        email = body['email']
+
+        try:
+            lecturerObj = Lecturer.objects.get(email=email)
+            ret_list = editUser(lecturerObj, body)
+
+            if ret_list[0] is None:
+                return JsonResponse({"Status": ret_list[1]})
+            
+            newLecturerObj = ret_list[0]
+            changedEmailFlg = ret_list[1]
+            changedFirstNameFlg = ret_list[2]
+            changedLastNameFlg = ret_list[3]
+            changedPermissionsFlag = ret_list[4]
+
+            ret_json = dict()
+
+            if changedFirstNameFlg == True:
+                Lecturer.objects.filter(email=email).update(first_name=newLecturerObj.first_name)
+                ret_json['Changed First Name'] = "True"
+            else:
+                ret_json['Changed First Name'] = "False"
+                
+            if changedLastNameFlg == True:
+                Lecturer.objects.filter(email=email).update(last_name=newLecturerObj.last_name)
+                ret_json['Changed Last Name'] = "True"
+            else:
+                ret_json['Changed Last Name'] = "False"
+            
+            if changedPermissionsFlag == True:
+                Lecturer.objects.filter(email=email).update(permissions=newLecturerObj.permissions)
+                ret_json['Changed Permissions'] = "True"
+            else:
+                ret_json['Changed Permissions'] = "False"
+
+            if changedEmailFlg == True:
+                Lecturer.objects.filter(email=email).update(email=newLecturerObj.email)
+                ret_json['Changed Email'] = "True"
+            else:
+                ret_json['Changed Email'] = "False"
+
+            return JsonResponse(ret_json)
+
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": "Can't Edit Lecturer"
+                    },
+                    status=500
+                )
+    
+    else:
+        return JsonResponse(
+            {
+                "Status": "editLecturer() only accepts POST requests"
+            },
+            status=500
+        )
+
+######################################################
+'''
+deleteLecturer()
+method: GET
+GET params: email of lecturer to delete
+'''
 #####################################################
 @csrf_exempt
 def deleteLecturer(request):
@@ -1297,9 +1544,11 @@ def deleteLecturer(request):
             )
 
 ######################################################
-# getLecturers()
-# method: GET
-# Returns all the existing lecturers in the DB
+'''
+getLecturers()
+method: GET
+Returns all the existing lecturers in the DB
+'''
 #####################################################
 @csrf_exempt
 def getLecturers(request):
@@ -1319,9 +1568,11 @@ def getLecturers(request):
 
 
 ######################################################
-# getLecturerByEmail()
-# method: GET
-# Returns lecturer by its email (if it exists in DB)
+'''
+getLecturerByEmail()
+method: GET
+Returns lecturer by its email (if it exists in DB)
+'''
 #####################################################
 @csrf_exempt
 def getLecturerByEmail(request):
@@ -1343,20 +1594,22 @@ def getLecturerByEmail(request):
                 )
 
 
-######################################################
-# setAdmin()
-# method: POST
-# POST body example:
-# {
-# 	"first_name" : "David",
-# 	"last_name" : "Shaulov",
-# 	"email": "david@gmail.com",
-# 	"permissions": [
-# 		"Create Exam",
-# 		"Delete Exam"
-# 	]
-# }
-#####################################################
+###################################################
+'''
+setAdmin()
+method: POST
+POST body example:
+{
+	"first_name" : "David",
+	"last_name" : "Shaulov",
+	"email": "david@gmail.com",
+	"permissions": [
+		"Create Exam",
+		"Delete Exam"
+	]
+}
+'''
+####################################################3
 @csrf_exempt
 def setAdmin(request):
     if request.method == "POST":
@@ -1407,10 +1660,96 @@ def setAdmin(request):
 
 
 ######################################################
-# getAdmins()
-# method: GET
-# Returns all the existing admins in the DB
-#####################################################
+'''
+ editAdmin(request)
+ Method: POST
+ POST body example:
+{
+	"email":"inbarcha1@gmail.com",
+	"ChangeFirstName": "Inbarrrr",
+	"ChangeLastName":"Hachmonnn",
+	"ChangePermissions":[
+			"Create Exam"
+		]
+}
+'''
+######################################################
+@csrf_exempt
+def editAdmin(request):
+    if request.method == "POST":
+        # decode request body
+        body = parseRequestBody(request)
+        
+        if 'email' not in body.keys():
+            return JsonResponse({"Status":"Can't Edit Admin: 'email' field in not in request body"}, status=500)
+        email = body['email']
+
+        try:
+            adminObj = Admin.objects.get(email=email)
+            ret_list = editUser(adminObj, body)
+
+            if ret_list[0] is None:
+                return JsonResponse({"Status": ret_list[1]})
+            
+            newAdminObj = ret_list[0]
+            changedEmailFlg = ret_list[1]
+            changedFirstNameFlg = ret_list[2]
+            changedLastNameFlg = ret_list[3]
+            changedPermissionsFlag = ret_list[4]
+
+            ret_json = dict()
+
+            if changedFirstNameFlg == True:
+                Admin.objects.filter(email=email).update(first_name=newAdminObj.first_name)
+                ret_json['Changed First Name'] = "True"
+            else:
+                ret_json['Changed First Name'] = "False"
+                
+            if changedLastNameFlg == True:
+                Admin.objects.filter(email=email).update(last_name=newAdminObj.last_name)
+                ret_json['Changed Last Name'] = "True"
+            else:
+                ret_json['Changed Last Name'] = "False"
+            
+            if changedPermissionsFlag == True:
+                Admin.objects.filter(email=email).update(permissions=newAdminObj.permissions)
+                ret_json['Changed Permissions'] = "True"
+            else:
+                ret_json['Changed Permissions'] = "False"
+
+            if changedEmailFlg == True:
+                Admin.objects.filter(email=email).update(email=newAdminObj.email)
+                ret_json['Changed Email'] = "True"
+            else:
+                ret_json['Changed Email'] = "False"
+
+            return JsonResponse(ret_json)
+
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": "Can't Edit Admin"
+                    },
+                    status=500
+                )
+    
+    else:
+        return JsonResponse(
+            {
+                "Status": "editAdmin() only accepts POST requests"
+            },
+            status=500
+        )
+
+
+##################################################
+'''
+getAdmins()
+method: GET
+Returns all the existing admins in the DB
+'''
+##################################################
 @csrf_exempt
 def getAdmins(request):
     if request.method == "GET": 
@@ -1429,9 +1768,11 @@ def getAdmins(request):
 
 
 ######################################################
-# deleteAdmin()
-# method: GET
-# GET params: email of admin to delete
+'''
+deleteAdmin()
+method: GET
+GET params: email of admin to delete
+'''
 #####################################################
 @csrf_exempt
 def deleteAdmin(request):
@@ -1460,9 +1801,11 @@ def deleteAdmin(request):
             )
 
 ######################################################
-# getAdminByEmail()
-# method: GET
-# Returns admin by its email (if it exists in DB)
+'''
+getAdminByEmail()
+method: GET
+Returns admin by its email (if it exists in DB)
+'''
 #####################################################
 @csrf_exempt
 def getAdminByEmail(request):
@@ -1485,45 +1828,47 @@ def getAdminByEmail(request):
 
 
 ######################################################
-# setExam()
-# method: POST
-# POST body example:
-# {
-#     "name": "OOP Exam",
-#     "date": "15/07/19",
-#     "writers": [
-#     "Eliyahu Khelsatzchi",
-#     "Haim Shafir"
-#     ],
-#     "course": 
-#         {
-#         "name" : "OOP"
-#         },
-#     "questions": [
-#         {
-#             "subject":
-#                 {
-#                     "name": "Object-Oriented Principles"
-#                 },          
-#             "body": "What is encapsulation?",
-#             "answers": [
-#                     "blah blah",
-#                     "bleh beh",
-#                     "bundling of data with the methods that operate on that data",
-#                     "blu blue"
-#                 ],
-#             "correctAnswer": 2
-#         }
-#     ],
-#     "subjects":[ 
-#         {
-#             "name": "Object-Oriented Principles"
-#         }
-#     ]
-# }
-#       
-#       no need to add 'subjects' to the request body,
-#       server parses exam questions and adds each question subject to the exam subjects array 
+'''
+setExam()
+method: POST
+POST body example:
+{
+    "name": "OOP Exam",
+    "date": "15/07/19",
+    "writers": [
+    "Eliyahu Khelsatzchi",
+    "Haim Shafir"
+    ],
+    "course": 
+        {
+        "name" : "OOP"
+        },
+    "questions": [
+        {
+            "subject":
+                {
+                    "name": "Object-Oriented Principles"
+                },          
+            "body": "What is encapsulation?",
+            "answers": [
+                    "blah blah",
+                    "bleh beh",
+                    "bundling of data with the methods that operate on that data",
+                    "blu blue"
+                ],
+            "correctAnswer": 2
+        }
+    ],
+    "subjects":[ 
+        {
+            "name": "Object-Oriented Principles"
+        }
+    ]
+}
+      
+      no need to add 'subjects' to the request body,
+      server parses exam questions and adds each question subject to the exam subjects array 
+'''
 #####################################################
 @csrf_exempt
 def setExam(request):
@@ -1642,9 +1987,11 @@ def setExam(request):
         )
 
 ######################################################
-# getExams()
-# method: GET
-# Returns all the existing exams in the DB
+'''
+getExams()
+method: GET
+Returns all the existing exams in the DB
+'''
 #####################################################
 @csrf_exempt
 def getExams(request):
@@ -1664,9 +2011,11 @@ def getExams(request):
                 )
 
 ######################################################
-# deleteExam()
-# method: GET
-# GET params: examID of exam to delete
+'''
+deleteExam()
+method: GET
+GET params: examID of exam to delete
+'''
 #####################################################
 @csrf_exempt
 def deleteExam(request):
@@ -1696,9 +2045,11 @@ def deleteExam(request):
 
 
 ######################################################
-# getExamByID()
-# method: GET
-# Returns exam by its ID (if it exists in DB)
+'''
+getExamByID()
+method: GET
+Returns exam by its ID (if it exists in DB)
+'''
 #####################################################
 @csrf_exempt
 def getExamByID(request):
