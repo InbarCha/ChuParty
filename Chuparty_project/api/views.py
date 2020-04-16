@@ -1401,6 +1401,15 @@ def editExam(request):
                 ret_json['Error'] = "Can't delete one or more of the questions to delete, becuse they don't exist"
             
             return JsonResponse(ret_json)
+        
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": "Can't Edit Question"
+                    },
+                    status=500
+                )
 
     else: # request.method isn't POST
         return JsonResponse(
