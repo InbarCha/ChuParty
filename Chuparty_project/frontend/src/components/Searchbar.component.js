@@ -7,7 +7,7 @@ export default class Home extends Component{
                 <span>ChuParty</span>
                 <div className="search-container">
                     <form action="/action_page.php">
-                        <input type="text" placeholder="Search.." name="search"/>
+                        <input type="text" placeholder="Search..." name="search"/>
                         <button type="submit"><i className="material-icons">search</i></button>
                     </form>
                 </div>
