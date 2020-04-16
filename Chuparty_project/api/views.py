@@ -1143,10 +1143,10 @@ def setExam(request):
         if 'date' not in body.keys():
              return JsonResponse({ "Status": "Can't Create Exam - 'date' not specified"}, status=500)
         date = body['date']
-        dateObj = datetime.strptime(date, "%d/%m/%y")
+        dateObj = datetime.strptime(date, "%d/%m/%y").date()
 
         # id
-        examID = str(name) + "_" + str(date)
+        examID = str(name) + "_" + str(dateObj)
 
         try:
             Exam.objects.get(examID=examID)
@@ -1249,10 +1249,34 @@ def setExam(request):
 '''
 editExam()
 method: POST
-POST body example:
-
+{
+	"examID":"Computer Networks Exam_2019-07-15 00:00:00",
+	"ChangeWriters":[
+		"Eliav Menache"
+		],
+	"ChangeCourse": 
+		{
+			"name":"Computer Networks"
+		},
+	"AddQuestions":[
+			{
+				"body":"What is HTTP?"
+			},
+			{
+				"body":"What is UDP?"
+			}
+		],
+	"DeleteQuestions":[
+			{
+				"body":"What is DNS?"
+			}
+		],
+	"ChangeName": "Computer Networks Exam",
+	"ChangeDate": "16/07/19"
+}
 '''
 ##################################################
+@csrf_exempt
 def editExam(request):
     if request.method == "POST":
         changedNameFlg = False
@@ -1294,9 +1318,11 @@ def editExam(request):
                 
                 if isCourseReturned is None:
                     return JsonResponse({ "Status": ret_tuple[1] }, status=500)
-
-                examObj.course = ret_tuple[1]
-                changedCourseFlg = True
+                
+                courseObj = ret_tuple[1]
+                if examObj.course.name != courseObj.name:
+                    examObj.course = courseObj
+                    changedCourseFlg = True
             
             # add a new question
             if 'AddQuestions' in body.keys():
@@ -1313,12 +1339,11 @@ def editExam(request):
                     
                     if questionObj.body not in [question.body for question in examObj.questions]:
                         examObj.questions.append(questionObj)
+                        addedQuestionsFlg = True
 
                         # if the new question's subject is not in the exam subjects, add it
                         if questionObj.subject.name not in [subject.name for subject in examObj.subjects]:
-                            examObj.subjects.append(questionObj.subjects)
-
-                        AddedToQuestionssFlg = True
+                            examObj.subjects.append(questionObj.subject)
                 
             # delete a question
             if 'DeleteQuestions' in body.keys():
@@ -1330,6 +1355,7 @@ def editExam(request):
 
                         if questionObj.body in [question.body for question in examObj.questions]:
                             examObj.questions = list(filter(lambda question:question.body!=questionObj.body, examObj.questions))
+                            deletedQuestionsFlg = True
 
                             # if the deleted question's subject is in the exam subjects,
                             # and no other exam question is from this subject, 
@@ -1338,8 +1364,6 @@ def editExam(request):
                             if deletedQuestionSubject.name in [subject.name for subject in examObj.subjects] \
                                 and deletedQuestionSubject.name not in [question.subject.name for question in examObj.questions]:
                                 examObj.subjects = list(filter(lambda subject:subject.name != deletedQuestionSubject.name, examObj.subjects))
-
-                            deletedQuestionsFlg = True
                     
                     except:
                         questionToDeleteNotExistFlg = True
@@ -1347,14 +1371,17 @@ def editExam(request):
             # change exam name
             if 'ChangeName' in body.keys():
                 newName = body['ChangeName']
-                examObj.name = newName
-                changedNameFlg = True
+                if examObj.name != newName:
+                    examObj.name = newName
+                    changedNameFlg = True
             
             # change exam date
             if 'ChangeDate' in body.keys():
                 newDate = body['ChangeDate']
-                examObj.date = datetime.strptime(newDate, "%d/%m/%y")
-                changedDateFlg = True
+                newDateObj = datetime.strptime(newDate, "%d/%m/%y").date()
+                if examObj.date != newDateObj:
+                    examObj.date = newDateObj
+                    changedDateFlg = True
             
             if changedNameFlg == True or changedDateFlg == True:
                 newExamID = str(examObj.name) + "_" + str(examObj.date)

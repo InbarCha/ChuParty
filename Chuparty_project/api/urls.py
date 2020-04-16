@@ -34,6 +34,7 @@ urlpatterns = [
 
     # exam
     path('setExam', views.setExam),
+    path('editExam', views.editExam),
     path('getExams', views.getExams),
     path('getExamByID', views.getExamByID),
     path('deleteExam', views.deleteExam),
