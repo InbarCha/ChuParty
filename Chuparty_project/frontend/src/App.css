@@ -1,105 +1,114 @@
 .title {
-  /* z-index: 999; */
-  /* position: fixed; */
-  display: inline-flex;
-  margin: 0px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  background-color: rgb(20, 34, 34);;
-  width: 100vw;
-  text-align: center;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 35px;
-  font-weight: bold;
-  color: rgba(30, 30, 30, 1);
-  text-shadow: black 1px 3px;
-  padding-bottom: 7px;
+    /* z-index: 999; */
+    /* position: fixed; */
+    display: inline-flex;
+    margin: 0px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: rgb(20, 34, 34);
+    ;
+    width: 100vw;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 35px;
+    font-weight: bold;
+    color: rgba(30, 30, 30, 1);
+    text-shadow: black 1px 3px;
+    padding-bottom: 7px;
 }
-
-.title span{
-  padding-left: 7px;
-  color: rgb(50, 50, 150);
+.title img {
+    width: 72px;
+    height: 40px;
+    border-radius: 30px;
+    margin-top: 2px;
+    margin-left: 2px;
 }
-
+.title span {
+    padding-left: 7px;
+    color: rgb(50, 50, 150);
+}
 form {
-  display: inline-grid;
-  column-count: 2;
+    display: inline-grid;
+    column-count: 2;
 }
-
 .sidebar {
-  position: fixed;
-  background-color: rgb(20, 34, 34);;
-  margin-top: 0px;
-  padding-top: 50px;
-  height: 100vh;
+    position: fixed;
+    background-color: rgb(20, 34, 34);
+    ;
+    margin-top: 0px;
+    padding-top: 50px;
+    height: 100vh;
 }
-
 .side_item {
-  color: white;
-  padding-top: 15px;
-  padding-left: 10px;
-  padding-right: 15px;
-  padding-bottom: 15px;
+    color: white;
+    padding-top: 15px;
+    padding-left: 10px;
+    padding-right: 15px;
+    padding-bottom: 15px;
 }
-
 .side_item:hover {
-  cursor: pointer;
-  color: black;
-  box-shadow: black 1px 3px;
-  background-color: rgb(46, 77, 77);
+    cursor: pointer;
+    color: black;
+    box-shadow: black 1px 3px;
+    background-color: rgb(46, 77, 77);
 }
-
 .side_description {
-  width: 0px;
-  height: 58px;
-  position: absolute;
-  border-bottom-right-radius: 12px;
-  border-top-right-radius: 12px;
-  box-shadow: black 1px 3px;
-  background-color:  inherit;
-  font-family: Impact, Charcoal, sans-serif;
-  color: black;
-  margin-left: 47px;
-  margin-top: -58px;
-  font-size: 0%;
-  text-align: center;
-  transition: width 250ms ease-in-out, font-size 250ms ease-in-out;
+    width: 0px;
+    height: 58px;
+    position: absolute;
+    border-bottom-right-radius: 12px;
+    border-top-right-radius: 12px;
+    box-shadow: black 1px 3px;
+    background-color: inherit;
+    font-family: Impact, Charcoal, sans-serif;
+    color: black;
+    margin-left: 47px;
+    margin-top: -58px;
+    font-size: 0%;
+    text-align: center;
+    transition: width 250ms ease-in-out, font-size 250ms ease-in-out;
 }
-
-.side_item:hover + .side_description {
-  display: inline-block;
-  font-size: 100%;
-  width: 75px;
-  background-color:  rgb(46, 77, 77);
+.side_item:hover+.side_description {
+    display: inline-block;
+    font-size: 100%;
+    width: 75px;
+    background-color: rgb(46, 77, 77);
 }
-
-.side_description span{
-  display: block;
-  margin-top: 25%;
+.side_description span {
+    display: block;
+    margin-top: 25%;
 }
 .search-container {
-  margin-left: 15vw;
-  margin-right: 15vw;
+    margin-left: 15vw;
+    margin-right: 15vw;
 }
-
-.search-container input[type=text]{
-  grid-row: 1;
-  grid-column: 1;
-  border: none;
-  padding: 6px;
-  font-size: 17px;
-  width: 40vw;
+.search-container input[type=text] {
+    grid-row: 1;
+    grid-column: 1;
+    border: none;
+    padding: 6px;
+    font-size: 17px;
+    width: 40vw;
 }
-
-.search-container button{
-  grid-row: 1;
-  grid-column: 2;
-  border: none;
-  background-color: rebeccapurple;
-  font-size: 17px;
-  padding: 6px;
+.search-container button {
+    grid-row: 1;
+    grid-column: 2;
+    border: none;
+    background-color: rebeccapurple;
+    font-size: 17px;
+    padding: 6px;
 }
-
-#content_container{
-  margin-left: 60px;
+#content_container {
+    margin-left: 60px;
+}
+.course {
+    background-color: cadetblue;
+    width: fit-content;
+    padding: 10px 10px 10px 10px;
+    border-radius: 5px;
+}
+.subjects_container {
+    background-color: darkseagreen;
+    border-radius: 5px;
+    text-align: center;
 }
