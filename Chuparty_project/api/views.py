@@ -1085,6 +1085,416 @@ def getQuestionByBody(request):
                     status=500
                 )
 
+######################################################
+'''
+setExam()
+method: POST
+POST body example:
+{
+    "name": "OOP Exam",
+    "date": "15/07/19",
+    "writers": [
+    "Eliyahu Khelsatzchi",
+    "Haim Shafir"
+    ],
+    "course": 
+        {
+        "name" : "OOP"
+        },
+    "questions": [
+        {
+            "subject":
+                {
+                    "name": "Object-Oriented Principles"
+                },          
+            "body": "What is encapsulation?",
+            "answers": [
+                    "blah blah",
+                    "bleh beh",
+                    "bundling of data with the methods that operate on that data",
+                    "blu blue"
+                ],
+            "correctAnswer": 2
+        }
+    ],
+    "subjects":[ 
+        {
+            "name": "Object-Oriented Principles"
+        }
+    ]
+}
+      
+      no need to add 'subjects' to the request body,
+      server parses exam questions and adds each question subject to the exam subjects array 
+'''
+#####################################################
+@csrf_exempt
+def setExam(request):
+    if request.method == "POST":
+        # decode request body
+        body = parseRequestBody(request)
+
+        # name
+        if 'name' not in body.keys():
+             return JsonResponse({ "Status": "Can't Create Exam - 'name' not specified"}, status=500)
+        name = body['name']
+
+        # date
+        if 'date' not in body.keys():
+             return JsonResponse({ "Status": "Can't Create Exam - 'date' not specified"}, status=500)
+        date = body['date']
+        dateObj = datetime.strptime(date, "%d/%m/%y")
+
+        # id
+        examID = str(name) + "_" + str(date)
+
+        try:
+            Exam.objects.get(examID=examID)
+            print(f"Exam {examID} already exists")
+            return JsonResponse(
+                {
+                    "Status": "Exam Already Exists",
+                },
+                status=500
+            )
+
+        except:
+            # writers
+            if 'writers' not in body.keys():
+                return JsonResponse({ "Status": "Can't Create Exam - 'date' not specified"}, status=500)
+            writers = list(body['writers'])
+
+            # course
+            if 'course' not in body.keys():
+                return JsonResponse({ "Status": "Can't Create Exam - 'course' not specified"},status=500)
+            course = body['course'] 
+
+            if 'subjects' not in course.keys():
+                course['subjects'] = list()
+
+            ret_tuple = createCourseOrAddSubject(course)
+            isCourseReturned = ret_tuple[0]
+            if isCourseReturned is None:
+                return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+            courseObj = ret_tuple[1]
+
+            # subjects
+            subjectsObjList = []
+            
+            if 'subjects' in body.keys():
+                subjects = body['subjects']
+                
+                # for every subject in the requestBody, check if it exists in the DB
+                # if it doesn't, create it
+                for subject in subjects:
+                    subjectObj = createSubject(subject)[1]
+                    subjectsObjList.append(subjectObj)
+
+            # questions
+            questionsObjList = []
+            
+            if 'questions' in body.keys():
+                questions = body['questions']
+                
+                # for every question in the requestBody, check if it exists in the DB
+                # if it doesn't, create it
+                for question in questions:
+                    if 'course' not in question.keys():
+                        question['course'] = courseObj.as_json()
+
+                    questionObj = createQuestion(question)[1]
+                    questionsObjList.append(questionObj)
+
+                    # for every question, if its subject is not in the exam subjects, add it
+                    questionSubject = questionObj.subject
+                    if questionSubject.name not in [subject.name for subject in subjectsObjList]:
+                        subjectsObjList.append(questionSubject)
+                    if questionSubject.name not in [subject for subject in courseObj.subjects]:
+                        course['subjects'].append(questionSubject.as_json())
+                
+                ret_tuple = createCourseOrAddSubject(course)
+                isCourseReturned = ret_tuple[0]
+                if isCourseReturned is None:
+                    return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+                courseObj = ret_tuple[1]
+
+            
+            newExam = Exam(
+                examID=examID,
+                name=name,
+                date=dateObj, 
+                writers = writers,
+                course = courseObj,
+                questions = questionsObjList,
+                subjects = subjectsObjList
+            )
+            newExam.save()
+
+            return JsonResponse(
+                {
+                    "Status": "Created Exam",
+                }
+            )
+
+    else:
+        return JsonResponse(
+            {
+                "Status": "setExam() only accepts POST requests"
+            },
+            status=500
+        )
+
+
+##################################################
+'''
+editExam()
+method: POST
+POST body example:
+
+'''
+##################################################
+def editExam(request):
+    if request.method == "POST":
+        changedNameFlg = False
+        changedDateFlg = False
+        changedWritersFlg = False
+        changedCourseFlg = False
+        addedQuestionsFlg = False
+        deletedQuestionsFlg = False
+        questionToDeleteNotExistFlg = False
+
+        # decode request body
+        body = parseRequestBody(request)
+
+        if 'examID' not in body.keys():
+            return JsonResponse({"Status":"Can't Edit Exam: 'examID' field in not in request body"}, status=500)
+        examID = body['examID']
+
+        try: 
+            examObj = Exam.objects.get(examID=examID)
+
+            # change exam writers list
+            if 'ChangeWriters' in body.keys():
+                newWritersList = list(body['ChangeWriters'])
+                oldWritersList = examObj.writers
+
+                filteredListNew = [writer for writer in newWritersList if writer not in oldWritersList]
+                filteredListOld = [writer for writer in oldWritersList if writer not in newWritersList]
+                
+                if filteredListNew or filteredListOld:
+                    examObj.writers = newWritersList
+                    changedWritersFlg = True
+            
+            # change exam course
+            if 'ChangeCourse' in body.keys():
+                newCourse = body['ChangeCourse']
+
+                ret_tuple = createCourseOrAddSubject(newCourse)
+                isCourseReturned = ret_tuple[0]
+                
+                if isCourseReturned is None:
+                    return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+
+                examObj.course = ret_tuple[1]
+                changedCourseFlg = True
+            
+            # add a new question
+            if 'AddQuestions' in body.keys():
+                newQuestionsList = list(body['AddQuestions'])
+
+                for question in newQuestionsList:
+                    ret_tuple = createQuestion(question)
+                    isNewQuestionCreated = ret_tuple[0]
+
+                    if isNewQuestionCreated is None:
+                        return JsonResponse({"Status": ret_tuple[1]}, status=500)
+            
+                    questionObj = ret_tuple[1]
+                    
+                    if questionObj.body not in [question.body for question in examObj.questions]:
+                        examObj.questions.append(questionObj)
+
+                        # if the new question's subject is not in the exam subjects, add it
+                        if questionObj.subject.name not in [subject.name for subject in examObj.subjects]:
+                            examObj.subjects.append(questionObj.subjects)
+
+                        AddedToQuestionssFlg = True
+                
+            # delete a question
+            if 'DeleteQuestions' in body.keys():
+                newQuestionsList = list(body['DeleteQuestions'])
+
+                for question in newQuestionsList:
+                    try:
+                        questionObj = Question.objects.get(body=question['body'])
+
+                        if questionObj.body in [question.body for question in examObj.questions]:
+                            examObj.questions = list(filter(lambda question:question.body!=questionObj.body, examObj.questions))
+
+                            # if the deleted question's subject is in the exam subjects,
+                            # and no other exam question is from this subject, 
+                            # delete the subject from the exam subjects
+                            deletedQuestionSubject = questionObj.subject
+                            if deletedQuestionSubject.name in [subject.name for subject in examObj.subjects] \
+                                and deletedQuestionSubject.name not in [question.subject.name for question in examObj.questions]:
+                                examObj.subjects = list(filter(lambda subject:subject.name != deletedQuestionSubject.name, examObj.subjects))
+
+                            deletedQuestionsFlg = True
+                    
+                    except:
+                        questionToDeleteNotExistFlg = True
+            
+            # change exam name
+            if 'ChangeName' in body.keys():
+                newName = body['ChangeName']
+                examObj.name = newName
+                changedNameFlg = True
+            
+            # change exam date
+            if 'ChangeDate' in body.keys():
+                newDate = body['ChangeDate']
+                examObj.date = datetime.strptime(newDate, "%d/%m/%y")
+                changedDateFlg = True
+            
+            if changedNameFlg == True or changedDateFlg == True:
+                newExamID = str(examObj.name) + "_" + str(examObj.date)
+                examObj.examID = newExamID
+            
+            if changedNameFlg == True or changedDateFlg == True or changedCourseFlg == True \
+                or changedWritersFlg == True or addedQuestionsFlg == True or deletedQuestionsFlg == True:
+                Exam.objects.filter(examID=examID).delete()
+                examObj.save()
+            
+            ret_json = dict()
+
+            if changedNameFlg == True:
+                ret_json['Changed Name'] = "True"
+            else:
+                ret_json['Changed Name'] = "False"
+
+            if changedDateFlg == True:
+                ret_json['Changed Date'] = "True"
+            else:
+                ret_json['Changed Date'] = "False"
+
+            if changedWritersFlg == True:
+                ret_json['Changed Writers'] = "True"
+            else:
+                ret_json['Changed Writers'] = "False"
+
+            if changedCourseFlg == True:
+                ret_json['Changed Course'] = "True"
+            else:
+                ret_json['Changed Course'] = "False"
+
+            if addedQuestionsFlg == True:
+                ret_json['Added Questions'] = "True"
+            else:
+                ret_json['Added Questions'] = "False"
+            
+            if deletedQuestionsFlg == True:
+                ret_json['Deleted Questions'] = "True"
+            else:
+                ret_json['Deleted Questions'] = "False"
+            
+            if questionToDeleteNotExistFlg == True:
+                ret_json['Error'] = "Can't delete one or more of the questions to delete, becuse they don't exist"
+            
+            return JsonResponse(ret_json)
+
+    else: # request.method isn't POST
+        return JsonResponse(
+                {
+                    "Status": "editExam() only accepts POST requests",
+                },
+                status=500
+            )
+
+
+######################################################
+'''
+getExams()
+method: GET
+Returns all the existing exams in the DB
+'''
+#####################################################
+@csrf_exempt
+def getExams(request):
+    if request.method == "GET": 
+        exams = Exam.objects.all()
+        print(exams)
+        examsList = [exam.as_json() for exam in exams]
+
+        return JsonResponse(list(examsList), safe=False)
+
+    else: # request.method isn't GET
+        return JsonResponse(
+                    {
+                        "Status": "getExams() only accepts GET requests",
+                    },
+                    status=500
+                )
+
+######################################################
+'''
+deleteExam()
+method: GET
+GET params: examID of exam to delete
+'''
+#####################################################
+@csrf_exempt
+def deleteExam(request):
+    if request.method == "GET": 
+        examID = request.GET.get("examID")
+    
+        try:
+            Exam.objects.filter(examID=examID).delete()
+            return JsonResponse({"Status": f"Deleted Exam '{examID}'"})
+
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": f"Can't delete exam {examID}",
+                    },
+                    status=500
+                )
+        
+    else:
+        return JsonResponse(
+                {
+                    "Status": "deleteExam() only accepts GET requests",
+                },
+                status=500
+            )
+
+
+######################################################
+'''
+getExamByID()
+method: GET
+Returns exam by its ID (if it exists in DB)
+'''
+#####################################################
+@csrf_exempt
+def getExamByID(request):
+    if request.method == "GET": 
+        examID = request.GET.get("examID")
+
+        try:
+            examObj = Exam.objects.get(examID=examID)
+            return JsonResponse(examObj.as_json())
+
+        except:
+            return JsonResponse({"Status": f"Exam {examID} doesn't exist in DB"}, status=500)
+
+    return JsonResponse(
+                    {
+                        "Status": "getExamByID() only accepts GET requests",
+                    },
+                    status=500
+                )
+
 
 ######################################################
 '''
@@ -1822,250 +2232,6 @@ def getAdminByEmail(request):
     return JsonResponse(
                     {
                         "Status": "getAdminByEmail() only accepts GET requests",
-                    },
-                    status=500
-                )
-
-
-######################################################
-'''
-setExam()
-method: POST
-POST body example:
-{
-    "name": "OOP Exam",
-    "date": "15/07/19",
-    "writers": [
-    "Eliyahu Khelsatzchi",
-    "Haim Shafir"
-    ],
-    "course": 
-        {
-        "name" : "OOP"
-        },
-    "questions": [
-        {
-            "subject":
-                {
-                    "name": "Object-Oriented Principles"
-                },          
-            "body": "What is encapsulation?",
-            "answers": [
-                    "blah blah",
-                    "bleh beh",
-                    "bundling of data with the methods that operate on that data",
-                    "blu blue"
-                ],
-            "correctAnswer": 2
-        }
-    ],
-    "subjects":[ 
-        {
-            "name": "Object-Oriented Principles"
-        }
-    ]
-}
-      
-      no need to add 'subjects' to the request body,
-      server parses exam questions and adds each question subject to the exam subjects array 
-'''
-#####################################################
-@csrf_exempt
-def setExam(request):
-    if request.method == "POST":
-        # decode request body
-        body = parseRequestBody(request)
-
-        # name
-        if 'name' not in body.keys():
-             return JsonResponse({ "Status": "Can't Create Exam - 'name' not specified"}, status=500)
-        name = body['name']
-
-        # date
-        if 'date' not in body.keys():
-             return JsonResponse({ "Status": "Can't Create Exam - 'date' not specified"}, status=500)
-        date = body['date']
-        dateObj = datetime.strptime(date, "%d/%m/%y")
-
-        # id
-        examID = str(name) + "_" + str(date)
-
-        try:
-            Exam.objects.get(examID=examID)
-            print(f"Exam {examID} already exists")
-            return JsonResponse(
-                {
-                    "Status": "Exam Already Exists",
-                },
-                status=500
-            )
-
-        except:
-            # writers
-            if 'date' not in body.keys():
-                return JsonResponse({ "Status": "Can't Create Exam - 'date' not specified"}, status=500)
-            writers = list(body['writers'])
-
-            # course
-            if 'course' not in body.keys():
-                return JsonResponse({ "Status": "Can't Create Exam - 'course' not specified"},status=500)
-
-            course = body['course'] 
-            if 'subjects' not in course.keys():
-                course['subjects'] = list()
-
-            ret_tuple = createCourseOrAddSubject(course)
-            isCourseReturned = ret_tuple[0]
-            if isCourseReturned is None:
-                return JsonResponse({ "Status": ret_tuple[1] }, status=500)
-            courseObj = ret_tuple[1]
-
-            # subjects
-            subjectsObjList = []
-            
-            if 'subjects' in body.keys():
-                subjects = body['subjects']
-                
-                # for every subject in the requestBody, check if it exists in the DB
-                # if it doesn't, create it
-                for subject in subjects:
-                    subjectObj = createSubject(subject)[1]
-                    subjectsObjList.append(subjectObj)
-
-            # questions
-            questionsObjList = []
-            
-            if 'questions' in body.keys():
-                questions = body['questions']
-                
-                # for every question in the requestBody, check if it exists in the DB
-                # if it doesn't, create it
-                for question in questions:
-                    if 'course' not in question.keys():
-                        question['course'] = courseObj.as_json()
-
-                    questionObj = createQuestion(question)[1]
-                    questionsObjList.append(questionObj)
-
-                    # for every question, if its subject is not in the exam subjects, add it
-                    questionSubject = questionObj.subject
-                    if questionSubject.name not in [subject.name for subject in subjectsObjList]:
-                        subjectsObjList.append(questionSubject)
-                    if questionSubject.name not in [subject for subject in courseObj.subjects]:
-                        course['subjects'].append(questionSubject.as_json())
-                
-                ret_tuple = createCourseOrAddSubject(course)
-                isCourseReturned = ret_tuple[0]
-                if isCourseReturned is None:
-                    return JsonResponse({ "Status": ret_tuple[1] }, status=500)
-                courseObj = ret_tuple[1]
-
-            
-            newExam = Exam(
-                examID=examID,
-                name=name,
-                date=dateObj, 
-                writers = writers,
-                course = courseObj,
-                questions = questionsObjList,
-                subjects = subjectsObjList
-            )
-            newExam.save()
-
-            return JsonResponse(
-                {
-                    "Status": "Created Exam",
-                }
-            )
-
-    else:
-        return JsonResponse(
-            {
-                "Status": "setExam() only accepts POST requests"
-            },
-            status=500
-        )
-
-######################################################
-'''
-getExams()
-method: GET
-Returns all the existing exams in the DB
-'''
-#####################################################
-@csrf_exempt
-def getExams(request):
-    if request.method == "GET": 
-        exams = Exam.objects.all()
-        print(exams)
-        examsList = [exam.as_json() for exam in exams]
-
-        return JsonResponse(list(examsList), safe=False)
-
-    else: # request.method isn't GET
-        return JsonResponse(
-                    {
-                        "Status": "getExams() only accepts GET requests",
-                    },
-                    status=500
-                )
-
-######################################################
-'''
-deleteExam()
-method: GET
-GET params: examID of exam to delete
-'''
-#####################################################
-@csrf_exempt
-def deleteExam(request):
-    if request.method == "GET": 
-        examID = request.GET.get("examID")
-    
-        try:
-            Exam.objects.filter(examID=examID).delete()
-            return JsonResponse({"Status": f"Deleted Exam '{examID}'"})
-
-        except Exception as e:
-            return JsonResponse(
-                    {
-                        "Exception": str(e),
-                        "Status": f"Can't delete exam {examID}",
-                    },
-                    status=500
-                )
-        
-    else:
-        return JsonResponse(
-                {
-                    "Status": "deleteExam() only accepts GET requests",
-                },
-                status=500
-            )
-
-
-######################################################
-'''
-getExamByID()
-method: GET
-Returns exam by its ID (if it exists in DB)
-'''
-#####################################################
-@csrf_exempt
-def getExamByID(request):
-    if request.method == "GET": 
-        examID = request.GET.get("examID")
-
-        try:
-            examObj = Exam.objects.get(examID=examID)
-            return JsonResponse(examObj.as_json())
-
-        except:
-            return JsonResponse({"Status": f"Exam {examID} doesn't exist in DB"}, status=500)
-
-    return JsonResponse(
-                    {
-                        "Status": "getExamByID() only accepts GET requests",
                     },
                     status=500
                 )

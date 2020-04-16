@@ -91,8 +91,16 @@ def updateQuestionInExams(newQuestionObj, questionBody):
     # change the questino to "newQuestionObj" parameter
     for exam in examsList:
         questionsList = exam.questions
+
         for i in range(len(questionsList)):
             if questionsList[i].body == questionBody:
+                # if question's subject changed, change the matching exam's subject name
+                if questionsList[i].subject.name != newQuestionObj.subject.name:
+                    for subject in exam.subjects:
+                         if subject.name == questionsList[i].subject.name:
+                             subject.name = newQuestionObj.subject.name
+
+                # change the exam's question to the new questionObj
                 questionsList[i] = newQuestionObj
 
         Exam.objects.filter(examID=exam.examID).delete()
