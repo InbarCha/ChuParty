@@ -10,6 +10,16 @@ from api.HelpFuncs_Courses import *
 from api.HelpFuncs_Questions import *
 from api.HelpFuncs_User import *
 
+'''
+TODO: in "get all documents from model" functions, change document template to - for example - 
+{ 
+  "computer Science":
+        {
+          "subjects":{...}
+        }
+}
+'''
+
 #TODO: take care of case-senstitive issues (for example in MongoDB queries)
 
 #TODO: Think of a better way to handle document IDs.
@@ -214,7 +224,6 @@ def editSubject(request):
                 },
                 status=500
             )
-
 
 ##################################################
 '''
