@@ -90,7 +90,8 @@ class Question(models.Model):
         max_length = 5
     )
     correctAnswer = models.IntegerField()
-
+    difficulty = models.IntegerField()
+    
     objects = models.DjongoManager()
 
     def as_json(self):

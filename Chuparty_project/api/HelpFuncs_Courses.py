@@ -226,3 +226,29 @@ def deleteSubjectFromCourseInExams(courseName, subjectObj):
         Exam.objects.filter(examID=exam.examID).delete()
         exam.save()
     
+
+
+########################################################
+# changeCoursesTemplateInList(coursesList)
+# Help Function
+########################################################
+def changeCoursesTemplateInList(coursesList):
+    ret_coursesList = list()
+
+    for course in coursesList:
+        courseJson = changeCourseTemplate(course)
+        ret_coursesList.append(courseJson)
+    
+    return ret_coursesList
+
+
+########################################################
+# changeCourseTemplate(course)
+# Help Function
+########################################################
+def changeCourseTemplate(course):
+    courseJson = dict()
+    courseJson[course.name] = dict()
+    courseJson[course.name]['subjects'] = [subject.name for subject in course.subjects]
+
+    return courseJson

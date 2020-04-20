@@ -136,7 +136,7 @@ def updateSubjectsInExams(name, newName):
         exam.save()
 
 
-#####################################
+########################################################
 # createSubject
 # help function
 # Parameters:
@@ -146,7 +146,7 @@ def updateSubjectsInExams(name, newName):
 #      if ret_tuple[0] == None: indicates Error, and ret_tuple[1] is a string describing the error
 #      else, ret_tuple[0] is True if a new subject was created in the DB, and False otherwise
 #            In both cases, ret_tuple[1] is the Subject Object (either just created or pulled from DB)
-###################################
+########################################################
 def createSubject(requestBody):
     # get subjectName from request body
     if 'name' not in requestBody.keys():

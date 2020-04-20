@@ -9,6 +9,7 @@ from api.HelpFuncs_Subjects import *
 from api.HelpFuncs_Courses import *
 from api.HelpFuncs_Questions import *
 from api.HelpFuncs_User import *
+from api.HelpFuncs_Schools import *
 
 '''
 TODO: in "get all documents from model" functions, change document template to - for example - 
@@ -448,7 +449,7 @@ Returns all the existing courses in the DB
 def getCourses(request):
     if request.method == "GET": 
         courses = Course.objects.all()
-        coursesList = [course.as_json() for course in courses]
+        coursesList = changeCoursesTemplateInList(courses)
 
         return JsonResponse(list(coursesList), safe=False)
 
@@ -475,10 +476,16 @@ def getCourseByName(request):
 
         try:
             courseObj = Course.objects.get(name=courseName)
-            return JsonResponse(courseObj.as_json())
+            return JsonResponse(changeCourseTemplate(courseObj))
 
-        except:
-            return JsonResponse({"Status": f"Course {courseName} doesn't exist in DB"}, status=500)
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": f"Course {courseName} doesn't exist in DB"
+                    },
+                    status=500
+                )
 
     return JsonResponse(
                     {
@@ -746,7 +753,7 @@ Returns all the existing schools in the DB
 def getSchools(request):
     if request.method == "GET": 
         schools = School.objects.all()
-        schoolsList = [school.as_json() for school in schools]
+        schoolsList = changeSchoolsTemplateInList(schools)
 
         return JsonResponse(list(schoolsList), safe=False)
 
@@ -774,10 +781,16 @@ def getSchoolByName(request):
 
         try:
             schoolObj = School.objects.get(name=schoolName)
-            return JsonResponse(schoolObj.as_json())
+            return JsonResponse(changeSchoolTemplate(schoolObj))
 
-        except:
-            return JsonResponse({"Status": f"School {schoolName} doesn't exist in DB"}, status=500)
+        except Exception as e:
+            return JsonResponse(
+                    {
+                        "Exception": str(e),
+                        "Status": f"School {schoolName} doesn't exist in DB"
+                    }, 
+                    status=500
+                )
 
     return JsonResponse(
                     {
