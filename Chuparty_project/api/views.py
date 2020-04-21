@@ -821,7 +821,8 @@ POST body example:
           "Deduction of Native Services",
           "Deformation of Name Servers"
       ],
-    "correctAnswer": 1
+    "correctAnswer": 1,
+    "difficulty":3
 }
 '''
 ##################################################
@@ -918,7 +919,8 @@ POST body example:
             "bleh beh",
             "blu blue"
 		],
-	"ChangeCorrectAnswer": 2
+	"ChangeCorrectAnswer": 2,
+    "ChangeDiffuculty: 4
 }
 '''
 ##################################################
@@ -930,6 +932,7 @@ def editQuestion(request):
         changedAnswersFlg = False
         changedCorrectAnswerFlg = False
         changedBodyFlg = False
+        changeDifficultyFlg = False
 
         # decode request body
         requestBody = parseRequestBody(request)
@@ -988,6 +991,12 @@ def editQuestion(request):
                 if questionObj.correctAnswer != newCorrectAnswer:
                     questionObj.correctAnswer = newCorrectAnswer
                     changedCorrectAnswerFlg = True
+            
+            if 'changeDifficulty' in requestBody.keys():
+                newDifficulty = int(requestBody['changeDifficulty'])
+                if questionObj.difficulty != newDifficulty:
+                    questionObj.difficulty = newDifficulty
+                    changeDifficultyFlg = True
 
             # change the question's body
             if 'ChangeBody' in requestBody.keys():
@@ -1002,7 +1011,7 @@ def editQuestion(request):
             # if successful, return
             # if not successful, save the old question back to the DB and return
             if changedCourseFlg == True or changedSubjectFlg == True or changedAnswersFlg == True or \
-                changedCorrectAnswerFlg == True or changedBodyFlg == True:
+                changedCorrectAnswerFlg == True or changedBodyFlg == True or changeDifficultyFlg == True:
 
                 Question.objects.filter(body=body).delete()
                 questionObj.save()
@@ -1028,6 +1037,11 @@ def editQuestion(request):
                 ret_json['Changed Correct Answer'] = "True"
             else:
                 ret_json['Changed Correct Answer'] = "False"
+            
+            if changeDifficultyFlg == True:
+                ret_json['Changed Difficulty'] = "True"
+            else:
+                ret_json['Changed Difficulty'] = "False"
 
             if changedBodyFlg == True:
                 ret_json['Changed Body'] = "True"
@@ -1197,7 +1211,7 @@ def setExam(request):
             ret_tuple = createCourseOrAddSubject(course)
             isCourseReturned = ret_tuple[0]
             if isCourseReturned is None:
-                return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+                return JsonResponse({ "Status": "Can't Create Exam - " + ret_tuple[1] }, status=500)
             courseObj = ret_tuple[1]
 
             # subjects
@@ -1209,7 +1223,12 @@ def setExam(request):
                 # for every subject in the requestBody, check if it exists in the DB
                 # if it doesn't, create it
                 for subject in subjects:
-                    subjectObj = createSubject(subject)[1]
+                    ret_tuple = createSubject(subject)
+                    isSubjectRetured = ret_tuple[0]
+                    if isSubjectRetured is None:
+                        return JsonResponse({ "Status": "Can't Create Exam - " + ret_tuple[1] }, status=500)
+
+                    subjectObj = ret_tuple[1]
                     subjectsObjList.append(subjectObj)
 
             # questions
@@ -1224,7 +1243,12 @@ def setExam(request):
                     if 'course' not in question.keys():
                         question['course'] = courseObj.as_json()
 
-                    questionObj = createQuestion(question)[1]
+                    ret_tuple = createQuestion(question)
+                    isQuestionReturned = ret_tuple[0]
+                    if isQuestionReturned is None:
+                        return JsonResponse({ "Status": "Can't Create Exam - " + ret_tuple[1] }, status=500)
+
+                    questionObj = ret_tuple[1]
                     questionsObjList.append(questionObj)
 
                     # for every question, if its subject is not in the exam subjects, add it
@@ -1237,7 +1261,7 @@ def setExam(request):
                 ret_tuple = createCourseOrAddSubject(course)
                 isCourseReturned = ret_tuple[0]
                 if isCourseReturned is None:
-                    return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+                    return JsonResponse({ "Status": "Can't Create Exam - " + ret_tuple[1] }, status=500)
                 courseObj = ret_tuple[1]
 
             

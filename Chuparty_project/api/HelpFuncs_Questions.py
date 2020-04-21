@@ -63,13 +63,19 @@ def createQuestion(requestBody):
         correctAnswer = requestBody['correctAnswer']
         if correctAnswer > 5 or correctAnswer < 1:
             return (None, "Can't Create Question: 'correctAnswer' field value must be between 1 and 5")
+
+        # difficulty
+        if 'difficulty' not in requestBody.keys():
+            return (None, "Can't Create Question: 'difficulty' field in not in request body")
+        difficulty = requestBody['difficulty']
     
         questionObj = Question(
             subject=subjectObj,
             course=courseObj, 
             body=questionBody,
             answers=answers,
-            correctAnswer=correctAnswer
+            correctAnswer=correctAnswer,
+            difficulty=difficulty
         )
 
         questionObj.save()

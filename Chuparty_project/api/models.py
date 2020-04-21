@@ -100,7 +100,8 @@ class Question(models.Model):
             course = self.course.as_json(), # pylint: disable=maybe-no-member
             body = self.body,
             answers = self.answers,
-            correctAnswer = self.correctAnswer
+            correctAnswer = self.correctAnswer,
+            difficulty = self.difficulty
         )
 
         return json_dict
