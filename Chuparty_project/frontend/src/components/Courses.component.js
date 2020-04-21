@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-const COURSES_ROUTE = '/api/getCourses';
+if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') console.log("DEV enabled");
+const COURSES_ROUTE = (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') ?
+    'http://localhost:8000/api/getCourses' : '/api/getCourses';
 
 export default class Courses extends Component {
     constructor() {
