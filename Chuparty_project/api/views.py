@@ -10,6 +10,7 @@ from api.HelpFuncs_Courses import *
 from api.HelpFuncs_Questions import *
 from api.HelpFuncs_User import *
 from api.HelpFuncs_Schools import *
+from api.HelpFuncs_Exams import *
 
 '''
 TODO: in "get all documents from model" functions, change document template to - for example - 
@@ -1504,8 +1505,7 @@ Returns all the existing exams in the DB
 def getExams(request):
     if request.method == "GET": 
         exams = Exam.objects.all()
-        print(exams)
-        examsList = [exam.as_json() for exam in exams]
+        examsList = changeExamsTemplateInList(exams)
 
         return JsonResponse(list(examsList), safe=False)
 
@@ -1565,7 +1565,7 @@ def getExamByID(request):
 
         try:
             examObj = Exam.objects.get(examID=examID)
-            return JsonResponse(examObj.as_json())
+            return JsonResponse(changeExamTemplate(examObj))
 
         except:
             return JsonResponse({"Status": f"Exam {examID} doesn't exist in DB"}, status=500)
