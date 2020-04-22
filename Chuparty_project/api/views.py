@@ -1081,7 +1081,7 @@ Returns all the existing questions in the DB
 def getQuestions(request):
     if request.method == "GET": 
         questions = Question.objects.all()
-        questionsList = [question.as_json() for question in questions]
+        questionsList = changeQuestionsTemplateInList(questions)
 
         return JsonResponse(list(questionsList), safe=False)
 
@@ -1109,7 +1109,7 @@ def getQuestionByBody(request):
 
         try:
             questionObj = Question.objects.get(body=questionBody)
-            return JsonResponse(questionObj.as_json())
+            return JsonResponse(changeQuestionTemplate(questionObj))
 
         except:
             return JsonResponse({"Status": f"Question {questionBody} doesn't exist in DB"}, status=500)

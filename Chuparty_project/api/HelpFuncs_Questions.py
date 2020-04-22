@@ -112,3 +112,34 @@ def updateQuestionInExams(newQuestionObj, questionBody):
         Exam.objects.filter(examID=exam.examID).delete()
         exam.save()
     
+
+
+########################################################
+# changeQuestionsTemplateInList(questionsList)
+# Help Function
+########################################################
+def changeQuestionsTemplateInList(questionsList):
+    ret_questionsList = list()
+
+    for question in questionsList:
+        questionJson = changeQuestionTemplate(question)
+        ret_questionsList.append(questionJson)
+    
+    return ret_questionsList
+
+
+########################################################
+# changeQuestionTemplate(question)
+# Help Function
+########################################################
+def changeQuestionTemplate(question):
+    questionJson = dict()
+    questionJson[question.body] = dict()
+    questionJson[question.body]['subject'] = question.subject.name
+    questionJson[question.body]['course'] = changeCourseTemplate(question.course)
+    questionJson[question.body]['body'] = question.body
+    questionJson[question.body]['answers'] = question.answers
+    questionJson[question.body]['correctAnswer'] = question.correctAnswer
+    questionJson[question.body]['difficulty'] = question.difficulty
+
+    return questionJson
