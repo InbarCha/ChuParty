@@ -13,8 +13,8 @@ from api.HelpFuncs_Schools import *
 from api.HelpFuncs_Exams import *
 
 '''
-TODO: in "get all documents from model" functions, change document template to - for example - 
-{ 
+TODO: in "get all documents from model" functions, change document template to - for example -
+{
   "computer Science":
         {
           "subjects":{...}
@@ -22,20 +22,22 @@ TODO: in "get all documents from model" functions, change document template to -
 }
 '''
 
-#TODO: take care of case-senstitive issues (for example in MongoDB queries)
+# TODO: take care of case-senstitive issues (for example in MongoDB queries)
 
-#TODO: Think of a better way to handle document IDs.
-#      For example, two courses with the same name could exist (that belong to different schools), 
+# TODO: Think of a better way to handle document IDs.
+#      For example, two courses with the same name could exist (that belong to different schools),
 #      so handling course name as its ID is not good enough
 #      NEEDED? or will every school have its own DB?
+
 
 def parseRequestBody(request):
     body_unicode = request.body.decode('utf-8')
     return json.loads(body_unicode)
 
 
-def index(request):                
+def index(request):
     return render(request, 'frontend/index.html')
+
 
 ##################################################
 '''
@@ -46,29 +48,29 @@ GET params: name of subject to delete
 ##################################################
 @csrf_exempt
 def deleteSubject(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         subjectName = request.GET.get("name")
-        
+
         try:
             Subject.objects.filter(name=subjectName).delete()
             return JsonResponse({"Status": f"Deleted subject '{subjectName}'"})
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": f"Can't delete subject {subjectName}",
                     },
-                    status=500
-                )
-        
-    else:
-        return JsonResponse(
-                {
-                    "Status": "deleteSubject() only accepts GET requests",
-                },
                 status=500
             )
+
+    else:
+        return JsonResponse(
+            {
+                    "Status": "deleteSubject() only accepts GET requests",
+                },
+            status=500
+        )
 
 
 ##################################################
@@ -80,17 +82,17 @@ Returns all the existing subjects in the DB
 ##################################################
 @csrf_exempt
 def getSubjects(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         subjectsList = list(Subject.objects.values())
         return JsonResponse(subjectsList, safe=False)
 
     else:
         return JsonResponse(
-                    {
+            {
                         "Status": "getSubjects() only accepts GET requests",
                     },
-                    status=500
-                )
+            status=500
+            )
 
 
 ##################################################
@@ -102,7 +104,7 @@ Returns subject by name (if it exists in DB)
 ##################################################
 @csrf_exempt
 def getSubjectByName(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         subjectName = request.GET.get("name")
 
         try:
@@ -113,11 +115,11 @@ def getSubjectByName(request):
             return JsonResponse({"Status": f"Subject {subjectName} doesn't exist in DB"}, status=500)
 
     return JsonResponse(
-                    {
+        {
                         "Status": "getSubjectByName() only accepts GET requests",
                     },
-                    status=500
-                )
+        status=500
+        )
 
 
 ##################################################
@@ -132,37 +134,38 @@ POST body example:
 ##################################################
 @csrf_exempt
 def setSubject(request):
-    if request.method == "POST": 
+    if request.method == "POST":
         # decode request body
         body = parseRequestBody(request)
 
         ret_tuple = createSubject(body)
         isNewSubjectCreated = ret_tuple[0]
-        
+
         if isNewSubjectCreated is None:
-            return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+            return JsonResponse({"Status": ret_tuple[1]}, status=500)
 
         elif isNewSubjectCreated == True:
             return JsonResponse(
-                    { 
+                    {
                         "Status": "Created Subject",
                     }
-                )
+            )
         else:
             return JsonResponse(
-                    {
+                {
                         "Status": "Subject Already Exists",
                     },
-                    status=500
-                )
+                status=500
+            )
 
-    else: # request.method isn't POST
+    else:  # request.method isn't POST
         return JsonResponse(
-                    {
+            {
                         "Status": "setSubject() only accepts POST requests",
                     },
-                    status=500
-                )
+            status=500
+            )
+
 
 ##################################################
 '''
@@ -182,9 +185,9 @@ def editSubject(request):
 
         # decode request body
         body = parseRequestBody(request)
-        
+
         if 'name' not in body.keys():
-            return JsonResponse({"Status":"Can't Edit Subject: 'name' field in not in request body"}, status=500)
+            return JsonResponse({"Status": "Can't Edit Subject: 'name' field in not in request body"}, status=500)
         name = body['name']
 
         try:
@@ -197,7 +200,7 @@ def editSubject(request):
 
                 updateSubjectsInCourses(name, newName)
                 updateSubjectsInSchools(name, newName)
-                updateSubjectsInQuestions(name,newName)
+                updateSubjectsInQuestions(name, newName)
                 updateSubjectsInExams(name, newName)
 
             # create response
@@ -207,25 +210,26 @@ def editSubject(request):
                 ret_json['Changed Name'] = "True"
             else:
                 ret_json['Changed Name'] = "False"
-             
+
             return JsonResponse(ret_json)
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": "Can't Edit Subject"
                     },
-                    status=500
-                )
+                status=500
+            )
 
     else:
         return JsonResponse(
-                {
+            {
                     "Status": "editSubject() only accepts POST requests",
                 },
-                status=500
-            )
+            status=500
+        )
+
 
 ##################################################
 '''
@@ -255,29 +259,30 @@ def setCourse(request):
         isNewCourseCreated = ret_tuple[0]
 
         if isNewCourseCreated is None:
-             return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+            return JsonResponse({"Status": ret_tuple[1]}, status=500)
 
         elif isNewCourseCreated == False:
             return JsonResponse(
                 {
                     "Status": "Course Already Exists",
-                }, 
+                },
                 status=500
             )
         else:
             return JsonResponse(
-                    {
+                {
                         "Status": "Added Course",
                     }
-                )
+            )
 
-    else: # request.method isn't POST
+    else:  # request.method isn't POST
         return JsonResponse(
-                    {
+            {
                         "Status": "setCourse() only accepts POST calls",
                     },
-                    status=500
-                )
+            status=500
+            )
+
 
 ##################################################
 '''
@@ -288,29 +293,30 @@ GET params: name of course to delete
 ##################################################
 @csrf_exempt
 def deleteCourse(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         courseName = request.GET.get("name")
-    
+
         try:
             Course.objects.filter(name=courseName).delete()
             return JsonResponse({"Status": f"Deleted Course '{courseName}'"})
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": f"Can't delete course {courseName}",
                     },
-                    status=500
-                )
-        
-    else:
-        return JsonResponse(
-                {
-                    "Status": "deleteCourse() only accepts GET requests",
-                },
                 status=500
             )
+
+    else:
+        return JsonResponse(
+            {
+                    "Status": "deleteCourse() only accepts GET requests",
+                },
+            status=500
+        )
+
 
 ##################################################
 '''
@@ -323,7 +329,7 @@ POST body example:
 	"AddToSubjects":[
 		{
 			"name": "C++"
-		}   
+		}
 	]
 }
 '''
@@ -332,14 +338,14 @@ POST body example:
 def editCourse(request):
     if request.method == "POST":
         changedNameFlg = False
-        addedToSubjectsFlg = False 
+        addedToSubjectsFlg = False
         deletedFromSubjectsFlg = False
 
         # decode request body
         body = parseRequestBody(request)
-        
+
         if 'name' not in body.keys():
-            return JsonResponse({"Status":"Can't Edit Course: 'name' field in not in request body"}, status=500)
+            return JsonResponse({"Status": "Can't Edit Course: 'name' field in not in request body"}, status=500)
         name = body['name']
 
         try:
@@ -353,9 +359,9 @@ def editCourse(request):
                 for subject in subjectsToAdd:
                     ret_tuple = createSubject(subject)
                     isSubjectReturned = ret_tuple[0]
-                    
+
                     if isSubjectReturned is None:
-                        return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+                        return JsonResponse({"Status": ret_tuple[1]}, status=500)
 
                     subjectObj = ret_tuple[1]
                     if subjectObj.name not in [subject.name for subject in newSubjectsList]:
@@ -365,7 +371,7 @@ def editCourse(request):
                         addSubjectToCoursesInSchools(name, subjectObj)
                         addSubjectToCourseInQuestions(name, subjectObj)
                         addSubjectToCourseInExams(name, subjectObj)
-            
+
             # delete subjects from course
             if 'DeleteFromSubjects' in body.keys():
                 newSubjectsList = courseObj.subjects
@@ -374,22 +380,24 @@ def editCourse(request):
                 for subject in subjectsToDelete:
                     ret_tuple = createSubject(subject)
                     isSubjectReturned = ret_tuple[0]
-                    
+
                     if isSubjectReturned is None:
-                        return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+                        return JsonResponse({"Status": ret_tuple[1]}, status=500)
 
                     subjectObj = ret_tuple[1]
                     if subjectObj.name in [subject.name for subject in newSubjectsList]:
-                        newSubjectsList = list(filter(lambda subject:subject.name != subjectObj.name, newSubjectsList))
+                        newSubjectsList = list(
+                            filter(lambda subject: subject.name != subjectObj.name, newSubjectsList))
                         deletedFromSubjectsFlg = True
 
                         deleteSubjectFromCoursesInSchools(name, subjectObj)
                         deleteSubjectFromCourseInQuestions(name, subjectObj)
                         deleteSubjectFromCourseInExams(name, subjectObj)
-            
-            # update course's subjects list 
+
+            # update course's subjects list
             if addedToSubjectsFlg == True or deletedFromSubjectsFlg == True:
-                Course.objects.filter(name=name).update(subjects=newSubjectsList)
+                Course.objects.filter(name=name).update(
+                    subjects=newSubjectsList)
 
             # change course name
             if 'ChangeName' in body.keys():
@@ -400,7 +408,7 @@ def editCourse(request):
                 updateCourseNameInSchools(name, newName)
                 updateCourseNameInQuestions(name, newName)
                 updateCourseNameInExams(name, newName)
-            
+
             # create response
             ret_json = dict()
 
@@ -418,25 +426,25 @@ def editCourse(request):
                 ret_json['Deleted Subject'] = "True"
             else:
                 ret_json['Deleted Subject'] = "False"
-            
+
             return JsonResponse(ret_json)
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": "Can't Edit Course"
                     },
-                    status=500
-                )
+                status=500
+            )
 
     else:
         return JsonResponse(
-                {
+            {
                     "Status": "editCourse() only accepts POST requests",
                 },
-                status=500
-            )
+            status=500
+        )
 
 
 ##################################################
@@ -448,19 +456,20 @@ Returns all the existing courses in the DB
 ##################################################
 @csrf_exempt
 def getCourses(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         courses = Course.objects.all()
         coursesList = changeCoursesTemplateInList(courses)
 
         return JsonResponse(list(coursesList), safe=False)
 
-    else: # request.method isn't GET
+    else:  # request.method isn't GET
         return JsonResponse(
-                    {
+            {
                         "Status": "getCourses() only accepts GET requests",
                     },
-                    status=500
-                )
+            status=500
+            )
+
 
 ##################################################
 '''
@@ -471,8 +480,8 @@ Returns course by name (if it exists in DB)
 ##################################################
 @csrf_exempt
 def getCourseByName(request):
-    if request.method == "GET": 
-        courseName = request.GET.get("name")    
+    if request.method == "GET":
+        courseName = request.GET.get("name")
         print(courseName)
 
         try:
@@ -481,19 +490,19 @@ def getCourseByName(request):
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": f"Course {courseName} doesn't exist in DB"
                     },
-                    status=500
-                )
+                status=500
+            )
 
     return JsonResponse(
-                    {
+        {
                         "Status": "getCourseByName() only accepts GET requests",
                     },
-                    status=500
-                )
+        status=500
+        )
 
 
 ##################################################
@@ -538,7 +547,7 @@ def setSchool(request):
 
         # get school name and courses' names from request body
         if 'name' not in body.keys():
-            return JsonResponse({"Status":"Can't Create School: 'name' field in not in request body"}, status=500)
+            return JsonResponse({"Status": "Can't Create School: 'name' field in not in request body"}, status=500)
         schoolName = body['name']
 
         try:
@@ -561,29 +570,28 @@ def setSchool(request):
                 for doc in courses:
                     ret_tuple = createCourseOrAddSubject(doc)
                     isCourseReturned = ret_tuple[0]
-                    
+
                     if isCourseReturned is None:
-                        return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+                        return JsonResponse({"Status": ret_tuple[1]}, status=500)
 
                     course = ret_tuple[1]
                     coursesList.append(course)
 
-            
             newShool = School(name=schoolName, courses=coursesList)
             newShool.save()
             return JsonResponse(
-                    {
+                {
                         "Status": "Added School",
                     }
-                )
-                
-    else: # request.method isn't POST
+            )
+
+    else:  # request.method isn't POST
         return JsonResponse(
-                    {
+            {
                         "Status": "setSchool() only accepts POST requests",
                     },
-                    status=500
-                )
+            status=500
+            )
 
 
 ##################################################
@@ -595,29 +603,29 @@ GET params: name of school to delete
 ##################################################
 @csrf_exempt
 def deleteSchool(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         schoolName = request.GET.get("name")
-    
+
         try:
             School.objects.filter(name=schoolName).delete()
             return JsonResponse({"Status": f"Deleted school '{schoolName}'"})
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": f"Can't delete school {schoolName}",
                     },
-                    status=500
-                )
-        
-    else:
-        return JsonResponse(
-                {
-                    "Status": "deleteSchool() only accepts GET requests",
-                },
                 status=500
             )
+
+    else:
+        return JsonResponse(
+            {
+                    "Status": "deleteSchool() only accepts GET requests",
+                },
+            status=500
+        )
 
 
 ##################################################
@@ -650,14 +658,15 @@ def editSchool(request):
 
         # decode request body
         body = parseRequestBody(request)
-        
+
         if 'name' not in body.keys():
-            return JsonResponse({"Status":"Can't Edit School: 'name' field in not in request body"}, status=500)
+            return JsonResponse({"Status": "Can't Edit School: 'name' field in not in request body"}, status=500)
         name = body['name']
 
         try:
-            schoolObj = School.objects.get(name=name) # check if School exists in DB
-            
+            # check if School exists in DB
+            schoolObj = School.objects.get(name=name)
+
             # add course to school courses
             if 'AddToCourses' in body.keys():
                 newCoursesList = schoolObj.courses
@@ -666,15 +675,15 @@ def editSchool(request):
                 for course in coursesToAdd:
                     ret_tuple = createCourseOrAddSubject(course)
                     isCourseReturned = ret_tuple[0]
-                    
+
                     if isCourseReturned is None:
-                        return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+                        return JsonResponse({"Status": ret_tuple[1]}, status=500)
 
                     courseObj = ret_tuple[1]
                     if courseObj.name not in [course.name for course in newCoursesList]:
                         newCoursesList.append(courseObj)
                         addedToCoursesFlg = True
-            
+
             # delete course from school courses
             if 'DeleteFromCourses' in body.keys():
                 newCoursesList = schoolObj.courses
@@ -683,20 +692,20 @@ def editSchool(request):
                 for course in coursesToDelete:
                     ret_tuple = createCourseOrAddSubject(course)
                     isCourseReturned = ret_tuple[0]
-                    
+
                     if isCourseReturned is None:
-                        return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+                        return JsonResponse({"Status": ret_tuple[1]}, status=500)
 
                     courseObj = ret_tuple[1]
 
                     if courseObj.name in [course.name for course in newCoursesList]:
-                        newCoursesList = list(filter(lambda course:course.name != courseObj.name, newCoursesList))
+                        newCoursesList = list(
+                            filter(lambda course: course.name != courseObj.name, newCoursesList))
                         deletedFromCoursesFlg = True
-                
-            # update school's courses list 
+
+            # update school's courses list
             if deletedFromCoursesFlg == True or addedToCoursesFlg == True:
                 School.objects.filter(name=name).update(courses=newCoursesList)
-
 
             # change school name
             if 'ChangeName' in body.keys():
@@ -726,21 +735,20 @@ def editSchool(request):
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": "Can't Edit School"
                     },
-                    status=500
-                )
-           
-
-    else: # request.method isn't POST
-        return JsonResponse(
-                {
-                    "Status": "editSchool() only accepts POST requests",
-                },
                 status=500
             )
+
+    else:  # request.method isn't POST
+        return JsonResponse(
+            {
+                    "Status": "editSchool() only accepts POST requests",
+                },
+            status=500
+        )
 
 
 ##################################################
@@ -752,19 +760,19 @@ Returns all the existing schools in the DB
 ##################################################
 @csrf_exempt
 def getSchools(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         schools = School.objects.all()
         schoolsList = changeSchoolsTemplateInList(schools)
 
         return JsonResponse(list(schoolsList), safe=False)
 
-    else: # request.method isn't GET
+    else:  # request.method isn't GET
         return JsonResponse(
-                    {
+            {
                         "Status": "getSchools() only accepts GET requests",
                     },
-                    status=500
-                )
+            status=500
+            )
 
 
 ##################################################
@@ -776,8 +784,8 @@ Returns school by name (if it exists in DB)
 ##################################################
 @csrf_exempt
 def getSchoolByName(request):
-    if request.method == "GET": 
-        schoolName = request.GET.get("name")    
+    if request.method == "GET":
+        schoolName = request.GET.get("name")
         print(schoolName)
 
         try:
@@ -786,19 +794,19 @@ def getSchoolByName(request):
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": f"School {schoolName} doesn't exist in DB"
-                    }, 
-                    status=500
-                )
+                    },
+                status=500
+            )
 
     return JsonResponse(
-                    {
+        {
                         "Status": "getSchoolByName() only accepts GET requests",
                     },
-                    status=500
-                )
+        status=500
+        )
 
 
 ##################################################
@@ -809,9 +817,9 @@ POST body example:
 {
   "subject":
       {
-          "name": "DNS"    
-      },          
-	"course": 
+          "name": "DNS"
+      },
+	"course":
 		{
 			"name" : "Computer Networks",
 		},
@@ -842,24 +850,24 @@ def setQuestion(request):
 
         elif isNewQuestionCreated == True:
             return JsonResponse(
-            {
+                {
                 "Status": "Question Created"
             }
-        )
+                )
 
         else:
             return JsonResponse(
-            {
+                {
                 "Status": "Question Already Exists"
             },
-            status=500
-        )
-    
+                status=500
+                )
+
     else:
         return JsonResponse(
             {
                 "Status": "setQuestion() only accepts POST requests"
-            }, 
+            },
             status=500
         )
 
@@ -873,29 +881,29 @@ GET params: body of question to delete
 ##################################################
 @csrf_exempt
 def deleteQuestion(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         questionBody = request.GET.get("body")
-    
+
         try:
             Question.objects.filter(body=questionBody).delete()
             return JsonResponse({"Status": f"Deleted Question '{questionBody}'"})
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": f"Can't delete question {questionBody}",
                     },
-                    status=500
-                )
-        
-    else:
-        return JsonResponse(
-                {
-                    "Status": "deleteQuestion() only accepts GET requests",
-                },
                 status=500
             )
+
+    else:
+        return JsonResponse(
+            {
+                    "Status": "deleteQuestion() only accepts GET requests",
+                },
+            status=500
+        )
 
 
 ##################################################
@@ -909,7 +917,7 @@ POST body example:
 			{
 				"name":"Computer Networks"
 			},
-	"ChangeSubject": 
+	"ChangeSubject":
 			{
 				"name": "DNS"
 			},
@@ -939,7 +947,7 @@ def editQuestion(request):
         requestBody = parseRequestBody(request)
 
         if 'body' not in requestBody.keys():
-            return JsonResponse({"Status":"Can't Edit Question: 'body' field in not in request body"}, status=500)
+            return JsonResponse({"Status": "Can't Edit Question: 'body' field in not in request body"}, status=500)
         body = requestBody['body']
 
         try:
@@ -951,37 +959,39 @@ def editQuestion(request):
 
                 ret_tuple = createCourseOrAddSubject(newCourse)
                 isCourseReturned = ret_tuple[0]
-                
+
                 if isCourseReturned is None:
-                    return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+                    return JsonResponse({"Status": ret_tuple[1]}, status=500)
 
                 courseObj = ret_tuple[1]
                 if courseObj.name != questionObj.course.name:
                     questionObj.course = courseObj
                     changedCourseFlg = True
-            
+
             # change the question's subject
             if 'ChangeSubject' in requestBody.keys():
                 newSubject = requestBody['ChangeSubject']
 
                 ret_tuple = createSubject(newSubject)
                 isSubjectReturned = ret_tuple[0]
-                
+
                 if isSubjectReturned is None:
-                    return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+                    return JsonResponse({"Status": ret_tuple[1]}, status=500)
 
                 subjectObj = ret_tuple[1]
                 if subjectObj.name != questionObj.subject.name:
                     questionObj.subject = subjectObj
                     changedSubjectFlg = True
-        
+
             # change the question's answers list
             if 'ChangeAnswers' in requestBody.keys():
                 oldAnswersList = questionObj.answers
                 newAnswersList = requestBody['ChangeAnswers']
 
-                filteredListNew = [string for string in newAnswersList if string not in oldAnswersList]
-                filteredListOld = [string for string in oldAnswersList if string not in newAnswersList]
+                filteredListNew = [
+                    string for string in newAnswersList if string not in oldAnswersList]
+                filteredListOld = [
+                    string for string in oldAnswersList if string not in newAnswersList]
                 if filteredListNew or filteredListOld:
                     questionObj.answers = newAnswersList
                     changedAnswersFlg = True
@@ -992,7 +1002,7 @@ def editQuestion(request):
                 if questionObj.correctAnswer != newCorrectAnswer:
                     questionObj.correctAnswer = newCorrectAnswer
                     changedCorrectAnswerFlg = True
-            
+
             if 'changeDifficulty' in requestBody.keys():
                 newDifficulty = int(requestBody['changeDifficulty'])
                 if questionObj.difficulty != newDifficulty:
@@ -1005,14 +1015,14 @@ def editQuestion(request):
                 if newBody != questionObj.body:
                     questionObj.body = newBody
                     changedBodyFlg = True
-            
+
             # if one of the question's fileds has been changed:
-            # delete the old question from db 
+            # delete the old question from db
             # try to create the new question
             # if successful, return
             # if not successful, save the old question back to the DB and return
             if changedCourseFlg == True or changedSubjectFlg == True or changedAnswersFlg == True or \
-                changedCorrectAnswerFlg == True or changedBodyFlg == True or changeDifficultyFlg == True:
+                    changedCorrectAnswerFlg == True or changedBodyFlg == True or changeDifficultyFlg == True:
 
                 Question.objects.filter(body=body).delete()
                 questionObj.save()
@@ -1038,7 +1048,7 @@ def editQuestion(request):
                 ret_json['Changed Correct Answer'] = "True"
             else:
                 ret_json['Changed Correct Answer'] = "False"
-            
+
             if changeDifficultyFlg == True:
                 ret_json['Changed Difficulty'] = "True"
             else:
@@ -1055,21 +1065,21 @@ def editQuestion(request):
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": "Can't Edit Question"
                     },
-                    status=500
-                )
-
+                status=500
+            )
 
     else:
         return JsonResponse(
             {
                 "Status": "editQuestion() only accepts POST requests"
-            }, 
+            },
             status=500
         )
+
 
 ##################################################
 '''
@@ -1080,19 +1090,19 @@ Returns all the existing questions in the DB
 ##################################################
 @csrf_exempt
 def getQuestions(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         questions = Question.objects.all()
         questionsList = changeQuestionsTemplateInList(questions)
 
         return JsonResponse(list(questionsList), safe=False)
 
-    else: # request.method isn't GET
+    else:  # request.method isn't GET
         return JsonResponse(
-                    {
+            {
                         "Status": "getSchools() only accepts GET requests",
                     },
-                    status=500
-                )
+            status=500
+            )
 
 
 ######################################################
@@ -1104,8 +1114,8 @@ Returns question by body (if it exists in DB)
 #####################################################
 @csrf_exempt
 def getQuestionByBody(request):
-    if request.method == "GET": 
-        questionBody = request.GET.get("body")    
+    if request.method == "GET":
+        questionBody = request.GET.get("body")
         print(questionBody)
 
         try:
@@ -1116,11 +1126,12 @@ def getQuestionByBody(request):
             return JsonResponse({"Status": f"Question {questionBody} doesn't exist in DB"}, status=500)
 
     return JsonResponse(
-                    {
+        {
                         "Status": "getQuestionByBody() only accepts GET requests",
                     },
-                    status=500
-                )
+        status=500
+        )
+
 
 ######################################################
 '''
@@ -1134,7 +1145,7 @@ POST body example:
     "Eliyahu Khelsatzchi",
     "Haim Shafir"
     ],
-    "course": 
+    "course":
         {
         "name" : "OOP"
         },
@@ -1143,7 +1154,7 @@ POST body example:
             "subject":
                 {
                     "name": "Object-Oriented Principles"
-                },          
+                },
             "body": "What is encapsulation?",
             "answers": [
                     "blah blah",
@@ -1154,15 +1165,15 @@ POST body example:
             "correctAnswer": 2
         }
     ],
-    "subjects":[ 
+    "subjects":[
         {
             "name": "Object-Oriented Principles"
         }
     ]
 }
-      
+
       no need to add 'subjects' to the request body,
-      server parses exam questions and adds each question subject to the exam subjects array 
+      server parses exam questions and adds each question subject to the exam subjects array
 '''
 #####################################################
 @csrf_exempt
@@ -1173,12 +1184,12 @@ def setExam(request):
 
         # name
         if 'name' not in body.keys():
-             return JsonResponse({ "Status": "Can't Create Exam - 'name' not specified"}, status=500)
+            return JsonResponse({"Status": "Can't Create Exam - 'name' not specified"}, status=500)
         name = body['name']
 
         # date
         if 'date' not in body.keys():
-             return JsonResponse({ "Status": "Can't Create Exam - 'date' not specified"}, status=500)
+            return JsonResponse({"Status": "Can't Create Exam - 'date' not specified"}, status=500)
         date = body['date']
         dateObj = datetime.strptime(date, "%d/%m/%y").date()
 
@@ -1198,13 +1209,13 @@ def setExam(request):
         except:
             # writers
             if 'writers' not in body.keys():
-                return JsonResponse({ "Status": "Can't Create Exam - 'date' not specified"}, status=500)
+                return JsonResponse({"Status": "Can't Create Exam - 'date' not specified"}, status=500)
             writers = list(body['writers'])
 
             # course
             if 'course' not in body.keys():
-                return JsonResponse({ "Status": "Can't Create Exam - 'course' not specified"},status=500)
-            course = body['course'] 
+                return JsonResponse({"Status": "Can't Create Exam - 'course' not specified"}, status=500)
+            course = body['course']
 
             if 'subjects' not in course.keys():
                 course['subjects'] = list()
@@ -1212,32 +1223,32 @@ def setExam(request):
             ret_tuple = createCourseOrAddSubject(course)
             isCourseReturned = ret_tuple[0]
             if isCourseReturned is None:
-                return JsonResponse({ "Status": "Can't Create Exam - " + ret_tuple[1] }, status=500)
+                return JsonResponse({"Status": "Can't Create Exam - " + ret_tuple[1]}, status=500)
             courseObj = ret_tuple[1]
 
             # subjects
             subjectsObjList = []
-            
+
             if 'subjects' in body.keys():
                 subjects = body['subjects']
-                
+
                 # for every subject in the requestBody, check if it exists in the DB
                 # if it doesn't, create it
                 for subject in subjects:
                     ret_tuple = createSubject(subject)
                     isSubjectRetured = ret_tuple[0]
                     if isSubjectRetured is None:
-                        return JsonResponse({ "Status": "Can't Create Exam - " + ret_tuple[1] }, status=500)
+                        return JsonResponse({"Status": "Can't Create Exam - " + ret_tuple[1]}, status=500)
 
                     subjectObj = ret_tuple[1]
                     subjectsObjList.append(subjectObj)
 
             # questions
             questionsObjList = []
-            
+
             if 'questions' in body.keys():
                 questions = body['questions']
-                
+
                 # for every question in the requestBody, check if it exists in the DB
                 # if it doesn't, create it
                 for question in questions:
@@ -1247,7 +1258,7 @@ def setExam(request):
                     ret_tuple = createQuestion(question)
                     isQuestionReturned = ret_tuple[0]
                     if isQuestionReturned is None:
-                        return JsonResponse({ "Status": "Can't Create Exam - " + ret_tuple[1] }, status=500)
+                        return JsonResponse({"Status": "Can't Create Exam - " + ret_tuple[1]}, status=500)
 
                     questionObj = ret_tuple[1]
                     questionsObjList.append(questionObj)
@@ -1258,22 +1269,21 @@ def setExam(request):
                         subjectsObjList.append(questionSubject)
                     if questionSubject.name not in [subject for subject in courseObj.subjects]:
                         course['subjects'].append(questionSubject.as_json())
-                
+
                 ret_tuple = createCourseOrAddSubject(course)
                 isCourseReturned = ret_tuple[0]
                 if isCourseReturned is None:
-                    return JsonResponse({ "Status": "Can't Create Exam - " + ret_tuple[1] }, status=500)
+                    return JsonResponse({"Status": "Can't Create Exam - " + ret_tuple[1]}, status=500)
                 courseObj = ret_tuple[1]
 
-            
             newExam = Exam(
                 examID=examID,
                 name=name,
-                date=dateObj, 
-                writers = writers,
-                course = courseObj,
-                questions = questionsObjList,
-                subjects = subjectsObjList
+                date=dateObj,
+                writers=writers,
+                course=courseObj,
+                questions=questionsObjList,
+                subjects=subjectsObjList
             )
             newExam.save()
 
@@ -1301,7 +1311,7 @@ method: POST
 	"ChangeWriters":[
 		"Eliav Menache"
 		],
-	"ChangeCourse": 
+	"ChangeCourse":
 		{
 			"name":"Computer Networks"
 		},
@@ -1338,10 +1348,10 @@ def editExam(request):
         body = parseRequestBody(request)
 
         if 'examID' not in body.keys():
-            return JsonResponse({"Status":"Can't Edit Exam: 'examID' field in not in request body"}, status=500)
+            return JsonResponse({"Status": "Can't Edit Exam: 'examID' field in not in request body"}, status=500)
         examID = body['examID']
 
-        try: 
+        try:
             examObj = Exam.objects.get(examID=examID)
 
             # change exam writers list
@@ -1349,28 +1359,30 @@ def editExam(request):
                 newWritersList = list(body['ChangeWriters'])
                 oldWritersList = examObj.writers
 
-                filteredListNew = [writer for writer in newWritersList if writer not in oldWritersList]
-                filteredListOld = [writer for writer in oldWritersList if writer not in newWritersList]
-                
+                filteredListNew = [
+                    writer for writer in newWritersList if writer not in oldWritersList]
+                filteredListOld = [
+                    writer for writer in oldWritersList if writer not in newWritersList]
+
                 if filteredListNew or filteredListOld:
                     examObj.writers = newWritersList
                     changedWritersFlg = True
-            
+
             # change exam course
             if 'ChangeCourse' in body.keys():
                 newCourse = body['ChangeCourse']
 
                 ret_tuple = createCourseOrAddSubject(newCourse)
                 isCourseReturned = ret_tuple[0]
-                
+
                 if isCourseReturned is None:
-                    return JsonResponse({ "Status": ret_tuple[1] }, status=500)
-                
+                    return JsonResponse({"Status": ret_tuple[1]}, status=500)
+
                 courseObj = ret_tuple[1]
                 if examObj.course.name != courseObj.name:
                     examObj.course = courseObj
                     changedCourseFlg = True
-            
+
             # add a new question
             if 'AddQuestions' in body.keys():
                 newQuestionsList = list(body['AddQuestions'])
@@ -1381,9 +1393,9 @@ def editExam(request):
 
                     if isNewQuestionCreated is None:
                         return JsonResponse({"Status": ret_tuple[1]}, status=500)
-            
+
                     questionObj = ret_tuple[1]
-                    
+
                     if questionObj.body not in [question.body for question in examObj.questions]:
                         examObj.questions.append(questionObj)
                         addedQuestionsFlg = True
@@ -1391,37 +1403,40 @@ def editExam(request):
                         # if the new question's subject is not in the exam subjects, add it
                         if questionObj.subject.name not in [subject.name for subject in examObj.subjects]:
                             examObj.subjects.append(questionObj.subject)
-                
+
             # delete a question
             if 'DeleteQuestions' in body.keys():
                 newQuestionsList = list(body['DeleteQuestions'])
 
                 for question in newQuestionsList:
                     try:
-                        questionObj = Question.objects.get(body=question['body'])
+                        questionObj = Question.objects.get(
+                            body=question['body'])
 
                         if questionObj.body in [question.body for question in examObj.questions]:
-                            examObj.questions = list(filter(lambda question:question.body!=questionObj.body, examObj.questions))
+                            examObj.questions = list(
+                                filter(lambda question: question.body != questionObj.body, examObj.questions))
                             deletedQuestionsFlg = True
 
                             # if the deleted question's subject is in the exam subjects,
-                            # and no other exam question is from this subject, 
+                            # and no other exam question is from this subject,
                             # delete the subject from the exam subjects
                             deletedQuestionSubject = questionObj.subject
                             if deletedQuestionSubject.name in [subject.name for subject in examObj.subjects] \
-                                and deletedQuestionSubject.name not in [question.subject.name for question in examObj.questions]:
-                                examObj.subjects = list(filter(lambda subject:subject.name != deletedQuestionSubject.name, examObj.subjects))
-                    
+                                    and deletedQuestionSubject.name not in [question.subject.name for question in examObj.questions]:
+                                examObj.subjects = list(filter(
+                                    lambda subject: subject.name != deletedQuestionSubject.name, examObj.subjects))
+
                     except:
                         questionToDeleteNotExistFlg = True
-            
+
             # change exam name
             if 'ChangeName' in body.keys():
                 newName = body['ChangeName']
                 if examObj.name != newName:
                     examObj.name = newName
                     changedNameFlg = True
-            
+
             # change exam date
             if 'ChangeDate' in body.keys():
                 newDate = body['ChangeDate']
@@ -1429,16 +1444,16 @@ def editExam(request):
                 if examObj.date != newDateObj:
                     examObj.date = newDateObj
                     changedDateFlg = True
-            
+
             if changedNameFlg == True or changedDateFlg == True:
                 newExamID = str(examObj.name) + "_" + str(examObj.date)
                 examObj.examID = newExamID
-            
+
             if changedNameFlg == True or changedDateFlg == True or changedCourseFlg == True \
-                or changedWritersFlg == True or addedQuestionsFlg == True or deletedQuestionsFlg == True:
+                    or changedWritersFlg == True or addedQuestionsFlg == True or deletedQuestionsFlg == True:
                 Exam.objects.filter(examID=examID).delete()
                 examObj.save()
-            
+
             ret_json = dict()
 
             if changedNameFlg == True:
@@ -1465,33 +1480,33 @@ def editExam(request):
                 ret_json['Added Questions'] = "True"
             else:
                 ret_json['Added Questions'] = "False"
-            
+
             if deletedQuestionsFlg == True:
                 ret_json['Deleted Questions'] = "True"
             else:
                 ret_json['Deleted Questions'] = "False"
-            
+
             if questionToDeleteNotExistFlg == True:
                 ret_json['Error'] = "Can't delete one or more of the questions to delete, becuse they don't exist"
-            
+
             return JsonResponse(ret_json)
-        
+
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": "Can't Edit Question"
                     },
-                    status=500
-                )
-
-    else: # request.method isn't POST
-        return JsonResponse(
-                {
-                    "Status": "editExam() only accepts POST requests",
-                },
                 status=500
             )
+
+    else:  # request.method isn't POST
+        return JsonResponse(
+            {
+                    "Status": "editExam() only accepts POST requests",
+                },
+            status=500
+        )
 
 
 ######################################################
@@ -1503,19 +1518,54 @@ Returns all the existing exams in the DB
 #####################################################
 @csrf_exempt
 def getExams(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         exams = Exam.objects.all()
         examsList = changeExamsTemplateInList(exams)
 
         return JsonResponse(list(examsList), safe=False)
 
-    else: # request.method isn't GET
+    else:  # request.method isn't GET
         return JsonResponse(
-                    {
+            {
                         "Status": "getExams() only accepts GET requests",
                     },
-                    status=500
-                )
+            status=500
+            )
+
+
+######################################################
+'''
+getExamsFromCourse()
+method: GET
+Returns all the existing exams in the DB
+'''
+#####################################################
+@csrf_exempt
+def getExamsFromCourse(request):
+    if request.method == "GET":
+        courseName = request.GET.get("courseName")
+        try: 
+            courseObj = Course.objects.get(name=courseName)
+
+            exams = Exam.objects.filter(course=courseObj)
+            examsList = changeExamsTemplateInList(exams)
+
+            return JsonResponse(list(examsList), safe=False)
+        
+        except Exception as e:
+            return JsonResponse({
+                "Error": str(e),
+                "Status": f"Can't get exams from course {courseName}"
+            })
+
+    else:  # request.method isn't GET
+        return JsonResponse(
+            {
+                        "Status": "getExams() only accepts GET requests",
+                    },
+            status=500
+            )
+
 
 ######################################################
 '''
@@ -1526,29 +1576,29 @@ GET params: examID of exam to delete
 #####################################################
 @csrf_exempt
 def deleteExam(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         examID = request.GET.get("examID")
-    
+
         try:
             Exam.objects.filter(examID=examID).delete()
             return JsonResponse({"Status": f"Deleted Exam '{examID}'"})
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": f"Can't delete exam {examID}",
                     },
-                    status=500
-                )
-        
-    else:
-        return JsonResponse(
-                {
-                    "Status": "deleteExam() only accepts GET requests",
-                },
                 status=500
             )
+
+    else:
+        return JsonResponse(
+            {
+                    "Status": "deleteExam() only accepts GET requests",
+                },
+            status=500
+        )
 
 
 ######################################################
@@ -1560,10 +1610,9 @@ Returns exam by its ID (if it exists in DB)
 #####################################################
 @csrf_exempt
 def getExamByID(request):
-    if request.method == "GET": 
-        examID = request.GET.get("examID")
-
+    if request.method == "GET":
         try:
+            examID = request.GET.get("examID")
             examObj = Exam.objects.get(examID=examID)
             return JsonResponse(changeExamTemplate(examObj))
 
@@ -1571,11 +1620,11 @@ def getExamByID(request):
             return JsonResponse({"Status": f"Exam {examID} doesn't exist in DB"}, status=500)
 
     return JsonResponse(
-                    {
+        {
                         "Status": "getExamByID() only accepts GET requests",
                     },
-                    status=500
-                )
+        status=500
+        )
 
 
 ######################################################
@@ -1611,7 +1660,7 @@ def setStudent(request):
         ret_list = getUserFields(body)
         if ret_list[0] is None:
             return JsonResponse({"Status": "Can't Create Student, " + str(ret_list[1])}, status=500)
-        
+
         first_name = ret_list[0]
         last_name = ret_list[1]
         email = ret_list[2]
@@ -1623,7 +1672,7 @@ def setStudent(request):
             return JsonResponse(
                 {
                     "Status": "Student Already Exists",
-                }, 
+                },
                 status=500
             )
 
@@ -1639,16 +1688,17 @@ def setStudent(request):
                     ret_tuple = createCourseOrAddSubject(doc)
                     isCourseReturned = ret_tuple[0]
                     if isCourseReturned is None:
-                        return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+                        return JsonResponse({"Status": ret_tuple[1]}, status=500)
                     course = ret_tuple[1]
                     coursesList.append(course)
-            
+
             for permission in permissions:
                 if permission not in PermissionEnum.choices():
                     status = f"Can't create student, permission {permission} is not allowed. Choose from PermissionEnum values"
                     return JsonResponse({"Status": status}, status=500)
 
-            newStudent = Student(first_name=first_name, last_name=last_name, email=email, permissions=permissions, relevantCourses=coursesList)
+            newStudent = Student(first_name=first_name, last_name=last_name,
+                                 email=email, permissions=permissions, relevantCourses=coursesList)
             newStudent.save()
 
             return JsonResponse(
@@ -1661,7 +1711,7 @@ def setStudent(request):
         return JsonResponse(
             {
                 "Status": "setStudent() only accepts POST requests"
-            }, 
+            },
             status=500
         )
 
@@ -1686,9 +1736,9 @@ def editStudent(request):
     if request.method == "POST":
         # decode request body
         body = parseRequestBody(request)
-        
+
         if 'email' not in body.keys():
-            return JsonResponse({"Status":"Can't Edit Student: 'email' field in not in request body"}, status=500)
+            return JsonResponse({"Status": "Can't Edit Student: 'email' field in not in request body"}, status=500)
         email = body['email']
 
         try:
@@ -1697,7 +1747,7 @@ def editStudent(request):
 
             if ret_list[0] is None:
                 return JsonResponse({"Status": ret_list[1]})
-            
+
             newStudentObj = ret_list[0]
             changedEmailFlg = ret_list[1]
             changedFirstNameFlg = ret_list[2]
@@ -1707,25 +1757,29 @@ def editStudent(request):
             ret_json = dict()
 
             if changedFirstNameFlg == True:
-                Student.objects.filter(email=email).update(first_name=newStudentObj.first_name)
+                Student.objects.filter(email=email).update(
+                    first_name=newStudentObj.first_name)
                 ret_json['Changed First Name'] = "True"
             else:
                 ret_json['Changed First Name'] = "False"
-                
+
             if changedLastNameFlg == True:
-                Student.objects.filter(email=email).update(last_name=newStudentObj.last_name)
+                Student.objects.filter(email=email).update(
+                    last_name=newStudentObj.last_name)
                 ret_json['Changed Last Name'] = "True"
             else:
                 ret_json['Changed Last Name'] = "False"
-            
+
             if changedPermissionsFlag == True:
-                Student.objects.filter(email=email).update(permissions=newStudentObj.permissions)
+                Student.objects.filter(email=email).update(
+                    permissions=newStudentObj.permissions)
                 ret_json['Changed Permissions'] = "True"
             else:
                 ret_json['Changed Permissions'] = "False"
 
             if changedEmailFlg == True:
-                Student.objects.filter(email=email).update(email=newStudentObj.email)
+                Student.objects.filter(email=email).update(
+                    email=newStudentObj.email)
                 ret_json['Changed Email'] = "True"
             else:
                 ret_json['Changed Email'] = "False"
@@ -1734,13 +1788,13 @@ def editStudent(request):
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": "Can't Edit Student"
                     },
-                    status=500
-                )
-    
+                status=500
+            )
+
     else:
         return JsonResponse(
             {
@@ -1748,6 +1802,7 @@ def editStudent(request):
             },
             status=500
         )
+
 
 ######################################################
 '''
@@ -1758,19 +1813,20 @@ Returns all the existing students in the DB
 #####################################################
 @csrf_exempt
 def getStudents(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         students = Student.objects.all()
         studentsList = [student.as_json() for student in students]
 
         return JsonResponse(list(studentsList), safe=False)
 
-    else: # request.method isn't GET
+    else:  # request.method isn't GET
         return JsonResponse(
-                    {
+            {
                         "Status": "getStudents() only accepts GET requests",
-                    }, 
-                    status=500
-                )
+                    },
+            status=500
+            )
+
 
 ######################################################
 '''
@@ -1781,29 +1837,30 @@ GET params: email of student to delete
 #####################################################
 @csrf_exempt
 def deleteStudent(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         email = request.GET.get("email")
-    
+
         try:
             Student.objects.filter(email=email).delete()
             return JsonResponse({"Status": f"Deleted Student '{email}'"})
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": f"Can't delete student {email}",
                     },
-                    status=500
-                )
-        
-    else:
-        return JsonResponse(
-                {
-                    "Status": "deleteStudent() only accepts GET requests",
-                },
                 status=500
             )
+
+    else:
+        return JsonResponse(
+            {
+                    "Status": "deleteStudent() only accepts GET requests",
+                },
+            status=500
+        )
+
 
 ######################################################
 '''
@@ -1814,7 +1871,7 @@ Returns student by its email (if it exists in DB)
 #####################################################
 @csrf_exempt
 def getStudentByEmail(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         email = request.GET.get("email")
 
         try:
@@ -1825,11 +1882,12 @@ def getStudentByEmail(request):
             return JsonResponse({"Status": f"Student {email} doesn't exist in DB"}, status=500)
 
     return JsonResponse(
-                    {
+        {
                         "Status": "getStudentByEmail() only accepts GET requests",
                     },
-                    status=500
-                )
+        status=500
+        )
+
 
 ######################################################
 '''
@@ -1864,7 +1922,7 @@ def setLecturer(request):
         ret_list = getUserFields(body)
         if ret_list[0] is None:
             return JsonResponse({"Status": "Can't Create Lecturer, " + str(ret_list[1])}, status=500)
-        
+
         first_name = ret_list[0]
         last_name = ret_list[1]
         email = ret_list[2]
@@ -1876,7 +1934,7 @@ def setLecturer(request):
             return JsonResponse(
                 {
                     "Status": "Lecturer Already Exists",
-                }, 
+                },
                 status=500
             )
 
@@ -1892,7 +1950,7 @@ def setLecturer(request):
                     ret_tuple = createCourseOrAddSubject(doc)
                     isCourseReturned = ret_tuple[0]
                     if isCourseReturned is None:
-                        return JsonResponse({ "Status": ret_tuple[1] }, status=500)
+                        return JsonResponse({"Status": ret_tuple[1]}, status=500)
                     courseObj = ret_tuple[1]
                     coursesList.append(courseObj)
 
@@ -1901,7 +1959,8 @@ def setLecturer(request):
                     status = f"Can't create Lecturer, permission {permission} is not allowed. Choose from PermissionEnum values"
                     return JsonResponse({"Status": status}, status=500)
 
-            newLecturer = Lecturer(first_name=first_name, last_name=last_name, email=email, permissions=permissions, coursesTeaching=coursesList)
+            newLecturer = Lecturer(first_name=first_name, last_name=last_name,
+                                   email=email, permissions=permissions, coursesTeaching=coursesList)
             newLecturer.save()
 
             return JsonResponse(
@@ -1914,7 +1973,7 @@ def setLecturer(request):
         return JsonResponse(
             {
                 "Status": "setLecturer() only accepts POST requests"
-            }, 
+            },
             status=500
         )
 
@@ -1933,15 +1992,15 @@ def setLecturer(request):
 		]
 }
 '''
-######################################################
+########################################################
 @csrf_exempt
 def editLecturer(request):
     if request.method == "POST":
         # decode request body
         body = parseRequestBody(request)
-        
+
         if 'email' not in body.keys():
-            return JsonResponse({"Status":"Can't Edit Lecturer: 'email' field in not in request body"}, status=500)
+            return JsonResponse({"Status": "Can't Edit Lecturer: 'email' field in not in request body"}, status=500)
         email = body['email']
 
         try:
@@ -1950,7 +2009,7 @@ def editLecturer(request):
 
             if ret_list[0] is None:
                 return JsonResponse({"Status": ret_list[1]})
-            
+
             newLecturerObj = ret_list[0]
             changedEmailFlg = ret_list[1]
             changedFirstNameFlg = ret_list[2]
@@ -1960,25 +2019,29 @@ def editLecturer(request):
             ret_json = dict()
 
             if changedFirstNameFlg == True:
-                Lecturer.objects.filter(email=email).update(first_name=newLecturerObj.first_name)
+                Lecturer.objects.filter(email=email).update(
+                    first_name=newLecturerObj.first_name)
                 ret_json['Changed First Name'] = "True"
             else:
                 ret_json['Changed First Name'] = "False"
-                
+
             if changedLastNameFlg == True:
-                Lecturer.objects.filter(email=email).update(last_name=newLecturerObj.last_name)
+                Lecturer.objects.filter(email=email).update(
+                    last_name=newLecturerObj.last_name)
                 ret_json['Changed Last Name'] = "True"
             else:
                 ret_json['Changed Last Name'] = "False"
-            
+
             if changedPermissionsFlag == True:
-                Lecturer.objects.filter(email=email).update(permissions=newLecturerObj.permissions)
+                Lecturer.objects.filter(email=email).update(
+                    permissions=newLecturerObj.permissions)
                 ret_json['Changed Permissions'] = "True"
             else:
                 ret_json['Changed Permissions'] = "False"
 
             if changedEmailFlg == True:
-                Lecturer.objects.filter(email=email).update(email=newLecturerObj.email)
+                Lecturer.objects.filter(email=email).update(
+                    email=newLecturerObj.email)
                 ret_json['Changed Email'] = "True"
             else:
                 ret_json['Changed Email'] = "False"
@@ -1987,13 +2050,13 @@ def editLecturer(request):
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": "Can't Edit Lecturer"
                     },
-                    status=500
-                )
-    
+                status=500
+            )
+
     else:
         return JsonResponse(
             {
@@ -2001,6 +2064,7 @@ def editLecturer(request):
             },
             status=500
         )
+
 
 ######################################################
 '''
@@ -2011,29 +2075,30 @@ GET params: email of lecturer to delete
 #####################################################
 @csrf_exempt
 def deleteLecturer(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         email = request.GET.get("email")
-    
+
         try:
             Lecturer.objects.filter(email=email).delete()
             return JsonResponse({"Status": f"Deleted Lecturer '{email}'"})
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": f"Can't delete lecturer {email}",
                     },
-                    status=500
-                )
-        
-    else:
-        return JsonResponse(
-                {
-                    "Status": "deleteLecturer() only accepts GET requests",
-                },
                 status=500
             )
+
+    else:
+        return JsonResponse(
+            {
+                    "Status": "deleteLecturer() only accepts GET requests",
+                },
+            status=500
+        )
+
 
 ######################################################
 '''
@@ -2044,19 +2109,19 @@ Returns all the existing lecturers in the DB
 #####################################################
 @csrf_exempt
 def getLecturers(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         lecturers = Lecturer.objects.all()
         lecturersList = [lecturer.as_json() for lecturer in lecturers]
 
         return JsonResponse(list(lecturersList), safe=False)
 
-    else: # request.method isn't GET
+    else:  # request.method isn't GET
         return JsonResponse(
-                    {
+            {
                         "Status": "getLecturers() only accepts GET requests",
-                    }, 
-                    status=500
-                )
+                    },
+            status=500
+            )
 
 
 ######################################################
@@ -2068,7 +2133,7 @@ Returns lecturer by its email (if it exists in DB)
 #####################################################
 @csrf_exempt
 def getLecturerByEmail(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         email = request.GET.get("email")
 
         try:
@@ -2079,11 +2144,11 @@ def getLecturerByEmail(request):
             return JsonResponse({"Status": f"Lecturer {email} doesn't exist in DB"}, status=500)
 
     return JsonResponse(
-                    {
+        {
                         "Status": "getLecturerByEmail() only accepts GET requests",
                     },
-                    status=500
-                )
+        status=500
+        )
 
 
 ###################################################
@@ -2101,7 +2166,7 @@ POST body example:
 	]
 }
 '''
-####################################################3
+# 3
 @csrf_exempt
 def setAdmin(request):
     if request.method == "POST":
@@ -2111,7 +2176,7 @@ def setAdmin(request):
         ret_list = getUserFields(body)
         if ret_list[0] is None:
             return JsonResponse({"Status": "Can't Create Admin, " + str(ret_list[1])}, status=500)
-        
+
         first_name = ret_list[0]
         last_name = ret_list[1]
         email = ret_list[2]
@@ -2123,7 +2188,7 @@ def setAdmin(request):
             return JsonResponse(
                 {
                     "Status": "Admin Already Exists",
-                }, 
+                },
                 status=500
             )
 
@@ -2133,7 +2198,8 @@ def setAdmin(request):
                     status = f"Can't create Admin, permission {permission} is not allowed. Choose from PermissionEnum values"
                     return JsonResponse({"Status": status}, status=500)
 
-            newAdmin = Admin(first_name=first_name, last_name=last_name, email=email, permissions=permissions)
+            newAdmin = Admin(first_name=first_name, last_name=last_name,
+                             email=email, permissions=permissions)
             newAdmin.save()
 
             return JsonResponse(
@@ -2146,7 +2212,7 @@ def setAdmin(request):
         return JsonResponse(
             {
                 "Status": "setAdmin() only accepts POST requests"
-            }, 
+            },
             status=500
         )
 
@@ -2171,9 +2237,9 @@ def editAdmin(request):
     if request.method == "POST":
         # decode request body
         body = parseRequestBody(request)
-        
+
         if 'email' not in body.keys():
-            return JsonResponse({"Status":"Can't Edit Admin: 'email' field in not in request body"}, status=500)
+            return JsonResponse({"Status": "Can't Edit Admin: 'email' field in not in request body"}, status=500)
         email = body['email']
 
         try:
@@ -2182,7 +2248,7 @@ def editAdmin(request):
 
             if ret_list[0] is None:
                 return JsonResponse({"Status": ret_list[1]})
-            
+
             newAdminObj = ret_list[0]
             changedEmailFlg = ret_list[1]
             changedFirstNameFlg = ret_list[2]
@@ -2190,27 +2256,30 @@ def editAdmin(request):
             changedPermissionsFlag = ret_list[4]
 
             ret_json = dict()
-
             if changedFirstNameFlg == True:
-                Admin.objects.filter(email=email).update(first_name=newAdminObj.first_name)
+                Admin.objects.filter(email=email).update(
+                    first_name=newAdminObj.first_name)
                 ret_json['Changed First Name'] = "True"
             else:
                 ret_json['Changed First Name'] = "False"
-                
+
             if changedLastNameFlg == True:
-                Admin.objects.filter(email=email).update(last_name=newAdminObj.last_name)
+                Admin.objects.filter(email=email).update(
+                    last_name=newAdminObj.last_name)
                 ret_json['Changed Last Name'] = "True"
             else:
                 ret_json['Changed Last Name'] = "False"
-            
+
             if changedPermissionsFlag == True:
-                Admin.objects.filter(email=email).update(permissions=newAdminObj.permissions)
+                Admin.objects.filter(email=email).update(
+                    permissions=newAdminObj.permissions)
                 ret_json['Changed Permissions'] = "True"
             else:
                 ret_json['Changed Permissions'] = "False"
 
             if changedEmailFlg == True:
-                Admin.objects.filter(email=email).update(email=newAdminObj.email)
+                Admin.objects.filter(email=email).update(
+                    email=newAdminObj.email)
                 ret_json['Changed Email'] = "True"
             else:
                 ret_json['Changed Email'] = "False"
@@ -2219,13 +2288,13 @@ def editAdmin(request):
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": "Can't Edit Admin"
                     },
-                    status=500
-                )
-    
+                status=500
+            )
+
     else:
         return JsonResponse(
             {
@@ -2244,19 +2313,19 @@ Returns all the existing admins in the DB
 ##################################################
 @csrf_exempt
 def getAdmins(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         admins = Admin.objects.all()
         adminsList = [admin.as_json() for admin in admins]
 
         return JsonResponse(list(adminsList), safe=False)
 
-    else: # request.method isn't GET
+    else:  # request.method isn't GET
         return JsonResponse(
-                    {
+            {
                         "Status": "getAdmins() only accepts GET requests",
-                    }, 
-                    status=500
-                )
+                    },
+            status=500
+            )
 
 
 ######################################################
@@ -2268,29 +2337,30 @@ GET params: email of admin to delete
 #####################################################
 @csrf_exempt
 def deleteAdmin(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         email = request.GET.get("email")
-    
+
         try:
             Admin.objects.filter(email=email).delete()
             return JsonResponse({"Status": f"Deleted Admin '{email}'"})
 
         except Exception as e:
             return JsonResponse(
-                    {
+                {
                         "Exception": str(e),
                         "Status": f"Can't delete admin {email}",
                     },
-                    status=500
-                )
-        
-    else:
-        return JsonResponse(
-                {
-                    "Status": "deleteAdmin() only accepts GET requests",
-                },
                 status=500
             )
+
+    else:
+        return JsonResponse(
+            {
+                    "Status": "deleteAdmin() only accepts GET requests",
+                },
+            status=500
+        )
+
 
 ######################################################
 '''
@@ -2301,7 +2371,7 @@ Returns admin by its email (if it exists in DB)
 #####################################################
 @csrf_exempt
 def getAdminByEmail(request):
-    if request.method == "GET": 
+    if request.method == "GET":
         email = request.GET.get("email")
 
         try:
@@ -2312,8 +2382,8 @@ def getAdminByEmail(request):
             return JsonResponse({"Status": f"Admin {email} doesn't exist in DB"}, status=500)
 
     return JsonResponse(
-                    {
+        {
                         "Status": "getAdminByEmail() only accepts GET requests",
                     },
-                    status=500
-                )
+        status=500
+        )

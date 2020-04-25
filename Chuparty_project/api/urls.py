@@ -36,6 +36,7 @@ urlpatterns = [
     path('setExam', views.setExam),
     path('editExam', views.editExam),
     path('getExams', views.getExams),
+    path('getExamsFromCourse', views.getExamsFromCourse),
     path('getExamByID', views.getExamByID),
     path('deleteExam', views.deleteExam),
 
