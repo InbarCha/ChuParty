@@ -39,10 +39,10 @@ export default class Courses extends Component {
     let content = [];
     let columns = [];
 
-    this.state.courses.forEach((elm, index) => {
+    this.state.courses.map((elm, index) => {
       let courseName = Object.keys(elm)[0];
       let newCourse = (
-        <Col md={4} key={index}>
+        <Col md={4} lg={3} key={index}>
           <div
             className={"course col-centered"}
             onClick={this.chooseActiveCourse.bind(this, courseName)}
@@ -64,11 +64,7 @@ export default class Courses extends Component {
         </Col>
       );
 
-      columns.push(newCourse);
-      if ((index + 1) % 3 === 0 || index === this.state.courses.length - 1) {
-        content.push(<Row key={uuid()}>{columns}</Row>);
-        columns = [];
-      }
+      content.push(newCourse);
     });
 
     return content;
@@ -78,11 +74,15 @@ export default class Courses extends Component {
     let res =
       this.state.courses !== null ? (
         <React.Fragment>
-          <div className="active_course">
-            {" "}
-            Active Course: {this.state.activeCourse}{" "}
-          </div>
-          <Container fluid>{this.getCoursesArr()}</Container>
+          {this.state.activeCourse !== "" && (
+            <React.Fragment>
+              <div className="active_model_title">Active Course:</div>
+              <div className="active_model"> {this.state.activeCourse} </div>
+            </React.Fragment>
+          )}
+          <Container fluid>
+            <Row>{this.getCoursesArr()}</Row>
+          </Container>
         </React.Fragment>
       ) : (
         <div>

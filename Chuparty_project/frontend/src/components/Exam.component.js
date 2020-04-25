@@ -5,8 +5,12 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
   console.log("DEV enabled");
 const EXAMS_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
-    ? "http://localhost:8000/api/getExamsFromCourse"
+    ? "http://localhost:8000/api/getExams"
     : "/api/getExams";
+const EXAMS_FROM_COURSE_ROUTE =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/getExamsFromCourse?courseName="
+    : "/api/getExams/getExamsFromCourse?courseName=";
 
 export default class Exam extends Component {
   constructor() {
@@ -18,15 +22,23 @@ export default class Exam extends Component {
   }
 
   componentDidMount() {
-    // courses should look like the following:
-    // [{"OOP": {subjects: ["Object-Oriented Principles"]}}, ...]
-    fetch(EXAMS_ROUTE + "?courseName=" + this.state.activeCourse)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        this.setState({ exams: data });
-      })
-      .catch((err) => console.error("error while fetching exmas:", err));
+    if (this.state.activeCourse !== "") {
+      fetch(EXAMS_FROM_COURSE_ROUTE + this.state.activeCourse)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+          this.setState({ exams: data });
+        })
+        .catch((err) => console.error("error while fetching exmas:", err));
+    } else {
+      fetch(EXAMS_ROUTE)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+          this.setState({ exams: data });
+        })
+        .catch((err) => console.error("error while fetching exmas:", err));
+    }
   }
 
   getExamsArr = () => {};
@@ -35,10 +47,16 @@ export default class Exam extends Component {
     let res =
       this.state.exams !== null ? (
         <React.Fragment>
-          <div className="active_course">
-            Exams <br />
-            Course: {this.state.activeCourse}
-          </div>
+          {this.state.activeCourse !== "" && (
+            <div className="active_model_title">
+              <div style={{ fontSize: "xx-large" }}> Exams </div>
+              <span style={{ fontStyle: "italic", fontSize: "large" }}>
+                {" "}
+                Course:
+              </span>
+              <span className="active_model"> {this.state.activeCourse}</span>
+            </div>
+          )}
           <Container fluid>{this.getExamsArr()}</Container>
         </React.Fragment>
       ) : (
