@@ -42,24 +42,35 @@ export default class Courses extends Component {
     this.state.courses.map((elm, index) => {
       let courseName = Object.keys(elm)[0];
       let newCourse = (
-        <Col md={4} lg={3} key={index}>
+        <Col sm={6} md={4} lg={3} key={index}>
           <div
             className={"course col-centered"}
             onClick={this.chooseActiveCourse.bind(this, courseName)}
             key={index}
           >
-            <div className="subject_name"> {courseName} </div>
-            {elm[courseName]["subjects"].length >= 1 && (
-              <div className="subjects_container">
-                {elm[courseName]["subjects"].map((elm, j_index) => {
-                  return (
-                    <div className="subject_container" key={j_index}>
-                      {elm}
-                    </div>
-                  );
-                })}
+            <div className="course_container">
+              <div className="course_name">
+                <img
+                  src={require("../assets/course.png")}
+                  width="50%"
+                  height="50%"
+                />
+                <div style={{ fontSize: "x-large", fontWeight: "bold" }}>
+                  {courseName}
+                </div>
               </div>
-            )}
+              {elm[courseName]["subjects"].length >= 1 && (
+                <div className="subjects_container">
+                  {elm[courseName]["subjects"].map((elm, j_index) => {
+                    return (
+                      <div className="subject_container" key={j_index}>
+                        {elm}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </Col>
       );
