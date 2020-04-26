@@ -3,10 +3,11 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Searchbar from "./Searchbar.component";
 import Sidebar from "./Sidebar.component";
 import Main from "./Main.component";
-import Courses from "./Courses.component";
-import Exam from "./Exam.component";
+import Courses from "./Courses/Courses.component";
+import Exams from "./Exams/Exams.component";
 import Feedback from "./Feedback.component";
 import Admin from "./Admin.component";
+import Questions from "./Questions/Questions.component";
 
 export default class Home extends Component {
   constructor() {
@@ -30,8 +31,15 @@ export default class Home extends Component {
           ),
         });
         break;
-      case "EXAM":
-        this.setState({ currentContentView: <Exam /> });
+      case "EXAMS":
+        this.setState({
+          currentContentView: (
+            <Exams parentClickHandler={this.onSideBarClick} />
+          ),
+        });
+        break;
+      case "QUESTIONS":
+        this.setState({ currentContentView: <Questions /> });
         break;
       case "FEEDBACK":
         this.setState({ currentContentView: <Feedback /> });

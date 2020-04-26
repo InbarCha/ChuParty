@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row } from "react-bootstrap";
+import Course from "./Course.component";
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
   console.log("DEV enabled");
@@ -31,42 +32,19 @@ export default class Courses extends Component {
   chooseActiveCourse = (courseName) => {
     localStorage["activeCourse"] = courseName;
     this.setState({ activeCourse: courseName });
-    this.props.parentClickHandler("EXAM");
+    this.props.parentClickHandler("EXAMS");
   };
 
   getCoursesArr() {
     let content = [];
 
     this.state.courses.forEach((elm, index) => {
-      let courseName = Object.keys(elm)[0];
       let newCourse = (
-        <Col xs={12} sm={12} md={6} lg={4} xl={3} key={index}>
-          <div
-            className={"model col-centered"}
-            onClick={this.chooseActiveCourse.bind(this, courseName)}
-            key={index}
-          >
-            <div className="model_container">
-              <div className="model_name">
-                <img className="course_img" alt="" />
-                <div style={{ fontSize: "x-large", fontWeight: "bold" }}>
-                  {courseName}
-                </div>
-              </div>
-              {elm[courseName]["subjects"].length >= 1 && (
-                <div className="details_container">
-                  {elm[courseName]["subjects"].map((elm, j_index) => {
-                    return (
-                      <div className="detail_container" key={j_index}>
-                        {elm}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-        </Col>
+        <Course
+          course={elm}
+          key={index}
+          chooseActiveCourse={this.chooseActiveCourse}
+        />
       );
 
       content.push(newCourse);

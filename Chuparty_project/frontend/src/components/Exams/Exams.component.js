@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row } from "react-bootstrap";
+import Exam from "./Exam.component";
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
   console.log("DEV enabled");
@@ -12,7 +13,7 @@ const EXAMS_FROM_COURSE_ROUTE =
     ? "http://localhost:8000/api/getExamsFromCourse?courseName="
     : "/api/getExams/getExamsFromCourse?courseName=";
 
-export default class Exam extends Component {
+export default class Exams extends Component {
   constructor() {
     super();
     this.state = {
@@ -41,54 +42,18 @@ export default class Exam extends Component {
     }
   }
 
-  chooseExam = () => {};
-
   getExamsArr = () => {
     let content = [];
 
     this.state.exams.forEach((elm, index) => {
-      let examID = Object.keys(elm)[0];
-      let examName = elm[examID]["name"];
-      let examDate = elm[examID]["date"];
-      let writers = elm[examID]["writers"];
-      let questions = elm[examID]["questions"];
-      let subjects = elm[examID]["subjects"];
-
       let newExam = (
-        <Col xs={12} sm={12} md={6} lg={4} xl={3} key={index}>
-          <div
-            className={"model col-centered"}
-            onClick={this.chooseExam.bind(this, examID)}
-            key={index}
-          >
-            <div className="model_container">
-              <div className="model_name">
-                <img className="exam_img" alt="" />
-                <div style={{ fontSize: "x-large", fontWeight: "bold" }}>
-                  {examName} <br /> {examDate}
-                </div>
-              </div>
-              <div className="details_container">
-                <div className="detail_container">
-                  <span style={{ fontStyle: "italic" }}>Exam Writers:</span>
-                  {" " + writers}
-                </div>
-                <div className="detail_container">
-                  <span style={{ fontStyle: "italic" }}>
-                    Number of Questions:
-                  </span>
-                  {" " + questions.length}
-                </div>
-                <div className="detail_container">
-                  <span style={{ fontStyle: "italic" }}>Subjects:</span>
-                  {" " + subjects}
-                </div>
-              </div>
-            </div>
-          </div>
-        </Col>
+        <Exam
+          parentClickHandler={this.props.parentClickHandler}
+          exam={elm}
+          key={index}
+          chooseExam={this.chooseExam}
+        />
       );
-
       content.push(newExam);
     });
 
