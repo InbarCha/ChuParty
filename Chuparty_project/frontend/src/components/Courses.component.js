@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import uuid from "react-uuid";
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
   console.log("DEV enabled");
@@ -37,33 +36,28 @@ export default class Courses extends Component {
 
   getCoursesArr() {
     let content = [];
-    let columns = [];
 
-    this.state.courses.map((elm, index) => {
+    this.state.courses.forEach((elm, index) => {
       let courseName = Object.keys(elm)[0];
       let newCourse = (
-        <Col sm={6} md={4} lg={3} key={index}>
+        <Col xs={12} sm={12} md={6} lg={4} xl={3} key={index}>
           <div
-            className={"course col-centered"}
+            className={"model col-centered"}
             onClick={this.chooseActiveCourse.bind(this, courseName)}
             key={index}
           >
-            <div className="course_container">
-              <div className="course_name">
-                <img
-                  src={require("../assets/course.png")}
-                  width="50%"
-                  height="50%"
-                />
+            <div className="model_container">
+              <div className="model_name">
+                <img className="course_img" alt="" />
                 <div style={{ fontSize: "x-large", fontWeight: "bold" }}>
                   {courseName}
                 </div>
               </div>
               {elm[courseName]["subjects"].length >= 1 && (
-                <div className="subjects_container">
+                <div className="details_container">
                   {elm[courseName]["subjects"].map((elm, j_index) => {
                     return (
-                      <div className="subject_container" key={j_index}>
+                      <div className="detail_container" key={j_index}>
                         {elm}
                       </div>
                     );
@@ -85,10 +79,15 @@ export default class Courses extends Component {
     let res =
       this.state.courses !== null ? (
         <React.Fragment>
+          <div className="page_title"> Courses </div>
           {this.state.activeCourse !== "" && (
             <React.Fragment>
-              <div className="active_model_title">Active Course:</div>
-              <div className="active_model"> {this.state.activeCourse} </div>
+              <div className="active_model_title">
+                <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
+                  Active Course:{" "}
+                </span>
+                <span className="active_model">{this.state.activeCourse}</span>
+              </div>
             </React.Fragment>
           )}
           <Container fluid>

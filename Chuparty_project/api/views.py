@@ -1162,7 +1162,8 @@ POST body example:
                     "bundling of data with the methods that operate on that data",
                     "blu blue"
                 ],
-            "correctAnswer": 2
+            "correctAnswer": 2,
+            "difficulty: 2
         }
     ],
     "subjects":[
