@@ -6,7 +6,7 @@ export class Course extends Component {
     let courseName = Object.keys(this.props.course)[0];
 
     return (
-      <Col xs={12} sm={12} md={6} lg={4} xl={3}>
+      <Col xs={12} sm={12} md={6} lg={4} xl={4}>
         <div
           className={"model col-centered"}
           onClick={this.props.chooseActiveCourse.bind(this, courseName)}

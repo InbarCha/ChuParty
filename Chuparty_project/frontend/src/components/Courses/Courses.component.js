@@ -68,7 +68,7 @@ export default class Courses extends Component {
               </div>
             </React.Fragment>
           )}
-          <Container fluid>
+          <Container fluid className="model_items_container">
             <Row>{this.getCoursesArr()}</Row>
           </Container>
         </React.Fragment>

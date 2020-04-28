@@ -73,7 +73,7 @@ export default class Exams extends Component {
               <span className="active_model"> {this.state.activeCourse}</span>
             </div>
           )}
-          <Container fluid>
+          <Container fluid className="model_items_container">
             <Row>{this.getExamsArr()}</Row>
           </Container>
         </React.Fragment>
