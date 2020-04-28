@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Container, Row } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
+import Question from "./Question.component";
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
   console.log("DEV enabled");
@@ -48,6 +49,32 @@ export class Questions extends Component {
     }
   };
 
+  getQuestions = () => {
+    let content = [];
+
+    this.state.questions.forEach((elm, index) => {
+      let body = Object.keys(elm)[0];
+      let answers = elm[body]["answers"];
+      let subject = elm[body]["subject"];
+      let correctAnswer = elm[body]["correctAnswer"];
+      let newQuestion = (
+        <Question
+          question={elm}
+          body={body}
+          answers={answers}
+          subject={subject}
+          correctAnswer={correctAnswer}
+          key={index}
+          index={index}
+        />
+      );
+
+      content.push(newQuestion);
+    });
+
+    return content;
+  };
+
   render() {
     return (
       <React.Fragment>
@@ -70,7 +97,15 @@ export class Questions extends Component {
             </div>
           </React.Fragment>
         )}
-        <Container fluid></Container>
+        <Container fluid>
+          {this.state.questions.length > 0 && (
+            <Row>
+              <Col md={{ span: 6, offset: 3 }} sm={{ span: 8, offset: 2 }}>
+                <div className="questions_form">{this.getQuestions()}</div>
+              </Col>
+            </Row>
+          )}
+        </Container>
       </React.Fragment>
     );
   }

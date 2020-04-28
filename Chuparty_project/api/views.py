@@ -817,21 +817,21 @@ POST body example:
 {
   "subject":
       {
-          "name": "DNS"
-      },
-	"course":
+          "name": "UDP"    
+      },          
+	"course": 
 		{
-			"name" : "Computer Networks",
+			"name" : "Computer Networks"
 		},
-   "body": "What is DNS?",
+   "body": "What is UDP?",
    "answers": [
-          "Domain Name Server",
-          "Desturction of Name Servers",
-          "Deduction of Native Services",
+          "bleh bel",
+          "bbbb",
+          "User Datagram Protocol",
           "Deformation of Name Servers"
       ],
-    "correctAnswer": 1,
-    "difficulty":3
+    "correctAnswer": 3,
+    "difficulty": 1
 }
 '''
 ##################################################
@@ -1308,7 +1308,7 @@ def setExam(request):
 editExam()
 method: POST
 {
-	"examID":"Computer Networks Exam_2019-07-15 00:00:00",
+	"examID":"Computer Networks Exam_2019-07-15",
 	"ChangeWriters":[
 		"Eliav Menache"
 		],

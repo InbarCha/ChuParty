@@ -132,7 +132,33 @@ form {
   padding-top: 30px;
   border-radius: 15px;
   overflow: hidden;
+  margin-left: 25px !important;
+  margin-right: 25px !important;
 }
+.questions_form {
+  background-color: rgb(208, 230, 243);
+  box-shadow: 0 0 3px 3px darkgray;
+  padding: 10px 10px 10px 10px;
+}
+.question_body {
+  font-size: large;
+  font-weight: bold;
+}
+.question_container {
+  box-shadow: 0 0 2px 2px darkgray;
+  padding: 10px 10px 10px 10px;
+  margin: 20px 20px 20px 20px;
+}
+.question_answers {
+  padding: 15px 15px 15px 15px;
+}
+.question_answer {
+  padding: 5px 5px 5px 5px;
+}
+.question_answer > span {
+  vertical-align: middle;
+}
+
 .model_container {
   background-color: rgb(156, 193, 218);
   border-radius: 15px;
