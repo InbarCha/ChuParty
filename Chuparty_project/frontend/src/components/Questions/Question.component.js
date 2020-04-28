@@ -10,7 +10,7 @@ export class Question extends Component {
           return (
             <div className="question_answer" key={uuid()}>
               <span className="material-icons">question_answer</span>{" "}
-              <span>{elm}</span>
+              <span style={{ paddingLeft: "1vw" }}>{elm}</span>
             </div>
           );
         })}

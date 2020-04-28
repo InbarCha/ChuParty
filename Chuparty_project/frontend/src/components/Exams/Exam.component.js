@@ -16,7 +16,7 @@ export class Exams extends Component {
     let subjects = this.props.exam[examID]["subjects"];
 
     return (
-      <Col xs={12} sm={12} md={6} lg={4} xl={4}>
+      <Col xs={12} sm={12} md={6} lg={6} xl={4}>
         <div className={"model col-centered"} onClick={this.chooseExam}>
           <div className="model_container">
             <div className="model_name">
