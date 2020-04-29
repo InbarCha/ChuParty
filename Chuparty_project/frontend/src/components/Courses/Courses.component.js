@@ -37,9 +37,15 @@ export default class Courses extends Component {
     this.props.parentClickHandler("EXAMS");
   };
 
-  changeCourse = (course, index) => {
+  changedCourse = (course, index) => {
     let courses = this.state.courses;
     courses[index] = course;
+
+    if (Object.keys(course)[0] !== this.state.activeCourse) {
+      localStorage["activeCourse"] = Object.keys(course)[0];
+      this.setState({ activeCourse: localStorage["activeCourse"] });
+    }
+
     this.setState({ courses: courses });
   };
 
@@ -66,8 +72,9 @@ export default class Courses extends Component {
             key={index}
             index={index}
             course={course_copy}
+            course_orig={course_orig}
             changeCourseComponent={this.changeCourseComponent}
-            changeCourse={this.changeCourse}
+            changedCourse={this.changedCourse}
           />
         );
         break;

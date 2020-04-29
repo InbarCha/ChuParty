@@ -26,7 +26,7 @@ export class EditCourse extends Component {
 
     //save changes to course_orig
     let course = this.state.course;
-    this.props.changeCourse(course, this.props.index);
+    this.props.changedCourse(course, this.props.index);
 
     this.props.changeCourseComponent(this.props.index, "COURSE");
   };
@@ -44,6 +44,20 @@ export class EditCourse extends Component {
     course[courseName]["subjects"][index] = newVal;
 
     this.setState({ course: course });
+  };
+
+  courseNameChanged = (e) => {
+    let newVal = e.target.value;
+
+    let course = { ...this.state.course };
+    let oldCourseName = Object.keys(course)[0];
+
+    let newCourse = {};
+    newCourse[newVal] = {};
+    newCourse[newVal]["subjects"] = course[oldCourseName]["subjects"];
+
+    this.setState({ course: newCourse });
+    console.log(Object.keys(this.state.course)[0]);
   };
 
   addSubject = (e) => {
@@ -95,6 +109,7 @@ export class EditCourse extends Component {
                     defaultValue={courseName}
                     name={courseName + "_edit"}
                     className="courseName_edit_input"
+                    onChange={(e) => this.courseNameChanged(e)}
                   />
                 </div>
               </div>
@@ -113,7 +128,7 @@ export class EditCourse extends Component {
                         <div className="detail_container" key={j_index}>
                           <input
                             type="text"
-                            placeholder={elm}
+                            value={elm}
                             name={elm + "_edit"}
                             className="subject_edit_input"
                             onChange={(e) => this.subjectChanged(e, j_index)}
