@@ -138,10 +138,16 @@ form {
   padding-left: 8vw;
   padding-right: 8vw;
 }
-.settings_icon {
+.settings_icon,
+.save_icon {
   float: right;
 }
-.settings_icon:hover {
+.delete_icon {
+  float: left;
+}
+.settings_icon:hover,
+.save_icon:hover,
+.delete_icon:hover {
   cursor: pointer;
 }
 .questions_form {
@@ -194,6 +200,13 @@ form {
   height: 50%;
   content: url("./assets/course.png");
 }
+.edit_img {
+  padding-top: 1.2vw;
+  padding-bottom: 1vw;
+  width: 40%;
+  height: 40%;
+  content: url("./assets/edit.png");
+}
 .exam_img {
   width: 80%;
   height: 80%;
@@ -231,4 +244,19 @@ nav {
   position: fixed;
   top: 0;
   z-index: 1;
+}
+.bounce_div {
+  height: 100%;
+}
+
+.subject_edit_input,
+.courseName_edit_input {
+  text-align: center;
+  border-radius: 7px;
+}
+.subject_edit_input {
+  background-color: rgb(231, 227, 227);
+}
+.courseName_edit_input {
+  background-color: rgb(216, 214, 214);
 }

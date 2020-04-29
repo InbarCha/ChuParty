@@ -1,50 +1,65 @@
 import React, { Component } from "react";
 import { Col } from "react-bootstrap";
+import { bounce } from "react-animations";
+import styled, { keyframes } from "styled-components";
+
+const Bounce = styled.div`
+  animation: 2s ${keyframes`${bounce}`};
+`;
 
 export class Course extends Component {
-  editCourse = (e, courseName) => {
+  editCourse = (e) => {
     e.stopPropagation();
-    console.log("edit course: " + courseName);
+    this.props.changeCourseComponent(this.props.index, "EDIT");
   };
 
   render() {
     let courseName = Object.keys(this.props.course)[0];
-
-    return (
-      <Col xs={12} sm={12} md={6} lg={6} xl={4}>
-        <div
-          className={"model col-centered"}
-          onClick={this.props.chooseActiveCourse.bind(this, courseName)}
-        >
-          <div className="model_container">
-            <div className="model_name">
-              <span
-                className="material-icons settings_icon"
-                onClick={(e) => this.editCourse(e, courseName)}
-              >
-                settings
-              </span>
-              <img className="course_img" alt="" />
-              <div style={{ fontSize: "x-large", fontWeight: "bold" }}>
-                {courseName}
-              </div>
+    let newCourse = (
+      <div
+        className={"model col-centered"}
+        onClick={this.props.chooseActiveCourse.bind(this, courseName)}
+      >
+        <div className="model_container">
+          <div className="model_name">
+            <span
+              className="material-icons settings_icon"
+              onClick={(e) => this.editCourse(e)}
+            >
+              settings
+            </span>
+            <img className="course_img" alt="" />
+            <div style={{ fontSize: "x-large", fontWeight: "bold" }}>
+              {courseName}
             </div>
-            {this.props.course[courseName]["subjects"].length >= 1 && (
-              <div className="details_container">
-                {this.props.course[courseName]["subjects"].map(
-                  (elm, j_index) => {
-                    return (
-                      <div className="detail_container" key={j_index}>
-                        {elm}
-                      </div>
-                    );
-                  }
-                )}
-              </div>
-            )}
           </div>
+          {this.props.course[courseName]["subjects"].length >= 1 && (
+            <div className="details_container">
+              {this.props.course[courseName]["subjects"].map((elm, j_index) => {
+                return (
+                  <div className="detail_container" key={j_index}>
+                    {elm}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
-      </Col>
+      </div>
+    );
+    return (
+      <React.Fragment>
+        {this.props.bounce && (
+          <Col xs={12} sm={12} md={6} lg={6} xl={4}>
+            <Bounce className="bounce_div"> {newCourse} </Bounce>
+          </Col>
+        )}
+        {!this.props.bounce && (
+          <Col xs={12} sm={12} md={6} lg={6} xl={4}>
+            {newCourse}
+          </Col>
+        )}
+      </React.Fragment>
     );
   }
 }

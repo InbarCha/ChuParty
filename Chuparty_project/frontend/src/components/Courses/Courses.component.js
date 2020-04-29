@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Container, Row } from "react-bootstrap";
 import Course from "./Course.component";
+import EditCourse from "./EditCourse.component";
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
   console.log("DEV enabled");
@@ -15,6 +16,7 @@ export default class Courses extends Component {
     this.state = {
       courses: [],
       activeCourse: localStorage["activeCourse"],
+      content: [],
     };
   }
   componentDidMount() {
@@ -23,8 +25,8 @@ export default class Courses extends Component {
     fetch(COURSES_ROUTE)
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
         this.setState({ courses: data });
+        this.setCoursesArr();
       })
       .catch((err) => console.error("error while fetching courses:", err));
   }
@@ -35,21 +37,58 @@ export default class Courses extends Component {
     this.props.parentClickHandler("EXAMS");
   };
 
-  getCoursesArr() {
+  changeCourseComponent = (index, component) => {
+    let content = this.state.content;
+
+    switch (component) {
+      case "EDIT":
+        content[index] = (
+          <EditCourse
+            key={index}
+            index={index}
+            course={this.state.courses[index]}
+            changeCourseComponent={this.changeCourseComponent}
+          />
+        );
+        break;
+      case "COURSE":
+        content[index] = (
+          <Course
+            bounce={true}
+            key={index}
+            index={index}
+            chooseActiveCourse={this.chooseActiveCourse}
+            changeCourseComponent={this.changeCourseComponent}
+            course={this.state.courses[index]}
+          />
+        );
+        break;
+      default:
+        console.log("no handler for:", component);
+    }
+
+    this.setState({ content: content });
+  };
+
+  setCoursesArr() {
     let content = [];
 
     this.state.courses.forEach((elm, index) => {
       let newCourse = (
         <Course
+          bounce={false}
           course={elm}
+          index={index}
           key={index}
           chooseActiveCourse={this.chooseActiveCourse}
+          changeCourseComponent={this.changeCourseComponent}
         />
       );
 
       content.push(newCourse);
     });
 
+    this.setState({ content: content });
     return content;
   }
 
@@ -69,7 +108,7 @@ export default class Courses extends Component {
             </React.Fragment>
           )}
           <Container fluid className="model_items_container">
-            <Row>{this.getCoursesArr()}</Row>
+            <Row>{this.state.content}</Row>
           </Container>
         </React.Fragment>
       ) : (
