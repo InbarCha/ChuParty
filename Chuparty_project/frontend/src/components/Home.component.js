@@ -8,6 +8,9 @@ import Exams from "./Exams/Exams.component";
 import Feedback from "./Feedback.component";
 import Admin from "./Admin.component";
 import Questions from "./Questions/Questions.component";
+import Login from "./Auth/Login.component";
+import Register from "./Auth/Register.component";
+import Profile from "./Auth/Profile.component";
 
 export default class Home extends Component {
   constructor() {
@@ -47,6 +50,15 @@ export default class Home extends Component {
       case "ADMIN":
         this.setState({ currentContentView: <Admin /> });
         break;
+      case "REGISTER":
+        this.setState({ currentContentView: <Register /> });
+        break;
+      case "LOGIN":
+        this.setState({ currentContentView: <Login /> });
+        break;
+      case "PROFILE":
+        this.setState({ currentContentView: <Profile /> });
+        break;
       default:
         console.log("no clickMsg handler for:", clickMsg);
     }
@@ -66,15 +78,6 @@ export default class Home extends Component {
               </nav>
               {/* TODO: check if user is logged in*/}
               <div id="content_container">{this.state.currentContentView}</div>
-            </Route>
-            <Route path="/login">
-              <span>We are at login</span>
-            </Route>
-            <Route path="/signup">
-              <span>We are at signup</span>
-            </Route>
-            <Route path="/profile">
-              <span>We are at profile</span>
             </Route>
           </Switch>
         </Router>

@@ -37,8 +37,27 @@ export default class Courses extends Component {
     this.props.parentClickHandler("EXAMS");
   };
 
+  changeCourse = (course, index) => {
+    let courses = this.state.courses;
+    courses[index] = course;
+    this.setState({ courses: courses });
+  };
+
+  createDeepCopyCourse = (course) => {
+    let courseName = Object.keys(course)[0];
+    let subjects = course[courseName]["subjects"];
+
+    let course_copy = {};
+    course_copy[courseName] = {};
+    course_copy[courseName]["subjects"] = [...subjects];
+
+    return course_copy;
+  };
+
   changeCourseComponent = (index, component) => {
     let content = this.state.content;
+    let course_orig = this.state.courses[index];
+    let course_copy = this.createDeepCopyCourse(course_orig);
 
     switch (component) {
       case "EDIT":
@@ -46,8 +65,9 @@ export default class Courses extends Component {
           <EditCourse
             key={index}
             index={index}
-            course={this.state.courses[index]}
+            course={course_copy}
             changeCourseComponent={this.changeCourseComponent}
+            changeCourse={this.changeCourse}
           />
         );
         break;

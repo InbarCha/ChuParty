@@ -34,12 +34,23 @@
   padding-left: 7px;
   color: white;
 }
+.plus_subjec_icon {
+  float: right;
+  cursor: pointer;
+}
+.remove_icon {
+  vertical-align: middle;
+  padding-left: 3px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  cursor: pointer;
+}
 form {
   display: inline-grid;
   column-count: 2;
 }
 .sidebar {
-  position: fixed;
+  position: relative;
   background-color: rgb(59, 128, 173);
   margin-top: 0px;
   padding-top: 50px;
@@ -138,9 +149,13 @@ form {
   padding-left: 8vw;
   padding-right: 8vw;
 }
-.settings_icon,
-.save_icon {
+.settings_icon {
   float: right;
+}
+.save_icon {
+  padding-left: 10px;
+  padding-bottom: 10px;
+  float: left;
 }
 .delete_icon {
   float: left;
@@ -253,6 +268,11 @@ nav {
 .courseName_edit_input {
   text-align: center;
   border-radius: 7px;
+  width: 80%;
+}
+.cancel_edit_course {
+  float: right;
+  cursor: pointer;
 }
 .subject_edit_input {
   background-color: rgb(231, 227, 227);
