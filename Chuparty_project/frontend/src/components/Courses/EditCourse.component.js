@@ -12,6 +12,8 @@ export class EditCourse extends Component {
     super(props);
     this.state = {
       course: this.props.course,
+      addedSubjects: [],
+      deletedSubjects: [],
     };
   }
 
@@ -26,6 +28,12 @@ export class EditCourse extends Component {
 
     //save changes to course_orig
     let course = this.state.course;
+    let courseName = Object.keys(course)[0];
+    let subjects = course[courseName]["subjects"];
+
+    if (this.state.addedSubjects.length > 0) {
+      course[courseName]["subjects"] = [...subjects, this.state.addedSubjects];
+    }
     this.props.changedCourse(course, this.props.index);
 
     this.props.changeCourseComponent(this.props.index, "COURSE");
@@ -39,11 +47,10 @@ export class EditCourse extends Component {
   subjectChanged = (e, index) => {
     let newVal = e.target.value;
 
-    let course = this.state.course;
-    let courseName = Object.keys(course)[0];
-    course[courseName]["subjects"][index] = newVal;
+    let addedSubjects = this.state.addedSubjects;
+    addedSubjects[index] = newVal;
 
-    this.setState({ course: course });
+    this.setState({ addedSubjects: addedSubjects });
   };
 
   courseNameChanged = (e) => {
@@ -63,22 +70,34 @@ export class EditCourse extends Component {
   addSubject = (e) => {
     e.stopPropagation();
 
-    let course = this.state.course;
-    let courseName = Object.keys(course)[0];
-    let subjects = course[courseName]["subjects"];
-    course[courseName]["subjects"] = [...subjects, ""];
-    this.setState({ course: course });
+    let addedSubjects = this.state.addedSubjects;
+    addedSubjects = [...addedSubjects, ""];
+    this.setState({ addedSubjects: addedSubjects });
   };
 
-  removeSubject = (e, index) => {
+  removeSubject = (e, index, array_name) => {
     e.stopPropagation();
-    let course = this.state.course;
-    let courseName = Object.keys(course)[0];
-    let subjects = course[courseName]["subjects"];
 
-    subjects.splice(index, 1);
-    course[courseName]["subjects"] = subjects;
-    this.setState({ course: course });
+    //remove an existing course subject
+    if (array_name === "course_subjects") {
+      let course = this.state.course;
+      let courseName = Object.keys(course)[0];
+      let subjects = course[courseName]["subjects"];
+
+      this.setState({
+        deletedSubjects: [...this.state.deletedSubjects, subjects[index]],
+      });
+
+      subjects.splice(index, 1);
+      course[courseName]["subjects"] = subjects;
+      this.setState({ course: course });
+    }
+    //remove one of the newly added subjects
+    else if (array_name === "added_subjects") {
+      let addedSubjects = this.state.addedSubjects;
+      addedSubjects.splice(index, 1);
+      this.setState({ addedSubjects: addedSubjects });
+    }
   };
 
   render() {
@@ -113,38 +132,61 @@ export class EditCourse extends Component {
                   />
                 </div>
               </div>
-              {this.state.course[courseName]["subjects"].length >= 1 && (
-                <div className="details_container">
-                  <span
-                    className="material-icons plus_subjec_icon"
-                    onClick={(e) => this.addSubject(e)}
-                  >
-                    add
-                  </span>
-                  <br />
-                  {this.state.course[courseName]["subjects"].map(
-                    (elm, j_index) => {
-                      return (
-                        <div className="detail_container" key={j_index}>
-                          <input
-                            type="text"
-                            value={elm}
-                            name={elm + "_edit"}
-                            className="subject_edit_input"
-                            onChange={(e) => this.subjectChanged(e, j_index)}
-                          />
-                          <span
-                            className="material-icons remove_icon"
-                            onClick={(e) => this.removeSubject(e, j_index)}
-                          >
-                            remove_circle_outline
-                          </span>
-                        </div>
-                      );
-                    }
-                  )}
-                </div>
-              )}
+              <div className="details_container">
+                <span
+                  className="material-icons plus_subjec_icon"
+                  onClick={(e) => this.addSubject(e)}
+                >
+                  add
+                </span>
+                <br />
+                {this.state.course[courseName]["subjects"].length >= 1 && (
+                  <div className="details_container">
+                    {this.state.course[courseName]["subjects"].map(
+                      (elm, j_index) => {
+                        return (
+                          <div className="detail_container" key={j_index}>
+                            {elm}
+                            <span
+                              className="material-icons remove_icon"
+                              onClick={(e) =>
+                                this.removeSubject(
+                                  e,
+                                  j_index,
+                                  "course_subjects"
+                                )
+                              }
+                            >
+                              remove_circle_outline
+                            </span>
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
+                )}
+                {this.state.addedSubjects.map((elm, j_index) => {
+                  return (
+                    <div className="detail_container" key={j_index}>
+                      <input
+                        type="text"
+                        value={elm}
+                        name={elm + "_edit"}
+                        className="subject_edit_input"
+                        onChange={(e) => this.subjectChanged(e, j_index)}
+                      />
+                      <span
+                        className="material-icons remove_icon"
+                        onClick={(e) =>
+                          this.removeSubject(e, j_index, "added_subjects")
+                        }
+                      >
+                        remove_circle_outline
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
               <span
                 className="material-icons save_icon"
                 onClick={(e) => this.saveCourse(e)}
