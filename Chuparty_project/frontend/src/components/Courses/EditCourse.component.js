@@ -7,6 +7,13 @@ const Bounce = styled.div`
   animation: 2s ${keyframes`${bounce}`};
 `;
 
+if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
+  console.log("DEV enabled");
+const EDIT_COURSE_ROUTE =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/editCourse"
+    : "/api/editCourse";
+
 export class EditCourse extends Component {
   constructor(props) {
     super(props);
@@ -24,19 +31,79 @@ export class EditCourse extends Component {
   saveCourse = (e) => {
     e.stopPropagation();
 
-    //save changes to the DB
-
     //save changes to course_orig
     let course = this.state.course;
     let courseName = Object.keys(course)[0];
     let subjects = course[courseName]["subjects"];
 
     if (this.state.addedSubjects.length > 0) {
-      course[courseName]["subjects"] = [...subjects, this.state.addedSubjects];
+      course[courseName]["subjects"] = [
+        ...subjects,
+        ...this.state.addedSubjects,
+      ];
     }
+
+    //save changes to db
+    this.saveChangesToDb();
+
+    //propagate changes to the course itself (addition/deletion of subjects)
     this.props.changedCourse(course, this.props.index);
 
     this.props.changeCourseComponent(this.props.index, "COURSE");
+  };
+
+  //save changes to the DB
+  // {
+  //   "name": "OOP",
+  //   "ChangeName": "Object-Oriented Programming"
+  //   "AddToSubjects":[
+  //             {
+  //                 "name": "C++"
+  //             }
+  //         ]
+  //     "DeleteFromSubjects": [
+  //             {
+  //                 "name": "c"
+  //             }
+  //         ]
+  //   ]
+  // }
+  saveChangesToDb = () => {
+    let course_orig = this.props.course_orig;
+    let courseNameOrig = Object.keys(course_orig)[0];
+    let courseNameNew = Object.keys(this.state.course)[0];
+
+    let request_body = {};
+    request_body["name"] = courseNameOrig;
+
+    //course name has changed
+    if (courseNameOrig !== courseNameNew) {
+      request_body["ChangeName"] = courseNameNew;
+    }
+
+    if (this.state.addedSubjects.length > 0) {
+      request_body["AddToSubjects"] = this.state.addedSubjects.map((elm) => {
+        return { name: elm };
+      });
+    }
+
+    if (this.state.deletedSubjects.length > 0) {
+      request_body["DeleteFromSubjects"] = this.state.deletedSubjects.map(
+        (elm) => {
+          return { name: elm };
+        }
+      );
+    }
+
+    fetch(EDIT_COURSE_ROUTE, {
+      method: "post",
+      body: JSON.stringify(request_body),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((err) => console.error("error while fetching courses:", err));
   };
 
   cancelEdit = (e) => {

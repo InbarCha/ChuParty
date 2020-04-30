@@ -325,11 +325,17 @@ method: POST
 POST body example:
 {
 	"name": "OOP",
-  "ChangeName": "Object-Oriented Programming"
+    "ChangeName": "Object-Oriented Programming"
 	"AddToSubjects":[
-		{
-			"name": "C++"
-		}
+            {
+                "name": "C++"
+            }
+        ]
+    "DeleteFromSubjects": [
+            {
+                "name": "c"
+            }
+        ]
 	]
 }
 '''
