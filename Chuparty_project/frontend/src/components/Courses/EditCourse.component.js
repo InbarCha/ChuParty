@@ -13,6 +13,10 @@ const EDIT_COURSE_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/editCourse"
     : "/api/editCourse";
+const DELETE_COURSE_ROUTE =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/deleteCourse?name="
+    : "/api/deleteCourse?name=";
 
 export class EditCourse extends Component {
   constructor(props) {
@@ -26,6 +30,18 @@ export class EditCourse extends Component {
 
   deleteCourse = (e) => {
     e.stopPropagation();
+
+    let course = this.props.course_orig;
+    let courseName = Object.keys(course)[0];
+
+    fetch(DELETE_COURSE_ROUTE + courseName)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((err) => console.error("error while fetching courses:", err));
+
+    this.props.deleteFromContent(this.props.index);
   };
 
   saveCourse = (e) => {
@@ -39,16 +55,16 @@ export class EditCourse extends Component {
     if (this.state.addedSubjects.length > 0) {
       course[courseName]["subjects"] = [
         ...subjects,
-        ...this.state.addedSubjects,
+        ...this.state.addedSubjects.filter((subject) => subject !== ""),
       ];
     }
 
     //save changes to db
     this.saveChangesToDb();
 
+    //TODO: move to saveToDb(), in fetch() callback
     //propagate changes to the course itself (addition/deletion of subjects)
     this.props.changedCourse(course, this.props.index);
-
     this.props.changeCourseComponent(this.props.index, "COURSE");
   };
 
@@ -82,17 +98,19 @@ export class EditCourse extends Component {
     }
 
     if (this.state.addedSubjects.length > 0) {
-      request_body["AddToSubjects"] = this.state.addedSubjects.map((elm) => {
-        return { name: elm };
-      });
+      request_body["AddToSubjects"] = this.state.addedSubjects
+        .filter((subject) => subject !== "")
+        .map((elm) => {
+          return { name: elm };
+        });
     }
 
     if (this.state.deletedSubjects.length > 0) {
-      request_body["DeleteFromSubjects"] = this.state.deletedSubjects.map(
-        (elm) => {
+      request_body["DeleteFromSubjects"] = this.state.deletedSubjects
+        .filter((subject) => subject !== "")
+        .map((elm) => {
           return { name: elm };
-        }
-      );
+        });
     }
 
     fetch(EDIT_COURSE_ROUTE, {
@@ -103,7 +121,7 @@ export class EditCourse extends Component {
       .then((data) => {
         console.log(data);
       })
-      .catch((err) => console.error("error while fetching courses:", err));
+      .catch((err) => console.error("error while editing course:", err));
   };
 
   cancelEdit = (e) => {
@@ -206,9 +224,15 @@ export class EditCourse extends Component {
                 >
                   add
                 </span>
+                <span
+                  className="material-icons save_icon"
+                  onClick={(e) => this.saveCourse(e)}
+                >
+                  save
+                </span>
                 <br />
                 {this.state.course[courseName]["subjects"].length >= 1 && (
-                  <div className="details_container">
+                  <React.Fragment>
                     {this.state.course[courseName]["subjects"].map(
                       (elm, j_index) => {
                         return (
@@ -230,7 +254,7 @@ export class EditCourse extends Component {
                         );
                       }
                     )}
-                  </div>
+                  </React.Fragment>
                 )}
                 {this.state.addedSubjects.map((elm, j_index) => {
                   return (
@@ -254,12 +278,6 @@ export class EditCourse extends Component {
                   );
                 })}
               </div>
-              <span
-                className="material-icons save_icon"
-                onClick={(e) => this.saveCourse(e)}
-              >
-                save
-              </span>
             </div>
           </div>
         </Bounce>

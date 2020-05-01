@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Container, Row } from "react-bootstrap";
 import Course from "./Course.component";
 import EditCourse from "./EditCourse.component";
+import AddCourse from "./AddCourse.component";
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
   console.log("DEV enabled");
@@ -62,8 +63,12 @@ export default class Courses extends Component {
 
   changeCourseComponent = (index, component) => {
     let content = this.state.content;
-    let course_orig = this.state.courses[index];
-    let course_copy = this.createDeepCopyCourse(course_orig);
+    let course_orig = "";
+    let course_copy = "";
+    if (index !== -1) {
+      course_orig = this.state.courses[index];
+      course_copy = this.createDeepCopyCourse(course_orig);
+    }
 
     switch (component) {
       case "EDIT":
@@ -75,6 +80,7 @@ export default class Courses extends Component {
             course_orig={course_orig}
             changeCourseComponent={this.changeCourseComponent}
             changedCourse={this.changedCourse}
+            deleteFromContent={this.deleteFromContent}
           />
         );
         break;
@@ -89,6 +95,17 @@ export default class Courses extends Component {
             course={this.state.courses[index]}
           />
         );
+        break;
+      case "ADD_COURSE":
+        content = [
+          ...content,
+          <AddCourse
+            key={content.length}
+            index={content.length}
+            deleteFromContent={this.deleteFromContent}
+            addCourseToState={this.addCourseToState}
+          />,
+        ];
         break;
       default:
         console.log("no handler for:", component);
@@ -119,6 +136,37 @@ export default class Courses extends Component {
     return content;
   }
 
+  deleteFromContent = (index) => {
+    let courses = this.state.courses;
+    let content = this.state.content;
+
+    console.log(content.length - 1);
+    console.log(index);
+
+    if (index < content.length - 1) {
+      courses[index] = "";
+      content[index] = "";
+    } else if (index === content.length - 1) {
+      content.pop();
+    }
+
+    this.setState({ courses: courses, content: content });
+  };
+
+  addCourseToState = (course) => {
+    let content = this.state.content;
+    content.pop();
+
+    let courses = this.state.courses;
+    this.setState({ courses: [...courses, course], content: content });
+
+    this.setCoursesArr();
+  };
+
+  addCourse = () => {
+    this.changeCourseComponent(-1, "ADD_COURSE");
+  };
+
   render() {
     let res =
       this.state.courses !== null ? (
@@ -135,6 +183,12 @@ export default class Courses extends Component {
             </React.Fragment>
           )}
           <Container fluid className="model_items_container">
+            <span
+              className="material-icons add_course_icon"
+              onClick={this.addCourse}
+            >
+              add
+            </span>
             <Row>{this.state.content}</Row>
           </Container>
         </React.Fragment>
