@@ -137,10 +137,10 @@ form {
   width: 100%;
   height: 100%;
   text-align: center;
-  padding-left: 2vw;
-  padding-right: 2vw;
-  padding-bottom: 6vh;
-  padding-top: 6vh;
+  padding-left: 1vw;
+  padding-right: 1vw;
+  padding-bottom: 7vh;
+  padding-top: 7vh;
   border-radius: 15px;
   position: relative;
   overflow: hidden;
@@ -165,10 +165,12 @@ form {
 .delete_icon {
   float: left;
 }
-.settings_icon:hover,
 .save_icon:hover,
 .delete_icon:hover {
   cursor: pointer;
+}
+.settings_icon:hover {
+  cursor: cell;
 }
 .questions_form {
   background-color: rgb(208, 230, 243);
@@ -204,10 +206,14 @@ form {
   height: 100%;
   overflow: hidden;
 }
+.model_container:hover {
+  box-shadow: 0 0 3px 3px rgb(117, 117, 117);
+}
 .model:hover {
-  transform: scale(1.1, 1.1);
-  -ms-transform: scale(1.1, 1.1);
-  -webkit-transform: scale(1.1, 1.1);
+  cursor: pointer;
+  transform: scale(1.03, 1.03);
+  -ms-transform: scale(1.03, 1.03);
+  -webkit-transform: scale(1.03, 1.03);
 }
 .detail_container {
   padding-top: 7px;
@@ -218,7 +224,12 @@ form {
 .course_img {
   width: 50%;
   height: 50%;
+  margin-left: 8%;
   content: url("./assets/course.png");
+}
+.course_name_text {
+  font-style: bold !important;
+  font-size: x-large;
 }
 .new_course_img {
   width: 50%;
@@ -239,12 +250,12 @@ form {
   content: url("./assets/exam.png");
 }
 .model_name {
-  font-weight: "bold";
-  font-size: "large";
+  font-weight: bold;
+  font-size: large;
   color: rgb(114, 110, 110);
   width: 100%;
   background-color: white;
-  padding: 7px 7px 7px 7px;
+  padding: 15px 15px 15px 15px;
   border-radius: 15px 15px 0 0;
   box-shadow: 0 0 3px 3px darkgray;
 }

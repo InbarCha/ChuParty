@@ -29,9 +29,7 @@ export class Course extends Component {
               settings
             </span>
             <img className="course_img" alt="" />
-            <div style={{ fontSize: "x-large", fontWeight: "bold" }}>
-              {courseName}
-            </div>
+            <div className="course_name_text">{courseName}</div>
           </div>
           {this.props.course[courseName]["subjects"].length >= 1 && (
             <div className="details_container">

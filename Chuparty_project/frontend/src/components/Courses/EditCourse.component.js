@@ -31,17 +31,20 @@ export class EditCourse extends Component {
   deleteCourse = (e) => {
     e.stopPropagation();
 
-    let course = this.props.course_orig;
-    let courseName = Object.keys(course)[0];
+    //TODO: change to message-box
+    if (window.confirm("Are you sure you want to delete this courese?")) {
+      let course = this.props.course_orig;
+      let courseName = Object.keys(course)[0];
 
-    fetch(DELETE_COURSE_ROUTE + courseName)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((err) => console.error("error while fetching courses:", err));
+      fetch(DELETE_COURSE_ROUTE + courseName)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+        })
+        .catch((err) => console.error("error while fetching courses:", err));
 
-    this.props.deleteFromContent(this.props.index);
+      this.props.deleteFromContent(this.props.index);
+    }
   };
 
   saveCourse = (e) => {
