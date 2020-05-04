@@ -1,10 +1,21 @@
 import React, { Component } from "react";
 import { Col } from "react-bootstrap";
+import { bounce } from "react-animations";
+import styled, { keyframes } from "styled-components";
 
-export class Exams extends Component {
+const Bounce = styled.div`
+  animation: 2s ${keyframes`${bounce}`};
+`;
+
+export class Exam extends Component {
   chooseExam = () => {
     localStorage["activeExamID"] = Object.keys(this.props.exam)[0];
     this.props.parentClickHandler("QUESTIONS");
+  };
+
+  editExam = (e) => {
+    e.stopPropagation();
+    this.props.changeExamComponent(this.props.index, "EDIT");
   };
 
   render() {
@@ -15,37 +26,54 @@ export class Exams extends Component {
     let questions = this.props.exam[examID]["questions"];
     let subjects = this.props.exam[examID]["subjects"];
 
-    return (
-      <Col xs={12} sm={12} md={6} lg={6} xl={4}>
-        <div className={"model col-centered"} onClick={this.chooseExam}>
-          <div className="model_container">
-            <div className="model_name">
-              <img className="exam_img" alt="" />
-              <div style={{ fontSize: "x-large", fontWeight: "bold" }}>
-                {examName} <br /> {examDate}
-              </div>
+    let newExam = (
+      <div className={"model col-centered"} onClick={this.chooseExam}>
+        <div className="model_container">
+          <div className="model_name">
+            <span
+              className="material-icons settings_icon"
+              onClick={(e) => this.editExam(e)}
+            >
+              settings
+            </span>
+            <img className="exam_img" alt="" />
+            <div className="model_name_text">
+              {examName} <br /> {examDate}
             </div>
-            <div className="details_container">
-              <div className="detail_container">
-                <span style={{ fontStyle: "italic" }}>Exam Writers:</span>
-                {" " + writers}
-              </div>
-              <div className="detail_container">
-                <span style={{ fontStyle: "italic" }}>
-                  Number of Questions:
-                </span>
-                {" " + questions.length}
-              </div>
-              <div className="detail_container">
-                <span style={{ fontStyle: "italic" }}>Subjects:</span>
-                {" " + subjects}
-              </div>
+          </div>
+          <div className="details_container">
+            <div className="detail_container">
+              <span style={{ fontStyle: "italic" }}>Exam Writers:</span>
+              {" " + writers}
+            </div>
+            <div className="detail_container">
+              <span style={{ fontStyle: "italic" }}>Subjects:</span>
+              {" " + subjects.join(", ")}
+            </div>
+            <div className="detail_container">
+              <span style={{ fontStyle: "italic" }}>Number of Questions:</span>
+              {" " + questions.length}
             </div>
           </div>
         </div>
-      </Col>
+      </div>
+    );
+
+    return (
+      <React.Fragment>
+        {this.props.bounce && (
+          <Col xs={12} sm={12} md={6} lg={6} xl={4}>
+            <Bounce className="bounce_div"> {newExam} </Bounce>
+          </Col>
+        )}
+        {!this.props.bounce && (
+          <Col xs={12} sm={12} md={6} lg={6} xl={4}>
+            {newExam}
+          </Col>
+        )}
+      </React.Fragment>
     );
   }
 }
 
-export default Exams;
+export default Exam;

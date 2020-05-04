@@ -17,7 +17,7 @@ export default class Courses extends Component {
     this.state = {
       courses: [],
       activeCourse: localStorage["activeCourse"],
-      content: [],
+      sonComponents: [],
     };
   }
   componentDidMount() {
@@ -27,7 +27,7 @@ export default class Courses extends Component {
       .then((res) => res.json())
       .then((data) => {
         this.setState({ courses: data });
-        this.setCoursesArr();
+        this.SetSonComponents();
       })
       .catch((err) => console.error("error while fetching courses:", err));
   }
@@ -62,7 +62,7 @@ export default class Courses extends Component {
   };
 
   changeCourseComponent = (index, component) => {
-    let content = this.state.content;
+    let sonComponents = this.state.sonComponents;
     let course_orig = "";
     let course_copy = "";
     if (index !== -1) {
@@ -72,7 +72,7 @@ export default class Courses extends Component {
 
     switch (component) {
       case "EDIT":
-        content[index] = (
+        sonComponents[index] = (
           <EditCourse
             key={index}
             index={index}
@@ -80,12 +80,12 @@ export default class Courses extends Component {
             course_orig={course_orig}
             changeCourseComponent={this.changeCourseComponent}
             changedCourse={this.changedCourse}
-            deleteFromContent={this.deleteFromContent}
+            deleteFromSonComponents={this.deleteFromSonComponents}
           />
         );
         break;
       case "COURSE":
-        content[index] = (
+        sonComponents[index] = (
           <Course
             bounce={true}
             key={index}
@@ -97,13 +97,13 @@ export default class Courses extends Component {
         );
         break;
       case "ADD_COURSE":
-        content = [
-          ...content,
+        sonComponents = [
+          ...sonComponents,
           <AddCourse
-            key={content.length}
-            index={content.length}
-            deleteFromContent={this.deleteFromContent}
-            addCourseToState={this.addCourseToState}
+            key={sonComponents.length}
+            index={sonComponents.length}
+            deleteFromSonComponents={this.deleteFromSonComponents}
+            addCourseToSonComponents={this.addCourseToSonComponents}
           />,
         ];
         break;
@@ -111,11 +111,11 @@ export default class Courses extends Component {
         console.log("no handler for:", component);
     }
 
-    this.setState({ content: content });
+    this.setState({ sonComponents: sonComponents });
   };
 
-  setCoursesArr() {
-    let content = [];
+  SetSonComponents() {
+    let sonComponents = [];
 
     this.state.courses.forEach((elm, index) => {
       let newCourse = (
@@ -129,38 +129,40 @@ export default class Courses extends Component {
         />
       );
 
-      content.push(newCourse);
+      sonComponents.push(newCourse);
     });
 
-    this.setState({ content: content });
-    return content;
+    this.setState({ sonComponents: sonComponents });
   }
 
-  deleteFromContent = (index) => {
+  deleteFromSonComponents = (index) => {
     let courses = this.state.courses;
-    let content = this.state.content;
+    let sonComponents = this.state.sonComponents;
 
-    console.log(content.length - 1);
+    console.log(sonComponents.length - 1);
     console.log(index);
 
-    if (index < content.length - 1) {
+    if (index < sonComponents.length - 1) {
       courses[index] = "";
-      content[index] = "";
-    } else if (index === content.length - 1) {
-      content.pop();
+      sonComponents[index] = "";
+    } else if (index === sonComponents.length - 1) {
+      sonComponents.pop();
     }
 
-    this.setState({ courses: courses, content: content });
+    this.setState({ courses: courses, sonComponents: sonComponents });
   };
 
-  addCourseToState = (course) => {
-    let content = this.state.content;
-    content.pop();
+  addCourseToSonComponents = (course) => {
+    let sonComponents = this.state.sonComponents;
+    sonComponents.pop();
 
     let courses = this.state.courses;
-    this.setState({ courses: [...courses, course], content: content });
+    this.setState({
+      courses: [...courses, course],
+      sonComponents: sonComponents,
+    });
 
-    this.setCoursesArr();
+    this.SetSonComponents();
   };
 
   addCourse = () => {
@@ -189,7 +191,7 @@ export default class Courses extends Component {
             >
               add
             </span>
-            <Row>{this.state.content}</Row>
+            <Row>{this.state.sonComponents}</Row>
           </Container>
         </React.Fragment>
       ) : (

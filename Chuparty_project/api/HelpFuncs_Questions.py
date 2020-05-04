@@ -137,7 +137,6 @@ def changeQuestionTemplate(question):
     questionJson[question.body] = dict()
     questionJson[question.body]['subject'] = question.subject.name
     questionJson[question.body]['course'] = changeCourseTemplate(question.course)
-    questionJson[question.body]['body'] = question.body
     questionJson[question.body]['answers'] = question.answers
     questionJson[question.body]['correctAnswer'] = question.correctAnswer
     questionJson[question.body]['difficulty'] = question.difficulty

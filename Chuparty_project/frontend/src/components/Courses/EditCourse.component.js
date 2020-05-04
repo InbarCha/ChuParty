@@ -40,10 +40,9 @@ export class EditCourse extends Component {
         .then((res) => res.json())
         .then((data) => {
           console.log(data);
+          this.props.deleteFromSonComponents(this.props.index);
         })
         .catch((err) => console.error("error while fetching courses:", err));
-
-      this.props.deleteFromContent(this.props.index);
     }
   };
 
@@ -210,15 +209,13 @@ export class EditCourse extends Component {
                   delete
                 </span>
                 <img className="edit_img" alt="" />
-                <div style={{ fontSize: "x-large", fontWeight: "bold" }}>
-                  <input
-                    type="text"
-                    defaultValue={courseName}
-                    name={courseName + "_edit"}
-                    className="courseName_edit_input"
-                    onChange={(e) => this.courseNameChanged(e)}
-                  />
-                </div>
+                <input
+                  type="text"
+                  defaultValue={courseName}
+                  name={courseName + "_edit"}
+                  className="modelTitle_edit_input"
+                  onChange={(e) => this.courseNameChanged(e)}
+                />
               </div>
               <div className="details_container">
                 <span

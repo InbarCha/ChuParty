@@ -227,15 +227,19 @@ form {
   margin-left: 8%;
   content: url("./assets/course.png");
 }
-.course_name_text {
+.model_name_text {
   font-style: bold !important;
-  font-size: x-large;
+  font-size: large;
 }
 .new_course_img {
   width: 50%;
   height: 50%;
   content: url("./assets/newCourse.png");
   margin-bottom: 15px;
+}
+.edit_questions_btn {
+  margin-top: 5px;
+  font-size: small;
 }
 .edit_img {
   padding-top: 1.2vw;
@@ -247,6 +251,7 @@ form {
 .exam_img {
   width: 80%;
   height: 80%;
+  padding-left: 7%;
   content: url("./assets/exam.png");
 }
 .model_name {
@@ -288,7 +293,7 @@ nav {
 }
 
 .subject_edit_input,
-.courseName_edit_input {
+.modelTitle_edit_input {
   text-align: center;
   border-radius: 7px;
   width: 80%;
@@ -300,6 +305,6 @@ nav {
 .subject_edit_input {
   background-color: rgb(231, 227, 227);
 }
-.courseName_edit_input {
+.modelTitle_edit_input {
   background-color: rgb(216, 214, 214);
 }

@@ -1,10 +1,12 @@
 import React, { Component } from "react";
 import { Container, Row } from "react-bootstrap";
 import Exam from "./Exam.component";
+import AddExam from "./AddExam.component";
+import EditExam from "./EditExam.component";
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
   console.log("DEV enabled");
-const EXAMS_ROUTE =
+const ALL_EXAMS_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/getExams"
     : "/api/getExams";
@@ -19,6 +21,7 @@ export default class Exams extends Component {
     this.state = {
       exams: [],
       activeCourse: localStorage["activeCourse"],
+      sonComponents: [],
     };
   }
 
@@ -29,35 +32,160 @@ export default class Exams extends Component {
         .then((data) => {
           console.log(data);
           this.setState({ exams: data });
+          this.SetSonComponents();
         })
         .catch((err) => console.error("error while fetching exmas:", err));
     } else {
-      fetch(EXAMS_ROUTE)
+      fetch(ALL_EXAMS_ROUTE)
         .then((res) => res.json())
         .then((data) => {
           console.log(data);
           this.setState({ exams: data });
+          this.SetSonComponents();
         })
         .catch((err) => console.error("error while fetching exmas:", err));
     }
   }
 
-  getExamsArr = () => {
-    let content = [];
+  SetSonComponents = () => {
+    let sonComponents = [];
 
     this.state.exams.forEach((elm, index) => {
       let newExam = (
         <Exam
-          parentClickHandler={this.props.parentClickHandler}
-          exam={elm}
+          bounce={false}
           key={index}
-          chooseExam={this.chooseExam}
+          index={index}
+          parentClickHandler={this.props.parentClickHandler}
+          exam={this.state.exams[index]}
+          changeExamComponent={this.changeExamComponent}
         />
       );
-      content.push(newExam);
+      sonComponents.push(newExam);
     });
 
-    return content;
+    this.setState({ sonComponents: sonComponents });
+  };
+
+  createDeepCopyExam = (exam) => {
+    let examID = Object.keys(exam)[0];
+
+    let course = exam[examID]["course"];
+    let courseName = Object.keys(course)[0];
+    let courseSubjects = course[courseName]["subjects"];
+    let course_copy = {};
+    course_copy[courseName] = {};
+    course_copy[courseName]["subjects"] = [...courseSubjects];
+
+    let name = exam[examID]["name"];
+    let date = exam[examID]["date"];
+
+    let questions = exam[examID]["questions"];
+    let questions_copy = [];
+    questions.forEach((question, index) => {
+      let body = Object.keys(question)[0];
+      let question_copy = {};
+      question_copy[body] = {};
+      question_copy[body]["answers"] = [...question[body]["answers"]];
+      question_copy[body]["correctAnswer"] = question[body]["correctAnswer"];
+      question_copy[body]["course"] = course_copy;
+      question_copy[body]["difficulty"] = question[body]["difficulty"];
+      question_copy[body]["subject"] = question[body]["subject"];
+
+      questions_copy.push(question_copy);
+    });
+
+    let subjects = exam[examID]["subjects"];
+    let subjects_copy = [...subjects];
+
+    let writers = exam[examID]["writers"];
+    let writers_copy = [...writers];
+
+    let exam_copy = {};
+    exam_copy[examID] = {};
+    exam_copy[examID]["course"] = course_copy;
+    exam_copy[examID]["date"] = date;
+    exam_copy[examID]["name"] = name;
+    exam_copy[examID]["questions"] = questions_copy;
+    exam_copy[examID]["subjects"] = subjects_copy;
+    exam_copy[examID]["writers"] = writers_copy;
+
+    return exam_copy;
+  };
+
+  changedExam = (exam, index) => {
+    let exams = this.state.exams;
+    exams[index] = exam;
+    this.setState({ exams: exams });
+  };
+
+  deleteFromSonComponents = (index) => {
+    let exams = this.state.exams;
+    let sonComponents = this.state.sonComponents;
+
+    console.log(sonComponents.length - 1);
+    console.log(index);
+
+    if (index < sonComponents.length - 1) {
+      exams[index] = "";
+      sonComponents[index] = "";
+    } else if (index === sonComponents.length - 1) {
+      sonComponents.pop();
+    }
+
+    this.setState({ exams: exams, sonComponents: sonComponents });
+  };
+
+  changeExamComponent = (index, component) => {
+    let sonComponents = this.state.sonComponents;
+    let exam_orig = "";
+    let exam_copy = "";
+    if (index !== -1) {
+      exam_orig = this.state.exams[index];
+      exam_copy = this.createDeepCopyExam(exam_orig);
+    }
+
+    switch (component) {
+      case "EDIT":
+        sonComponents[index] = (
+          <EditExam
+            key={index}
+            index={index}
+            exam={exam_copy}
+            exam_orig={exam_orig}
+            changeExamComponent={this.changeExamComponent}
+            changedExam={this.changedExam}
+            deleteFromSonComponents={this.deleteFromSonComponents}
+          />
+        );
+        break;
+      case "EXAM":
+        sonComponents[index] = (
+          <Exam
+            bounce={true}
+            key={index}
+            index={index}
+            parentClickHandler={this.props.parentClickHandler}
+            exam={this.state.exams[index]}
+            changeExamComponent={this.changeExamComponent}
+          />
+        );
+        break;
+      case "ADD_EXAM":
+        sonComponents = [
+          ...sonComponents,
+          <AddExam key={sonComponents.length} index={sonComponents.length} />,
+        ];
+        break;
+      default:
+        console.log("no handler for:", component);
+    }
+
+    this.setState({ sonComponents: sonComponents });
+  };
+
+  addExam = () => {
+    this.changeExamComponent(-1, "ADD_EXAM");
   };
 
   render() {
@@ -74,7 +202,13 @@ export default class Exams extends Component {
             </div>
           )}
           <Container fluid className="model_items_container">
-            <Row>{this.getExamsArr()}</Row>
+            <span
+              className="material-icons add_course_icon"
+              onClick={this.addExam}
+            >
+              add
+            </span>
+            <Row>{this.state.sonComponents}</Row>
           </Container>
         </React.Fragment>
       ) : (

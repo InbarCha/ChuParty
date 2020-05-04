@@ -41,7 +41,7 @@ export class AddCourse extends Component {
 
   cancelEdit = (e) => {
     e.stopPropagation();
-    this.props.deleteFromContent(this.props.index);
+    this.props.deleteFromSonComponents(this.props.index);
   };
 
   courseNameChanged = (e) => {
@@ -119,29 +119,38 @@ export class AddCourse extends Component {
 
         if (data["Status"] === "Added Course") {
           //propagate changes to the course itself
-          this.props.addCourseToState(course);
+          this.props.addCourseToSonComponents(course);
         }
       })
       .catch((err) => console.error("error while creating course:", err));
   };
 
+  //TODO: change so course isn't saved if course name is empty
   saveCourse = (e) => {
     e.stopPropagation();
 
     //save changes to course_orig
     let course = this.state.course;
     let courseName = Object.keys(course)[0];
-    let subjects = course[courseName]["subjects"];
 
-    if (this.state.addedSubjects.length > 0) {
-      course[courseName]["subjects"] = [
-        ...subjects,
-        ...this.state.addedSubjects.filter((subject) => subject !== ""),
-      ];
+    //COURSE NAME ISN'T EMPTY - DATE THE NEW COURSE
+    if (courseName !== "Course Name") {
+      let subjects = course[courseName]["subjects"];
+
+      if (this.state.addedSubjects.length > 0) {
+        course[courseName]["subjects"] = [
+          ...subjects,
+          ...this.state.addedSubjects.filter((subject) => subject !== ""),
+        ];
+      }
+
+      //save changes to db
+      this.saveChangesToDb();
     }
-
-    //save changes to db
-    this.saveChangesToDb();
+    //COURSE NAME IS EMPTY - DELETE ADD COMPONENT
+    else {
+      this.props.deleteFromSonComponents(this.props.index);
+    }
   };
 
   render() {
@@ -169,7 +178,7 @@ export class AddCourse extends Component {
                     type="text"
                     placeholder="Course Name"
                     name="course_namw"
-                    className="courseName_edit_input"
+                    className="modelTitle_edit_input"
                     onChange={(e) => this.courseNameChanged(e)}
                   />
                 </div>
