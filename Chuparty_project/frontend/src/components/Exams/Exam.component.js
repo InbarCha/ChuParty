@@ -43,15 +43,19 @@ export class Exam extends Component {
           </div>
           <div className="details_container">
             <div className="detail_container">
-              <span style={{ fontStyle: "italic" }}>Exam Writers:</span>
-              {" " + writers}
+              <div className="exam_detail">Exam Writers:</div>
+              {writers.map((writer, index) => {
+                return <div key={index}>{writer}</div>;
+              })}
             </div>
             <div className="detail_container">
-              <span style={{ fontStyle: "italic" }}>Subjects:</span>
-              {" " + subjects.join(", ")}
+              <div className="exam_detail">Subjects:</div>
+              {subjects.map((subject, index) => {
+                return <div key={index}>{subject}</div>;
+              })}
             </div>
             <div className="detail_container">
-              <span style={{ fontStyle: "italic" }}>Number of Questions:</span>
+              <span className="exam_detail">Number of Questions:</span>
               {" " + questions.length}
             </div>
           </div>

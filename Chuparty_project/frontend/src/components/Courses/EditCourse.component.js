@@ -49,7 +49,6 @@ export class EditCourse extends Component {
   saveCourse = (e) => {
     e.stopPropagation();
 
-    //save changes to course_orig
     let course = this.state.course;
     let courseName = Object.keys(course)[0];
     let subjects = course[courseName]["subjects"];
@@ -60,6 +59,8 @@ export class EditCourse extends Component {
         ...this.state.addedSubjects.filter((subject) => subject !== ""),
       ];
     }
+
+    this.setState({ course: course });
 
     //save changes to db
     this.saveChangesToDb();

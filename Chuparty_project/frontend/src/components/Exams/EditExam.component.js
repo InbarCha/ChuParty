@@ -9,11 +9,11 @@ const Bounce = styled.div`
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
   console.log("DEV enabled");
-const EDIT_COURSE_ROUTE =
+const EDIT_EXAM_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/editExam"
     : "/api/editExam";
-const DELETE_COURSE_ROUTE =
+const DELETE_EXAM_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/deleteExam?examID="
     : "/api/deleteExam?examID=";
@@ -33,16 +33,59 @@ export class EditExam extends Component {
     this.props.changeExamComponent(this.props.index, "EXAM");
   };
 
-  deleteExam = (e) => {};
+  deleteExam = (e) => {
+    e.stopPropagation();
 
-  examNameChanged = (e) => {};
+    //TODO: change to message-box
+    if (window.confirm("Are you sure you want to delete this exam?")) {
+      let exam = this.props.exam_orig;
+      let examID = Object.keys(exam)[0];
 
-  examDateChanged = (e) => {};
+      fetch(DELETE_EXAM_ROUTE + examID)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+          this.props.deleteFromSonComponents(this.props.index);
+        })
+        .catch((err) => console.error("error while fetching courses:", err));
+    }
+  };
 
-  writersChanged = (e, index) => {};
+  examNameChanged = (e) => {
+    let newVal = e.target.value;
+
+    let exam = this.state.exam;
+    let examID = Object.keys(exam)[0];
+    exam[examID]["name"] = newVal;
+
+    this.setState({ exam: exam });
+  };
+
+  examDateChanged = (e) => {
+    e.stopPropagation();
+    let newVal = e.target.value;
+
+    let exam = this.state.exam;
+    let examID = Object.keys(exam)[0];
+    exam[examID]["date"] = newVal;
+
+    this.setState({ exam: exam });
+  };
+
+  writersChanged = (e, index) => {
+    e.stopPropagation();
+    let newVal = e.target.value;
+
+    let exam = this.state.exam;
+    let examID = Object.keys(exam)[0];
+
+    exam[examID]["writers"][index] = newVal;
+    this.setState({ exam: exam });
+  };
 
   addWriter = (e) => {
     e.stopPropagation();
+
     let exam = this.state.exam;
     let examID = Object.keys(exam)[0];
     let writers = exam[examID]["writers"];
@@ -51,7 +94,68 @@ export class EditExam extends Component {
     this.setState({ exam: exam });
   };
 
-  saveExam = (e) => {};
+  // {
+  //   "examID":"Computer Networks Exam_2019-07-15",
+  //   "ChangeWriters":[
+  //     "Eliav Menache"
+  //     ],
+  //   "ChangeCourse":
+  //     {
+  //       "name":"Computer Networks"
+  //     },
+  //   "AddQuestions":[
+  //       {
+  //         "body":"What is HTTP?"
+  //       },
+  //       {
+  //         "body":"What is UDP?"
+  //       }
+  //     ],
+  //   "DeleteQuestions":[
+  //       {
+  //         "body":"What is DNS?"
+  //       }
+  //     ],
+  //   "ChangeName": "Computer Networks Exam",
+  //   "ChangeDate": "2019-07-17"
+  // }
+  saveChangesToDb = () => {
+    let exam = this.state.exam;
+    let examID = Object.keys(exam)[0];
+
+    let request_body = {};
+    request_body["examID"] = examID;
+
+    request_body["ChangeName"] = exam[examID]["name"];
+    request_body["ChangeDate"] = exam[examID]["date"];
+    request_body["ChangeWriters"] = exam[examID]["writers"];
+
+    fetch(EDIT_EXAM_ROUTE, {
+      method: "post",
+      body: JSON.stringify(request_body),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        this.props.changedExam(data["Edited Exam"], this.props.index);
+        this.props.changeExamComponent(this.props.index, "EXAM");
+      })
+      .catch((err) => console.error("error while editing exam:", err));
+  };
+
+  saveExam = (e) => {
+    e.stopPropagation();
+
+    let exam = this.state.exam;
+    let examID = Object.keys(exam)[0];
+    let writers = exam[examID]["writers"];
+
+    //filter out empty strings in writers array
+    exam[examID]["writers"] = [...writers.filter((writer) => writer !== "")];
+
+    //save changes to db and propagate changes to exams component
+    this.saveChangesToDb();
+  };
 
   removeWriter = (e, index) => {
     console.log(index);
@@ -96,6 +200,7 @@ export class EditExam extends Component {
                   defaultValue={examName}
                   name={examName + "_edit"}
                   className="modelTitle_edit_input"
+                  style={{ fontSize: "medium" }}
                   onChange={(e) => this.examNameChanged(e)}
                 />
                 <input
@@ -103,6 +208,7 @@ export class EditExam extends Component {
                   defaultValue={examDate}
                   name={examDate + "_edit"}
                   className="modelTitle_edit_input"
+                  style={{ fontSize: "medium" }}
                   onChange={(e) => this.examDateChanged(e)}
                 />
               </div>
@@ -144,7 +250,7 @@ export class EditExam extends Component {
                 </div>
                 <div className="detail_container">
                   <span style={{ fontStyle: "italic" }}>Subjects:</span>
-                  {" " + subjects}
+                  {" " + subjects.join(", ")}
                 </div>
                 <div className="detail_container">
                   <span style={{ fontStyle: "italic" }}>

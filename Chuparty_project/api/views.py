@@ -1146,7 +1146,7 @@ method: POST
 POST body example:
 {
     "name": "OOP Exam",
-    "date": "15/07/19",
+    "date": "2019-07-16",
     "writers": [
     "Eliyahu Khelsatzchi",
     "Haim Shafir"
@@ -1198,7 +1198,7 @@ def setExam(request):
         if 'date' not in body.keys():
             return JsonResponse({"Status": "Can't Create Exam - 'date' not specified"}, status=500)
         date = body['date']
-        dateObj = datetime.strptime(date, "%d/%m/%y").date()
+        dateObj = datetime.strptime(date, "%Y-%m-%d").date()
 
         # id
         examID = str(name) + "_" + str(dateObj)
@@ -1336,7 +1336,7 @@ method: POST
 			}
 		],
 	"ChangeName": "Computer Networks Exam",
-	"ChangeDate": "16/07/19"
+	"ChangeDate": "2019-07-16"
 }
 '''
 ##################################################
@@ -1447,7 +1447,7 @@ def editExam(request):
             # change exam date
             if 'ChangeDate' in body.keys():
                 newDate = body['ChangeDate']
-                newDateObj = datetime.strptime(newDate, "%d/%m/%y").date()
+                newDateObj = datetime.strptime(newDate, "%Y-%m-%d").date()
                 if examObj.date != newDateObj:
                     examObj.date = newDateObj
                     changedDateFlg = True
@@ -1462,6 +1462,7 @@ def editExam(request):
                 examObj.save()
 
             ret_json = dict()
+            ret_json["Edited Exam"] = changeExamTemplate(examObj);
 
             if changedNameFlg == True:
                 ret_json['Changed Name'] = "True"

@@ -298,6 +298,9 @@ nav {
   border-radius: 7px;
   width: 80%;
 }
+.exam_detail {
+  text-decoration: underline;
+}
 .cancel_edit_course {
   float: right;
   cursor: pointer;

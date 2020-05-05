@@ -68,6 +68,7 @@ export default class Exams extends Component {
   };
 
   createDeepCopyExam = (exam) => {
+    console.log(exam);
     let examID = Object.keys(exam)[0];
 
     let course = exam[examID]["course"];
