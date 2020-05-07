@@ -13,6 +13,8 @@ import Register from "./Auth/Register.component";
 import Profile from "./Auth/Profile.component";
 
 export default class Home extends Component {
+  _isMounted = false;
+
   constructor() {
     super();
     this.state = {
@@ -21,6 +23,7 @@ export default class Home extends Component {
       currentContentView: <Main />,
     };
   }
+
   onSideBarClick = (clickMsg) => {
     console.log(clickMsg);
     switch (clickMsg) {

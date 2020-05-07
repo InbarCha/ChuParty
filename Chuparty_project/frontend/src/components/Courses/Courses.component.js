@@ -12,6 +12,8 @@ const COURSES_ROUTE =
     : "/api/getCourses";
 
 export default class Courses extends Component {
+  _isMounted = false;
+
   constructor() {
     super();
     this.state = {
@@ -21,6 +23,8 @@ export default class Courses extends Component {
     };
   }
   componentDidMount() {
+    this._isMounted = true;
+
     // courses should look like the following:
     // [{"OOP": {subjects: ["Object-Oriented Principles"]}}, ...]
     fetch(COURSES_ROUTE)
@@ -30,6 +34,10 @@ export default class Courses extends Component {
         this.SetSonComponents();
       })
       .catch((err) => console.error("error while fetching courses:", err));
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   chooseActiveCourse = (courseName) => {

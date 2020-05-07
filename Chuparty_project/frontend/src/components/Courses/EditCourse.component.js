@@ -49,26 +49,26 @@ export class EditCourse extends Component {
   saveCourse = (e) => {
     e.stopPropagation();
 
-    let course = this.state.course;
-    let courseName = Object.keys(course)[0];
-    let subjects = course[courseName]["subjects"];
+    // let course = this.state.course;
+    // let courseName = Object.keys(course)[0];
+    // let subjects = course[courseName]["subjects"];
 
-    if (this.state.addedSubjects.length > 0) {
-      course[courseName]["subjects"] = [
-        ...subjects,
-        ...this.state.addedSubjects.filter((subject) => subject !== ""),
-      ];
-    }
+    // if (this.state.addedSubjects.length > 0) {
+    //   course[courseName]["subjects"] = [
+    //     ...subjects,
+    //     ...this.state.addedSubjects.filter((subject) => subject !== ""),
+    //   ];
+    // }
+    // if (this.state.deletedSubjects.length > 0) {
+    //   course[courseName]["subjects"] = subjects.filter(function (e) {
+    //     return this.indexOf(e) < 0;
+    //   }, this.state.deletedSubjects);
+    // }
 
-    this.setState({ course: course });
+    // this.setState({ course: course });
 
     //save changes to db
     this.saveChangesToDb();
-
-    //TODO: move to saveToDb(), in fetch() callback
-    //propagate changes to the course itself (addition/deletion of subjects)
-    this.props.changedCourse(course, this.props.index);
-    this.props.changeCourseComponent(this.props.index, "COURSE");
   };
 
   //save changes to the DB
@@ -123,6 +123,8 @@ export class EditCourse extends Component {
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
+        this.props.changedCourse(data["Edited Course"], this.props.index);
+        this.props.changeCourseComponent(this.props.index, "COURSE");
       })
       .catch((err) => console.error("error while editing course:", err));
   };

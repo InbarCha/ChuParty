@@ -394,6 +394,7 @@ def editCourse(request):
                     if subjectObj.name in [subject.name for subject in newSubjectsList]:
                         newSubjectsList = list(
                             filter(lambda subject: subject.name != subjectObj.name, newSubjectsList))
+                        courseObj.subjects = newSubjectsList
                         deletedFromSubjectsFlg = True
 
                         deleteSubjectFromCoursesInSchools(name, subjectObj)
@@ -417,6 +418,7 @@ def editCourse(request):
 
             # create response
             ret_json = dict()
+            ret_json["Edited Course"] = changeCourseTemplate(courseObj);
 
             if changedNameFlg == True:
                 ret_json['Changed Name'] = "True"
