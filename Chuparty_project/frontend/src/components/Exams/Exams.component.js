@@ -13,7 +13,7 @@ const ALL_EXAMS_ROUTE =
 const EXAMS_FROM_COURSE_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/getExamsFromCourse?courseName="
-    : "/api/getExams/getExamsFromCourse?courseName=";
+    : "/api/getExamsFromCourse?courseName=";
 
 export default class Exams extends Component {
   constructor() {
@@ -34,7 +34,7 @@ export default class Exams extends Component {
           this.setState({ exams: data });
           this.SetSonComponents();
         })
-        .catch((err) => console.error("error while fetching exmas:", err));
+        .catch((err) => console.error("error while fetching exams 1:", err));
     } else {
       fetch(ALL_EXAMS_ROUTE)
         .then((res) => res.json())
@@ -43,7 +43,7 @@ export default class Exams extends Component {
           this.setState({ exams: data });
           this.SetSonComponents();
         })
-        .catch((err) => console.error("error while fetching exmas:", err));
+        .catch((err) => console.error("error while fetching exmas 2:", err));
     }
   }
 
