@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+import urllib
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -83,7 +84,11 @@ WSGI_APPLICATION = 'ChuParty_server.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
-        'NAME': 'chuparty_db'
+        'CLIENT': {
+        'host': 'mongodb+srv://Chuparty_Admin:PC57YKbzBIMY7kvk@chupartycluster-k7qfx.mongodb.net/test?retryWrites=true', 
+        'username': 'Chuparty_Admin',
+        'password': 'PC57YKbzBIMY7kvk',
+        }
     }
 }
 

@@ -25,7 +25,7 @@ pip install Django
 
 ## MongoDB Backup/Restore
 **Backup:** <br/>
-    mongodump --db chuparty_db --gzip -o C:\Users\Inbar\Desktop\Final_Year_Project\ChuPartyGit\Chuparty\DB
+    mongodump --db chuparty_db --gzip -o C:\Users\aaa\Project\ChuParty-master\DB
 
 **Restore:** <br/>
-    mongorestore --gzip --drop --db chuparty_db C:\Users\Inbar\Desktop\Final_Year_Project\ChuPartyGit\Chuparty\DB\chuparty_db
+    mongorestore --gzip --drop --db chuparty_db C:\Users\aaa\Project\ChuParty-master\DB\chuparty_db
