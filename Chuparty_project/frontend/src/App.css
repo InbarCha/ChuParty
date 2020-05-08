@@ -152,6 +152,9 @@ form {
 .settings_icon {
   float: right;
 }
+.questions_settings_icon {
+  font-size: 14px;
+}
 .add_course_icon {
   float: right;
   height: 20px;
@@ -159,14 +162,23 @@ form {
   font-size: 30px !important;
   cursor: pointer;
 }
+.btn_center_wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .save_icon {
   float: left;
+}
+.save_question_icon {
+  float: right;
 }
 .delete_icon {
   float: left;
 }
 .save_icon:hover,
-.delete_icon:hover {
+.delete_icon:hover,
+.save_question_icon:hover {
   cursor: pointer;
 }
 .settings_icon:hover {
@@ -186,8 +198,16 @@ form {
   box-shadow: 0 0 2px 2px darkgray;
   background-color: white;
   padding: 10px 10px 10px 10px;
-  margin: 2.5vw 2.5vw;
+  margin: 2.5vw;
   border-radius: 10px;
+}
+.edit_all_questions_icon {
+  font-size: 40px;
+  margin: 15px;
+}
+.narrow_row {
+  margin: 0 !important;
+  padding-top: 20px;
 }
 .question_answers {
   padding: 15px 15px 15px 15px;
@@ -240,6 +260,11 @@ form {
   margin-top: 5px;
   font-size: small;
 }
+.edit_all_questions_btn {
+  margin: 15px;
+  font-size: small;
+  justify-content: center;
+}
 .edit_img {
   padding-top: 1.2vw;
   padding-bottom: 1vw;
@@ -252,6 +277,9 @@ form {
   height: 80%;
   padding-left: 7%;
   content: url("./assets/exam.png");
+}
+.row_top_margin_narrow {
+  margin-top: 5px !important;
 }
 .model_name {
   font-weight: bold;
@@ -295,6 +323,29 @@ nav {
   text-align: center;
   border-radius: 7px;
   width: 80%;
+}
+.question_edit_input {
+  text-align: center;
+  border-radius: 7px;
+  width: 80%;
+  margin-left: 15px;
+  background-color: rgb(208, 230, 243);
+}
+.question_body_edit_input {
+  text-align: center;
+  margin-bottom: 15px;
+  margin-top: 15px;
+  border-radius: 7px;
+  width: 100%;
+  height: 40px;
+  background-color: rgb(216, 214, 214);
+}
+.loading_title {
+  text-align: center;
+  font-size: xx-large;
+  font-weight: bold;
+  color: rgb(59, 128, 173);
+  font-family: "Courier New", Courier, monospace;
 }
 .exam_detail {
   text-decoration: underline;

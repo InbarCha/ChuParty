@@ -205,7 +205,8 @@ export default class Courses extends Component {
         </React.Fragment>
       ) : (
         <div className="col-centered models_loading">
-          <RotateLoader css={override} size={80} />
+          <div className="loading_title"> Loading Courses... </div>
+          <RotateLoader css={override} size={50} />
         </div>
       );
     return res;

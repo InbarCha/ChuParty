@@ -23,7 +23,7 @@ export class Questions extends Component {
       exam: "",
       examName: "",
       examDate: "",
-      questions: null,
+      questions: [],
       activeExamsID: localStorage["activeExamID"],
       activeCourse: localStorage["activeCourse"],
       sonComponents: [],
@@ -60,7 +60,26 @@ export class Questions extends Component {
 
   deleteFromSonComponents = (index) => {};
 
-  createDeepCopyQuestion = (question_orig) => {};
+  createDeepCopyQuestion = (question) => {
+    let body = Object.keys(question);
+    let course = question[body]["course"];
+
+    let courseName = Object.keys(course)[0];
+    let courseSubjects = course[courseName]["subjects"];
+    let course_copy = {};
+    course_copy[courseName] = {};
+    course_copy[courseName]["subjects"] = [...courseSubjects];
+
+    let question_copy = {};
+    question_copy[body] = {};
+    question_copy[body]["answers"] = [...question[body]["answers"]];
+    question_copy[body]["correctAnswer"] = question[body]["correctAnswer"];
+    question_copy[body]["course"] = course_copy;
+    question_copy[body]["difficulty"] = question[body]["difficulty"];
+    question_copy[body]["subject"] = question[body]["subject"];
+
+    return question_copy;
+  };
 
   changedQuestion = (question, index) => {};
 
@@ -127,7 +146,7 @@ export class Questions extends Component {
 
   render() {
     let res =
-      this.state.questions !== null ? (
+      this.state.questions.length !== 0 ? (
         <React.Fragment>
           <div className="page_title"> Questions </div>
           {this.state.activeExamsID !== "" && (
@@ -150,19 +169,34 @@ export class Questions extends Component {
           )}
           <Container fluid>
             {this.state.questions.length > 0 && (
-              <Row>
-                <Col md={{ span: 6, offset: 3 }} sm={{ span: 8, offset: 2 }}>
-                  <div className="questions_form">
-                    {this.state.sonComponents}
-                  </div>
-                </Col>
-              </Row>
+              <React.Fragment>
+                <Row className="narrow_row">
+                  <Col md={{ span: 6, offset: 3 }} sm={{ span: 8, offset: 2 }}>
+                    <div className="btn_center_wrapper">
+                      <button
+                        className="btn btn-dark questions_settings_icon"
+                        onClick={(e) => this.editQuestion(e)}
+                      >
+                        Edit All
+                      </button>
+                    </div>
+                  </Col>
+                </Row>
+                <Row className="row_top_margin_narrow">
+                  <Col md={{ span: 6, offset: 3 }} sm={{ span: 8, offset: 2 }}>
+                    <div className="questions_form">
+                      {this.state.sonComponents}
+                    </div>
+                  </Col>
+                </Row>
+              </React.Fragment>
             )}
           </Container>
         </React.Fragment>
       ) : this.state.activeExamsID !== undefined ? (
         <div className="col-centered models_loading">
-          <RotateLoader css={override} size={80} />
+          <div className="loading_title"> Loading Questions... </div>
+          <RotateLoader css={override} size={50} />
         </div>
       ) : (
         <React.Fragment>

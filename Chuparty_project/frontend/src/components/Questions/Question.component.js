@@ -57,7 +57,7 @@ export class Question extends Component {
         >
           settings
         </span>
-        <div className="question_body"> {this.props.body}</div>
+        <div className="question_body"> {this.state.body}</div>
         <div> {this.getAnswers()} </div>
       </div>
     );

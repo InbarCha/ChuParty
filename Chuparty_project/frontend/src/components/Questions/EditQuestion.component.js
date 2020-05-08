@@ -26,9 +26,10 @@ const override = css`
 `;
 
 export class EditQuestion extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
+      question: this.props.question,
       body: null,
       answers: [],
       correctAnswer: null,
@@ -56,26 +57,56 @@ export class EditQuestion extends Component {
 
   answersChanged = (e, index) => {};
 
+  saveQuestion = (e) => {};
+
+  bodyChanged = (e) => {};
+
+  deleteQuestion = (e) => {};
+
   getAnswers = () => {
     let answers = this.state.answers;
     return (
       <div className="question_answers">
-        {answers.map((elm, index) => {
-          return (
-            <div className="question_answer" key={uuid()}>
-              <span className="material-icons">question_answer</span>{" "}
-              <span style={{ paddingLeft: "1vw" }}>{elm}</span>
-              <input
-                type="text"
-                value={elm}
-                name={elm + "_edit"}
-                className="question_edit_input"
-                disabled={this.state.loading}
-                onChange={(e) => this.answersChanged(e, index)}
-              />
-            </div>
-          );
-        })}
+        <div
+          className="material-icons save_question_icon"
+          onClick={(e) => this.saveQuestion(e)}
+        >
+          save
+        </div>
+        <span
+          className="material-icons delete_icon"
+          onClick={(e) => this.deleteQuestion(e)}
+        >
+          delete
+        </span>
+        <br />
+        <div className="col-centered">
+          <input
+            type="text"
+            defaultValue={this.state.body}
+            name={this.state.body + "_edit"}
+            className="question_body_edit_input"
+            disabled={this.state.loading}
+            onChange={(e) => this.bodyChanged(e)}
+          />
+        </div>
+        <div className="col-centered">
+          {answers.map((elm, index) => {
+            return (
+              <div className="question_answer" key={uuid()}>
+                <span className="material-icons">question_answer</span>{" "}
+                <input
+                  type="text"
+                  defaultValue={elm}
+                  name={elm + "_edit"}
+                  className="question_edit_input"
+                  disabled={this.state.loading}
+                  onChange={(e) => this.answersChanged(e, index)}
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
     );
   };

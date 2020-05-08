@@ -209,7 +209,8 @@ export default class Exams extends Component {
         </React.Fragment>
       ) : this.state.activeCourse !== undefined ? (
         <div className="col-centered models_loading">
-          <RotateLoader css={override} size={80} />
+          <div className="loading_title"> Loading Exams... </div>
+          <RotateLoader css={override} size={50} />
         </div>
       ) : (
         <React.Fragment>
