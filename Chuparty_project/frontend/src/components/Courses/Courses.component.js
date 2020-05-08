@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import { Container, Row } from "react-bootstrap";
+import { css } from "@emotion/core";
+import RotateLoader from "react-spinners/ClipLoader";
 import Course from "./Course.component";
 import EditCourse from "./EditCourse.component";
 import AddCourse from "./AddCourse.component";
@@ -11,20 +13,22 @@ const COURSES_ROUTE =
     ? "http://localhost:8000/api/getCourses"
     : "/api/getCourses";
 
-export default class Courses extends Component {
-  _isMounted = false;
+const override = css`
+  display: block;
+  margin: 0 auto;
+`;
 
+export default class Courses extends Component {
   constructor() {
     super();
     this.state = {
-      courses: [],
+      courses: null,
       activeCourse: localStorage["activeCourse"],
       sonComponents: [],
+      loading: true,
     };
   }
   componentDidMount() {
-    this._isMounted = true;
-
     // courses should look like the following:
     // [{"OOP": {subjects: ["Object-Oriented Principles"]}}, ...]
     fetch(COURSES_ROUTE)
@@ -34,10 +38,6 @@ export default class Courses extends Component {
         this.SetSonComponents();
       })
       .catch((err) => console.error("error while fetching courses:", err));
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
   }
 
   chooseActiveCourse = (courseName) => {
@@ -203,8 +203,8 @@ export default class Courses extends Component {
           </Container>
         </React.Fragment>
       ) : (
-        <div>
-          <span>Loading Courses..</span>
+        <div className="col-centered courses_loading">
+          <RotateLoader css={override} />
         </div>
       );
     return res;

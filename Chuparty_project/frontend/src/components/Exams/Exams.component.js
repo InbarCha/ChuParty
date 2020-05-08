@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import { Container, Row } from "react-bootstrap";
+import { css } from "@emotion/core";
+import RotateLoader from "react-spinners/ClipLoader";
 import Exam from "./Exam.component";
 import AddExam from "./AddExam.component";
 import EditExam from "./EditExam.component";
@@ -15,11 +17,16 @@ const EXAMS_FROM_COURSE_ROUTE =
     ? "http://localhost:8000/api/getExamsFromCourse?courseName="
     : "/api/getExamsFromCourse?courseName=";
 
+const override = css`
+  display: block;
+  margin: 0 auto;
+`;
+
 export default class Exams extends Component {
   constructor() {
     super();
     this.state = {
-      exams: [],
+      exams: null,
       activeCourse: localStorage["activeCourse"],
       sonComponents: [],
     };
@@ -213,8 +220,8 @@ export default class Exams extends Component {
           </Container>
         </React.Fragment>
       ) : (
-        <div>
-          <span>Loading Exams..</span>
+        <div className="col-centered courses_loading">
+          <RotateLoader css={override} />
         </div>
       );
     return res;

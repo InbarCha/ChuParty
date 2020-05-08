@@ -771,8 +771,7 @@ def getSchools(request):
     if request.method == "GET":
         schools = School.objects.all()
         schoolsList = changeSchoolsTemplateInList(schools)
-
-        return JsonResponse(list(schoolsList), safe=False)
+        return JsonResponse(schoolsList, safe=False)
 
     else:  # request.method isn't GET
         return JsonResponse(
@@ -1107,7 +1106,7 @@ def getQuestions(request):
     else:  # request.method isn't GET
         return JsonResponse(
             {
-                        "Status": "getSchools() only accepts GET requests",
+                        "Status": "getQuestions() only accepts GET requests",
                     },
             status=500
             )

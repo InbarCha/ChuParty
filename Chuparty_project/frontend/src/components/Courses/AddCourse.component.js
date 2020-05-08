@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { Col } from "react-bootstrap";
 import { bounce } from "react-animations";
 import styled, { keyframes } from "styled-components";
+import { css } from "@emotion/core";
+import RotateLoader from "react-spinners/ClipLoader";
 import scrollToComponent from "react-scroll-to-component";
 
 const SET_COURSE_ROUTE =
@@ -13,12 +15,18 @@ const Bounce = styled.div`
   animation: 2s ${keyframes`${bounce}`};
 `;
 
+const override = css`
+  display: block;
+  margin: 0 auto;
+`;
+
 export class AddCourse extends Component {
   constructor() {
     super();
     this.state = {
       course: "",
       addedSubjects: [],
+      loading: false,
     };
   }
 
@@ -28,7 +36,7 @@ export class AddCourse extends Component {
     course["Course Name"] = {};
     course["Course Name"]["subjects"] = [];
 
-    this.setState({ course: course });
+    this.setState({ course: course, loading: false });
 
     //scroll down to new component
     scrollToComponent(this, {
@@ -41,45 +49,55 @@ export class AddCourse extends Component {
 
   cancelEdit = (e) => {
     e.stopPropagation();
-    this.props.deleteFromSonComponents(this.props.index);
+    if (!this.state.loading) {
+      this.props.deleteFromSonComponents(this.props.index);
+    }
   };
 
   courseNameChanged = (e) => {
-    let newVal = e.target.value;
+    if (!this.state.loading) {
+      let newVal = e.target.value;
 
-    let course = { ...this.state.course };
-    let oldCourseName = Object.keys(course)[0];
+      let course = { ...this.state.course };
+      let oldCourseName = Object.keys(course)[0];
 
-    let newCourse = {};
-    newCourse[newVal] = {};
-    newCourse[newVal]["subjects"] = course[oldCourseName]["subjects"];
+      let newCourse = {};
+      newCourse[newVal] = {};
+      newCourse[newVal]["subjects"] = course[oldCourseName]["subjects"];
 
-    this.setState({ course: newCourse });
+      this.setState({ course: newCourse });
+    }
   };
 
   addSubject = (e) => {
     e.stopPropagation();
 
-    let addedSubjects = this.state.addedSubjects;
-    addedSubjects = [...addedSubjects, ""];
-    this.setState({ addedSubjects: addedSubjects });
+    if (!this.state.loading) {
+      let addedSubjects = this.state.addedSubjects;
+      addedSubjects = [...addedSubjects, ""];
+      this.setState({ addedSubjects: addedSubjects });
+    }
   };
 
   subjectChanged = (e, index) => {
-    let newVal = e.target.value;
+    if (!this.state.loading) {
+      let newVal = e.target.value;
 
-    let addedSubjects = this.state.addedSubjects;
-    addedSubjects[index] = newVal;
+      let addedSubjects = this.state.addedSubjects;
+      addedSubjects[index] = newVal;
 
-    this.setState({ addedSubjects: addedSubjects });
+      this.setState({ addedSubjects: addedSubjects });
+    }
   };
 
   removeSubject = (e, index) => {
     e.stopPropagation();
 
-    let addedSubjects = this.state.addedSubjects;
-    addedSubjects.splice(index, 1);
-    this.setState({ addedSubjects: addedSubjects });
+    if (!this.state.loading) {
+      let addedSubjects = this.state.addedSubjects;
+      addedSubjects.splice(index, 1);
+      this.setState({ addedSubjects: addedSubjects });
+    }
   };
 
   // {
@@ -116,40 +134,50 @@ export class AddCourse extends Component {
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
-
         if (data["Status"] === "Added Course") {
           //propagate changes to the course itself
           this.props.addCourseToSonComponents(course);
+        } else if (data["Status"] === "Course Already Exists") {
+          //TODO: Change to messageBox
+          window.alert("Course Already Exists!");
+          this.props.deleteFromSonComponents(this.props.index);
         }
+        this.setState({ loading: false });
       })
-      .catch((err) => console.error("error while creating course:", err));
+      .catch((err) => {
+        console.error("error while creating course:", err);
+        this.setState({ loading: false });
+      });
   };
 
   //TODO: change so course isn't saved if course name is empty
   saveCourse = (e) => {
     e.stopPropagation();
 
-    //save changes to course_orig
-    let course = this.state.course;
-    let courseName = Object.keys(course)[0];
+    if (!this.state.loading) {
+      let course = this.state.course;
+      let courseName = Object.keys(course)[0];
 
-    //COURSE NAME ISN'T EMPTY - DATE THE NEW COURSE
-    if (courseName !== "Course Name") {
-      let subjects = course[courseName]["subjects"];
+      //COURSE NAME ISN'T EMPTY - CREATE THE NEW COURSE
+      if (courseName !== "Course Name") {
+        this.setState({ loading: true });
 
-      if (this.state.addedSubjects.length > 0) {
-        course[courseName]["subjects"] = [
-          ...subjects,
-          ...this.state.addedSubjects.filter((subject) => subject !== ""),
-        ];
+        let subjects = course[courseName]["subjects"];
+
+        if (this.state.addedSubjects.length > 0) {
+          course[courseName]["subjects"] = [
+            ...subjects,
+            ...this.state.addedSubjects.filter((subject) => subject !== ""),
+          ];
+        }
+
+        //save changes to db
+        this.saveChangesToDb();
       }
-
-      //save changes to db
-      this.saveChangesToDb();
-    }
-    //COURSE NAME IS EMPTY - DELETE ADD COMPONENT
-    else {
-      this.props.deleteFromSonComponents(this.props.index);
+      //COURSE NAME IS EMPTY - DELETE ADD COMPONENT
+      else {
+        this.props.deleteFromSonComponents(this.props.index);
+      }
     }
   };
 
@@ -179,6 +207,7 @@ export class AddCourse extends Component {
                     placeholder="Course Name"
                     name="course_namw"
                     className="modelTitle_edit_input"
+                    disabled={this.state.loading}
                     onChange={(e) => this.courseNameChanged(e)}
                   />
                 </div>
@@ -199,6 +228,7 @@ export class AddCourse extends Component {
                         value={elm}
                         name={elm + "_edit"}
                         className="subject_edit_input"
+                        disabled={this.state.loading}
                         onChange={(e) => this.subjectChanged(e, j_index)}
                       />
                       <span
@@ -211,6 +241,9 @@ export class AddCourse extends Component {
                   );
                 })}
               </div>
+            </div>
+            <div className="col-centered courses_loading">
+              <RotateLoader css={override} loading={this.state.loading} />
             </div>
           </div>
         </Bounce>

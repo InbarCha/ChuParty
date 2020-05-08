@@ -5,8 +5,6 @@ const SCHOOLS_ROUTE =
     : "/api/getSchools";
 
 export default class Main extends Component {
-  _isMounted = false;
-
   constructor() {
     super();
     this.state = {
@@ -14,7 +12,6 @@ export default class Main extends Component {
     };
   }
   componentDidMount() {
-    this._isMounted = true;
     /* schools should look like the following:
         //
         { 
@@ -38,22 +35,12 @@ export default class Main extends Component {
         }
         */
     fetch(SCHOOLS_ROUTE)
-      .then((res) => {
-        if (this._isMounted) {
-          res.json();
-        }
-      })
+      .then((res) => res.json())
       .then((data) => {
-        if (this._isMounted) {
-          console.log(data);
-          this.setState({ schools: data });
-        }
+        console.log(data);
+        this.setState({ schools: data });
       })
       .catch((err) => console.error("error while fetching schools:", err));
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
   }
 
   getSchoolsArr() {

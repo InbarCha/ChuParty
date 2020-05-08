@@ -1,10 +1,17 @@
 import React, { Component } from "react";
 import { Col } from "react-bootstrap";
+import { css } from "@emotion/core";
+import RotateLoader from "react-spinners/ClipLoader";
 import { bounce } from "react-animations";
 import styled, { keyframes } from "styled-components";
 
 const Bounce = styled.div`
   animation: 2s ${keyframes`${bounce}`};
+`;
+
+const override = css`
+  display: block;
+  margin: 0 auto;
 `;
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
@@ -25,50 +32,42 @@ export class EditCourse extends Component {
       course: this.props.course,
       addedSubjects: [],
       deletedSubjects: [],
+      loading: false,
     };
+  }
+
+  componentDidMount() {
+    this.setState({ loading: false });
   }
 
   deleteCourse = (e) => {
     e.stopPropagation();
 
-    //TODO: change to message-box
-    if (window.confirm("Are you sure you want to delete this courese?")) {
-      let course = this.props.course_orig;
-      let courseName = Object.keys(course)[0];
+    if (!this.state.loading) {
+      this.setState({ loading: true });
 
-      fetch(DELETE_COURSE_ROUTE + courseName)
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-          this.props.deleteFromSonComponents(this.props.index);
-        })
-        .catch((err) => console.error("error while fetching courses:", err));
+      //TODO: change to message-box
+      if (window.confirm("Are you sure you want to delete this courese?")) {
+        let course = this.props.course_orig;
+        let courseName = Object.keys(course)[0];
+
+        fetch(DELETE_COURSE_ROUTE + courseName)
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
+            this.props.deleteFromSonComponents(this.props.index);
+          })
+          .catch((err) => console.error("error while fetching courses:", err));
+      }
     }
   };
 
   saveCourse = (e) => {
     e.stopPropagation();
-
-    // let course = this.state.course;
-    // let courseName = Object.keys(course)[0];
-    // let subjects = course[courseName]["subjects"];
-
-    // if (this.state.addedSubjects.length > 0) {
-    //   course[courseName]["subjects"] = [
-    //     ...subjects,
-    //     ...this.state.addedSubjects.filter((subject) => subject !== ""),
-    //   ];
-    // }
-    // if (this.state.deletedSubjects.length > 0) {
-    //   course[courseName]["subjects"] = subjects.filter(function (e) {
-    //     return this.indexOf(e) < 0;
-    //   }, this.state.deletedSubjects);
-    // }
-
-    // this.setState({ course: course });
-
-    //save changes to db
-    this.saveChangesToDb();
+    if (!this.state.loading) {
+      this.setState({ loading: true });
+      this.saveChangesToDb();
+    }
   };
 
   //save changes to the DB
@@ -123,15 +122,21 @@ export class EditCourse extends Component {
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
+        this.setState({ loading: false });
         this.props.changedCourse(data["Edited Course"], this.props.index);
         this.props.changeCourseComponent(this.props.index, "COURSE");
       })
-      .catch((err) => console.error("error while editing course:", err));
+      .catch((err) => {
+        console.error("error while editing course:", err);
+        this.setState({ loading: false });
+      });
   };
 
   cancelEdit = (e) => {
     e.stopPropagation();
-    this.props.changeCourseComponent(this.props.index, "COURSE");
+    if (!this.state.loading) {
+      this.props.changeCourseComponent(this.props.index, "COURSE");
+    }
   };
 
   subjectChanged = (e, index) => {
@@ -144,49 +149,55 @@ export class EditCourse extends Component {
   };
 
   courseNameChanged = (e) => {
-    let newVal = e.target.value;
+    if (!this.state.loading) {
+      let newVal = e.target.value;
 
-    let course = { ...this.state.course };
-    let oldCourseName = Object.keys(course)[0];
+      let course = { ...this.state.course };
+      let oldCourseName = Object.keys(course)[0];
 
-    let newCourse = {};
-    newCourse[newVal] = {};
-    newCourse[newVal]["subjects"] = course[oldCourseName]["subjects"];
+      let newCourse = {};
+      newCourse[newVal] = {};
+      newCourse[newVal]["subjects"] = course[oldCourseName]["subjects"];
 
-    this.setState({ course: newCourse });
-    console.log(Object.keys(this.state.course)[0]);
+      this.setState({ course: newCourse });
+      console.log(Object.keys(this.state.course)[0]);
+    }
   };
 
   addSubject = (e) => {
     e.stopPropagation();
 
-    let addedSubjects = this.state.addedSubjects;
-    addedSubjects = [...addedSubjects, ""];
-    this.setState({ addedSubjects: addedSubjects });
+    if (!this.state.loading) {
+      let addedSubjects = this.state.addedSubjects;
+      addedSubjects = [...addedSubjects, ""];
+      this.setState({ addedSubjects: addedSubjects });
+    }
   };
 
   removeSubject = (e, index, array_name) => {
     e.stopPropagation();
 
-    //remove an existing course subject
-    if (array_name === "course_subjects") {
-      let course = this.state.course;
-      let courseName = Object.keys(course)[0];
-      let subjects = course[courseName]["subjects"];
+    if (!this.state.loading) {
+      //remove an existing course subject
+      if (array_name === "course_subjects") {
+        let course = this.state.course;
+        let courseName = Object.keys(course)[0];
+        let subjects = course[courseName]["subjects"];
 
-      this.setState({
-        deletedSubjects: [...this.state.deletedSubjects, subjects[index]],
-      });
+        this.setState({
+          deletedSubjects: [...this.state.deletedSubjects, subjects[index]],
+        });
 
-      subjects.splice(index, 1);
-      course[courseName]["subjects"] = subjects;
-      this.setState({ course: course });
-    }
-    //remove one of the newly added subjects
-    else if (array_name === "added_subjects") {
-      let addedSubjects = this.state.addedSubjects;
-      addedSubjects.splice(index, 1);
-      this.setState({ addedSubjects: addedSubjects });
+        subjects.splice(index, 1);
+        course[courseName]["subjects"] = subjects;
+        this.setState({ course: course });
+      }
+      //remove one of the newly added subjects
+      else if (array_name === "added_subjects") {
+        let addedSubjects = this.state.addedSubjects;
+        addedSubjects.splice(index, 1);
+        this.setState({ addedSubjects: addedSubjects });
+      }
     }
   };
 
@@ -217,6 +228,7 @@ export class EditCourse extends Component {
                   defaultValue={courseName}
                   name={courseName + "_edit"}
                   className="modelTitle_edit_input"
+                  disabled={this.state.loading}
                   onChange={(e) => this.courseNameChanged(e)}
                 />
               </div>
@@ -267,6 +279,7 @@ export class EditCourse extends Component {
                         value={elm}
                         name={elm + "_edit"}
                         className="subject_edit_input"
+                        disabled={this.state.loading}
                         onChange={(e) => this.subjectChanged(e, j_index)}
                       />
                       <span
@@ -281,6 +294,9 @@ export class EditCourse extends Component {
                   );
                 })}
               </div>
+            </div>
+            <div className="col-centered courses_loading">
+              <RotateLoader css={override} loading={this.state.loading} />
             </div>
           </div>
         </Bounce>

@@ -311,3 +311,6 @@ nav {
 .modelTitle_edit_input {
   background-color: rgb(216, 214, 214);
 }
+.courses_loading {
+  padding-top: 10px;
+}

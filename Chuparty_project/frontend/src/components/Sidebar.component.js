@@ -42,6 +42,16 @@ export default class Home extends Component {
 
         <div
           className="side_item"
+          onClick={(e) => this.state.parentClickHandler("QUESTIONS")}
+        >
+          <i className="material-icons">question_answer</i>
+        </div>
+        <div className="side_description">
+          <span>Questions</span>
+        </div>
+
+        <div
+          className="side_item"
           onClick={(e) => this.state.parentClickHandler("FEEDBACK")}
         >
           <i className="material-icons">message</i>
