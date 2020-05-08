@@ -155,6 +155,7 @@ export default class Courses extends Component {
       sonComponents[index] = "";
     } else if (index === sonComponents.length - 1) {
       sonComponents.pop();
+      courses.pop();
     }
 
     this.setState({ courses: courses, sonComponents: sonComponents });
@@ -203,8 +204,8 @@ export default class Courses extends Component {
           </Container>
         </React.Fragment>
       ) : (
-        <div className="col-centered courses_loading">
-          <RotateLoader css={override} size={100} />
+        <div className="col-centered models_loading">
+          <RotateLoader css={override} size={80} />
         </div>
       );
     return res;

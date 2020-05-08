@@ -45,7 +45,10 @@ export default class Home extends Component {
         });
         break;
       case "QUESTIONS":
-        this.setState({ currentContentView: <Questions /> });
+        this.setState({ currentContentView: <Questions edit={false} /> });
+        break;
+      case "QUESTIONS_EDIT":
+        this.setState({ currentContentView: <Questions edit={true} /> });
         break;
       case "FEEDBACK":
         this.setState({ currentContentView: <Feedback /> });

@@ -198,7 +198,6 @@ form {
 .question_answer > span {
   vertical-align: middle;
 }
-
 .model_container {
   background-color: rgb(156, 193, 218);
   border-radius: 15px;
@@ -268,7 +267,6 @@ form {
   border-radius: 10px;
   display: block;
   margin: 10px;
-  padding-bottom: 10px;
 }
 .row {
   margin-top: 5vh;
@@ -311,6 +309,11 @@ nav {
 .modelTitle_edit_input {
   background-color: rgb(216, 214, 214);
 }
-.courses_loading {
+.models_loading {
   padding-top: 40px;
+  padding-bottom: 10px;
+}
+.model_loading {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }

@@ -269,11 +269,9 @@ def setCourse(request):
                 status=500
             )
         else:
-            return JsonResponse(
-                {
-                        "Status": "Added Course",
-                    }
-            )
+            ret_json = { "Status": "Added Course" }
+            ret_json["New Course"] = changeCourseTemplate(ret_tuple[1])
+            return JsonResponse(ret_json)
 
     else:  # request.method isn't POST
         return JsonResponse(
@@ -589,17 +587,17 @@ def setSchool(request):
             newShool.save()
             return JsonResponse(
                 {
-                        "Status": "Added School",
-                    }
+                    "Status": "Added School",
+                }
             )
 
     else:  # request.method isn't POST
         return JsonResponse(
             {
-                        "Status": "setSchool() only accepts POST requests",
-                    },
-            status=500
-            )
+                "Status": "setSchool() only accepts POST requests",
+            },
+        status=500
+        )
 
 
 ##################################################

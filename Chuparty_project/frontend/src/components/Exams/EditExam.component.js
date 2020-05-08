@@ -212,6 +212,13 @@ export class EditExam extends Component {
     }
   };
 
+  editQuestions = (e) => {
+    e.stopPropagation();
+
+    localStorage["activeExamID"] = Object.keys(this.props.exam)[0];
+    this.props.parentClickHandler("QUESTIONS_EDIT");
+  };
+
   render() {
     let examID = Object.keys(this.state.exam)[0];
     let examName = this.state.exam[examID]["name"];
@@ -304,13 +311,16 @@ export class EditExam extends Component {
                   </span>
                   {" " + questions.length}
                 </div>
-                <div className="btn btn-primary edit_questions_btn">
+                <div
+                  className="btn btn-primary edit_questions_btn"
+                  onClick={(e) => this.editQuestions(e)}
+                >
                   Edit Questions
                 </div>
+                <div className="col-centered model_loading">
+                  <RotateLoader css={override} loading={this.state.loading} />
+                </div>
               </div>
-            </div>
-            <div className="col-centered courses_loading">
-              <RotateLoader css={override} loading={this.state.loading} />
             </div>
           </div>
         </Bounce>

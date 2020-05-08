@@ -5,15 +5,6 @@ import RotateLoader from "react-spinners/ClipLoader";
 import { bounce } from "react-animations";
 import styled, { keyframes } from "styled-components";
 
-const Bounce = styled.div`
-  animation: 2s ${keyframes`${bounce}`};
-`;
-
-const override = css`
-  display: block;
-  margin: 0 auto;
-`;
-
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
   console.log("DEV enabled");
 const EDIT_COURSE_ROUTE =
@@ -24,6 +15,15 @@ const DELETE_COURSE_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/deleteCourse?name="
     : "/api/deleteCourse?name=";
+
+const Bounce = styled.div`
+  animation: 2s ${keyframes`${bounce}`};
+`;
+
+const override = css`
+  display: block;
+  margin: 0 auto;
+`;
 
 export class EditCourse extends Component {
   constructor(props) {
@@ -297,10 +297,10 @@ export class EditCourse extends Component {
                     </div>
                   );
                 })}
+                <div className="col-centered model_loading">
+                  <RotateLoader css={override} loading={this.state.loading} />
+                </div>
               </div>
-            </div>
-            <div className="col-centered courses_loading">
-              <RotateLoader css={override} loading={this.state.loading} />
             </div>
           </div>
         </Bounce>

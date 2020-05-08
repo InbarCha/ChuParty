@@ -136,7 +136,7 @@ export class AddCourse extends Component {
         console.log(data);
         if (data["Status"] === "Added Course") {
           //propagate changes to the course itself
-          this.props.addCourseToSonComponents(course);
+          this.props.addCourseToSonComponents(data["New Course"]);
         } else if (data["Status"] === "Course Already Exists") {
           //TODO: Change to messageBox
           window.alert("Course Already Exists!");
@@ -239,10 +239,10 @@ export class AddCourse extends Component {
                     </div>
                   );
                 })}
+                <div className="col-centered model_loading">
+                  <RotateLoader css={override} loading={this.state.loading} />
+                </div>
               </div>
-            </div>
-            <div className="col-centered courses_loading">
-              <RotateLoader css={override} loading={this.state.loading} />
             </div>
           </div>
         </Bounce>

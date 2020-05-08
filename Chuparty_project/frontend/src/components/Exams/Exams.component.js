@@ -8,10 +8,6 @@ import EditExam from "./EditExam.component";
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
   console.log("DEV enabled");
-const ALL_EXAMS_ROUTE =
-  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
-    ? "http://localhost:8000/api/getExams"
-    : "/api/getExams";
 const EXAMS_FROM_COURSE_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/getExamsFromCourse?courseName="
@@ -33,7 +29,7 @@ export default class Exams extends Component {
   }
 
   componentDidMount() {
-    if (this.state.activeCourse !== "") {
+    if (this.state.activeCourse !== undefined) {
       fetch(EXAMS_FROM_COURSE_ROUTE + this.state.activeCourse)
         .then((res) => res.json())
         .then((data) => {
@@ -42,15 +38,6 @@ export default class Exams extends Component {
           this.SetSonComponents();
         })
         .catch((err) => console.error("error while fetching exams 1:", err));
-    } else {
-      fetch(ALL_EXAMS_ROUTE)
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-          this.setState({ exams: data });
-          this.SetSonComponents();
-        })
-        .catch((err) => console.error("error while fetching exmas 2:", err));
     }
   }
 
@@ -164,6 +151,7 @@ export default class Exams extends Component {
             changeExamComponent={this.changeExamComponent}
             changedExam={this.changedExam}
             deleteFromSonComponents={this.deleteFromSonComponents}
+            parentClickHandler={this.props.parentClickHandler}
           />
         );
         break;
@@ -219,10 +207,21 @@ export default class Exams extends Component {
             <Row>{this.state.sonComponents}</Row>
           </Container>
         </React.Fragment>
-      ) : (
-        <div className="col-centered courses_loading">
-          <RotateLoader css={override} size={100} />
+      ) : this.state.activeCourse !== undefined ? (
+        <div className="col-centered models_loading">
+          <RotateLoader css={override} size={80} />
         </div>
+      ) : (
+        <React.Fragment>
+          <div className="page_title"> Questions </div>
+          <div className="active_model_title">
+            <span
+              style={{ fontStyle: "italic", fontSize: "x-large", color: "red" }}
+            >
+              Error Loading Exam: No Course Chosen
+            </span>
+          </div>
+        </React.Fragment>
       );
     return res;
   }
