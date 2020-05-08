@@ -63,21 +63,27 @@ export class EditQuestion extends Component {
 
   deleteQuestion = (e) => {};
 
+  cancelEdit = (e) => {};
+
+  removeAnswer = (e, index) => {};
+
+  addAnswer = (e) => {};
+
   getAnswers = () => {
     let answers = this.state.answers;
     return (
       <div className="question_answers">
-        <div
-          className="material-icons save_question_icon"
-          onClick={(e) => this.saveQuestion(e)}
-        >
-          save
-        </div>
         <span
           className="material-icons delete_icon"
           onClick={(e) => this.deleteQuestion(e)}
         >
           delete
+        </span>
+        <span
+          className="material-icons cancel_edit_model"
+          onClick={(e) => this.cancelEdit(e)}
+        >
+          cancel
         </span>
         <br />
         <div className="col-centered">
@@ -90,22 +96,38 @@ export class EditQuestion extends Component {
             onChange={(e) => this.bodyChanged(e)}
           />
         </div>
-        <div className="col-centered">
-          {answers.map((elm, index) => {
-            return (
-              <div className="question_answer" key={uuid()}>
-                <span className="material-icons">question_answer</span>{" "}
-                <input
-                  type="text"
-                  defaultValue={elm}
-                  name={elm + "_edit"}
-                  className="question_edit_input"
-                  disabled={this.state.loading}
-                  onChange={(e) => this.answersChanged(e, index)}
-                />
-              </div>
-            );
-          })}
+        <span
+          className="material-icons plus_subjec_icon"
+          onClick={(e) => this.addAnswer(e)}
+        >
+          add
+        </span>
+        <br />
+        {answers.map((elm, index) => {
+          return (
+            <div className="question_answer" key={uuid()}>
+              <span
+                className="material-icons"
+                onClick={(e) => this.removeAnswer(e, index)}
+              >
+                remove_circle_outline
+              </span>
+              <input
+                type="text"
+                defaultValue={elm}
+                name={elm + "_edit"}
+                className="question_edit_input"
+                disabled={this.state.loading}
+                onChange={(e) => this.answersChanged(e, index)}
+              />
+            </div>
+          );
+        })}
+        <div
+          className="material-icons save_question_icon"
+          onClick={(e) => this.saveQuestion(e)}
+        >
+          save
         </div>
       </div>
     );

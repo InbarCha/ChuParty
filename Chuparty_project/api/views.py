@@ -408,6 +408,7 @@ def editCourse(request):
             if 'ChangeName' in body.keys():
                 newName = body['ChangeName']
                 Course.objects.filter(name=name).update(name=newName)
+                courseObj.name = newName
                 changedNameFlg = True
 
                 updateCourseNameInSchools(name, newName)

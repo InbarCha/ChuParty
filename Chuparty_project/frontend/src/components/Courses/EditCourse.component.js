@@ -215,7 +215,7 @@ export class EditCourse extends Component {
             <div className="model_container">
               <div className="model_name">
                 <span
-                  className="material-icons cancel_edit_course"
+                  className="material-icons cancel_edit_model"
                   onClick={(e) => this.cancelEdit(e)}
                 >
                   cancel

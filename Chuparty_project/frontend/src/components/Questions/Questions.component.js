@@ -27,6 +27,7 @@ export class Questions extends Component {
       activeExamsID: localStorage["activeExamID"],
       activeCourse: localStorage["activeCourse"],
       sonComponents: [],
+      edit: false,
     };
   }
 
@@ -37,7 +38,7 @@ export class Questions extends Component {
         .then((data) => {
           this.setState({ exam: data });
           this.setOtherStateVars();
-          this.SetSonComponents();
+          this.SetSonComponents("QUESTION");
           console.log(this.state.questions);
         })
         .catch((err) => console.error("error while fetching exmas:", err));
@@ -125,24 +126,59 @@ export class Questions extends Component {
     this.setState({ sonComponents: sonComponents });
   };
 
-  SetSonComponents = () => {
+  SetSonComponents = (component) => {
     let sonComponents = [];
 
     this.state.questions.forEach((elm, index) => {
-      let newQuestion = (
-        <Question
-          question={elm}
-          key={index}
-          index={index}
-          changeQuestionComponent={this.changeQuestionComponent}
-        />
-      );
+      let newQuestion = "";
+
+      if (component === "QUESTION") {
+        newQuestion = (
+          <Question
+            question={elm}
+            key={index}
+            index={index}
+            changeQuestionComponent={this.changeQuestionComponent}
+          />
+        );
+      } else if (component === "EDIT_QUESTION") {
+        let question_orig = this.state.questions[index];
+        let question_copy = this.createDeepCopyQuestion(question_orig);
+
+        newQuestion = (
+          <EditQuestion
+            question={question_copy}
+            question_orig={question_orig}
+            key={index}
+            index={index}
+            changeQuestionComponent={this.changeQuestionComponent}
+            changedQuestion={this.changedQuestion}
+            deleteFromSonComponents={this.deleteFromSonComponents}
+          />
+        );
+      } else {
+        newQuestion = <div>Unrecogined component in setSonComponents()</div>;
+      }
 
       sonComponents.push(newQuestion);
     });
 
     this.setState({ sonComponents: sonComponents });
   };
+
+  editAllQuestions = (e) => {
+    e.stopPropagation();
+    this.SetSonComponents("EDIT_QUESTION");
+    this.setState({ edit: true });
+  };
+
+  cancelEditAllQuestions = (e) => {
+    e.stopPropagation();
+    this.SetSonComponents("QUESTION");
+    this.setState({ edit: false });
+  };
+
+  saveAllQuestions = (e) => {};
 
   render() {
     let res =
@@ -175,9 +211,25 @@ export class Questions extends Component {
                     <div className="btn_center_wrapper">
                       <button
                         className="btn btn-dark questions_settings_icon"
-                        onClick={(e) => this.editQuestion(e)}
+                        onClick={(e) => this.editAllQuestions(e)}
+                        hidden={this.state.edit}
                       >
                         Edit All
+                      </button>
+                      <button
+                        className="btn btn-dark questions_settings_icon"
+                        onClick={(e) => this.saveAllQuestions(e)}
+                        hidden={!this.state.edit}
+                      >
+                        Save All
+                      </button>
+                      <button
+                        className="btn btn-dark questions_settings_icon"
+                        onClick={(e) => this.cancelEditAllQuestions(e)}
+                        hidden={!this.state.edit}
+                        style={{ marginLeft: "5px" }}
+                      >
+                        Cancel Edit
                       </button>
                     </div>
                   </Col>

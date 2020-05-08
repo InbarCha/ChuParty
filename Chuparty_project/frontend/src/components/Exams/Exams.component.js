@@ -111,6 +111,11 @@ export default class Exams extends Component {
   changedExam = (exam, index) => {
     let exams = this.state.exams;
     exams[index] = exam;
+
+    if (Object.keys(exam)[0] !== localStorage["activeExamID"]) {
+      localStorage["activeExamID"] = Object.keys(exam)[0];
+    }
+
     this.setState({ exams: exams });
   };
 

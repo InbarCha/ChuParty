@@ -154,6 +154,7 @@ form {
 }
 .questions_settings_icon {
   font-size: 14px;
+  margin-bottom: 10px;
 }
 .add_course_icon {
   float: right;
@@ -172,9 +173,14 @@ form {
 }
 .save_question_icon {
   float: right;
+  margin-bottom: 20px;
 }
 .delete_icon {
   float: left;
+}
+.center_wrapper {
+  overflow: hidden;
+  text-align: center;
 }
 .save_icon:hover,
 .delete_icon:hover,
@@ -211,6 +217,7 @@ form {
 }
 .question_answers {
   padding: 15px 15px 15px 15px;
+  margin-bottom: 15px;
 }
 .question_answer {
   padding: 5px 5px 5px 5px;
@@ -350,7 +357,7 @@ nav {
 .exam_detail {
   text-decoration: underline;
 }
-.cancel_edit_course {
+.cancel_edit_model {
   float: right;
   cursor: pointer;
 }
