@@ -17,8 +17,8 @@ const override = css`
   margin: 0 auto;
 `;
 export class Questions extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       exam: "",
       examName: "",
@@ -27,7 +27,7 @@ export class Questions extends Component {
       activeExamsID: localStorage["activeExamID"],
       activeCourse: localStorage["activeCourse"],
       sonComponents: [],
-      edit: false,
+      edit: this.props.edit,
     };
   }
 
@@ -38,7 +38,11 @@ export class Questions extends Component {
         .then((data) => {
           this.setState({ exam: data });
           this.setOtherStateVars();
-          this.SetSonComponents("QUESTION");
+          if (this.state.edit) {
+            this.SetSonComponents("EDIT_QUESTION");
+          } else {
+            this.SetSonComponents("QUESTION");
+          }
           console.log(this.state.questions);
         })
         .catch((err) => console.error("error while fetching exmas:", err));

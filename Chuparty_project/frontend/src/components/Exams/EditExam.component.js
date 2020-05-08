@@ -151,7 +151,7 @@ export class EditExam extends Component {
   //   "ChangeName": "Computer Networks Exam",
   //   "ChangeDate": "2019-07-17"
   // }
-  saveChangesToDb = () => {
+  saveChangesToDb = (changeToEditQuestions) => {
     let exam = this.state.exam;
     let examID = Object.keys(exam)[0];
 
@@ -171,7 +171,11 @@ export class EditExam extends Component {
         console.log(data);
         this.setState({ loading: false });
         this.props.changedExam(data["Edited Exam"], this.props.index);
-        this.props.changeExamComponent(this.props.index, "EXAM");
+        if (changeToEditQuestions) {
+          this.props.parentClickHandler("QUESTIONS_EDIT");
+        } else {
+          this.props.changeExamComponent(this.props.index, "EXAM");
+        }
       })
       .catch((err) => {
         console.error("error while editing exam:", err);
@@ -179,7 +183,7 @@ export class EditExam extends Component {
       });
   };
 
-  saveExam = (e) => {
+  saveExam = (e, changeToEditQuestions) => {
     e.stopPropagation();
 
     if (!this.state.loading) {
@@ -193,7 +197,7 @@ export class EditExam extends Component {
       exam[examID]["writers"] = [...writers.filter((writer) => writer !== "")];
 
       //save changes to db and propagate changes to exams component
-      this.saveChangesToDb();
+      this.saveChangesToDb(changeToEditQuestions);
     }
   };
 
@@ -214,9 +218,13 @@ export class EditExam extends Component {
 
   editQuestions = (e) => {
     e.stopPropagation();
-
     localStorage["activeExamID"] = Object.keys(this.props.exam)[0];
-    this.props.parentClickHandler("QUESTIONS_EDIT");
+
+    if (window.confirm("Save Changes Made to Exam?")) {
+      this.saveExam(e, true);
+    } else {
+      this.props.parentClickHandler("QUESTIONS_EDIT");
+    }
   };
 
   render() {
@@ -273,7 +281,7 @@ export class EditExam extends Component {
                 </span>
                 <span
                   className="material-icons save_icon"
-                  onClick={(e) => this.saveExam(e)}
+                  onClick={(e) => this.saveExam(e, false)}
                 >
                   save
                 </span>
@@ -312,7 +320,7 @@ export class EditExam extends Component {
                   {" " + questions.length}
                 </div>
                 <div
-                  className="btn btn-primary edit_questions_btn"
+                  className="btn btn-dark edit_questions_btn"
                   onClick={(e) => this.editQuestions(e)}
                 >
                   Edit Questions
