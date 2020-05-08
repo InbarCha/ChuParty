@@ -116,7 +116,7 @@ export class Questions extends Component {
         </React.Fragment>
       ) : (
         <div className="col-centered courses_loading">
-          <RotateLoader css={override} />
+          <RotateLoader css={override} size={100} />
         </div>
       );
 
