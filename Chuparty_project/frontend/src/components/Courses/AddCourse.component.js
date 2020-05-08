@@ -150,7 +150,6 @@ export class AddCourse extends Component {
       });
   };
 
-  //TODO: change so course isn't saved if course name is empty
   saveCourse = (e) => {
     e.stopPropagation();
 

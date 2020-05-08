@@ -1,10 +1,17 @@
 import React, { Component } from "react";
 import { Col } from "react-bootstrap";
+import { css } from "@emotion/core";
+import RotateLoader from "react-spinners/ClipLoader";
 import { bounce } from "react-animations";
 import styled, { keyframes } from "styled-components";
 
 const Bounce = styled.div`
   animation: 2s ${keyframes`${bounce}`};
+`;
+
+const override = css`
+  display: block;
+  margin: 0 auto;
 `;
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
@@ -25,73 +32,98 @@ export class EditExam extends Component {
       exam: this.props.exam,
       addedQuestions: [],
       deletedQuestions: [],
+      loading: false,
     };
+  }
+
+  componentDidMount() {
+    this.setState({ loading: false });
   }
 
   cancelEdit = (e) => {
     e.stopPropagation();
-    this.props.changeExamComponent(this.props.index, "EXAM");
+    if (!this.state.loading) {
+      this.props.changeExamComponent(this.props.index, "EXAM");
+    }
   };
 
   deleteExam = (e) => {
     e.stopPropagation();
 
-    //TODO: change to message-box
-    if (window.confirm("Are you sure you want to delete this exam?")) {
-      let exam = this.props.exam_orig;
-      let examID = Object.keys(exam)[0];
+    if (!this.state.loading) {
+      this.setState({ loading: true });
 
-      fetch(DELETE_EXAM_ROUTE + examID)
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-          this.props.deleteFromSonComponents(this.props.index);
-        })
-        .catch((err) => console.error("error while fetching courses:", err));
+      //TODO: change to message-box
+      if (window.confirm("Are you sure you want to delete this exam?")) {
+        let exam = this.props.exam_orig;
+        let examID = Object.keys(exam)[0];
+
+        fetch(DELETE_EXAM_ROUTE + examID)
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
+            this.props.deleteFromSonComponents(this.props.index);
+            this.setState({ loading: false });
+          })
+          .catch((err) => {
+            console.error("error while fetching courses:", err);
+            this.setState({ loading: false });
+          });
+      }
     }
   };
 
   examNameChanged = (e) => {
-    let newVal = e.target.value;
+    if (!this.state.loading) {
+      let newVal = e.target.value;
 
-    let exam = this.state.exam;
-    let examID = Object.keys(exam)[0];
-    exam[examID]["name"] = newVal;
+      let exam = this.state.exam;
+      let examID = Object.keys(exam)[0];
+      exam[examID]["name"] = newVal;
 
-    this.setState({ exam: exam });
+      this.setState({ exam: exam });
+    }
   };
 
   examDateChanged = (e) => {
     e.stopPropagation();
-    let newVal = e.target.value;
 
-    let exam = this.state.exam;
-    let examID = Object.keys(exam)[0];
-    exam[examID]["date"] = newVal;
+    if (!this.state.loading) {
+      let newVal = e.target.value;
 
-    this.setState({ exam: exam });
+      let exam = this.state.exam;
+      let examID = Object.keys(exam)[0];
+      exam[examID]["date"] = newVal;
+
+      this.setState({ exam: exam });
+    }
   };
 
   writersChanged = (e, index) => {
     e.stopPropagation();
-    let newVal = e.target.value;
 
-    let exam = this.state.exam;
-    let examID = Object.keys(exam)[0];
+    if (!this.state.loading) {
+      let newVal = e.target.value;
 
-    exam[examID]["writers"][index] = newVal;
-    this.setState({ exam: exam });
+      let exam = this.state.exam;
+      let examID = Object.keys(exam)[0];
+
+      exam[examID]["writers"][index] = newVal;
+      this.setState({ exam: exam });
+    }
   };
 
   addWriter = (e) => {
     e.stopPropagation();
 
-    let exam = this.state.exam;
-    let examID = Object.keys(exam)[0];
-    let writers = exam[examID]["writers"];
+    if (!this.state.loading) {
+      let exam = this.state.exam;
+      let examID = Object.keys(exam)[0];
+      let writers = exam[examID]["writers"];
 
-    exam[examID]["writers"] = [...writers, ""];
-    this.setState({ exam: exam });
+      exam[examID]["writers"] = [...writers, ""];
+      this.setState({ exam: exam });
+    }
   };
 
   // {
@@ -137,36 +169,47 @@ export class EditExam extends Component {
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
+        this.setState({ loading: false });
         this.props.changedExam(data["Edited Exam"], this.props.index);
         this.props.changeExamComponent(this.props.index, "EXAM");
       })
-      .catch((err) => console.error("error while editing exam:", err));
+      .catch((err) => {
+        console.error("error while editing exam:", err);
+        this.setState({ loading: false });
+      });
   };
 
   saveExam = (e) => {
     e.stopPropagation();
 
-    let exam = this.state.exam;
-    let examID = Object.keys(exam)[0];
-    let writers = exam[examID]["writers"];
+    if (!this.state.loading) {
+      this.setState({ loading: true });
 
-    //filter out empty strings in writers array
-    exam[examID]["writers"] = [...writers.filter((writer) => writer !== "")];
+      let exam = this.state.exam;
+      let examID = Object.keys(exam)[0];
+      let writers = exam[examID]["writers"];
 
-    //save changes to db and propagate changes to exams component
-    this.saveChangesToDb();
+      //filter out empty strings in writers array
+      exam[examID]["writers"] = [...writers.filter((writer) => writer !== "")];
+
+      //save changes to db and propagate changes to exams component
+      this.saveChangesToDb();
+    }
   };
 
   removeWriter = (e, index) => {
     console.log(index);
     e.stopPropagation();
-    let exam = this.state.exam;
-    let examID = Object.keys(exam)[0];
-    let writers = exam[examID]["writers"];
 
-    writers.splice(index, 1);
-    exam[examID]["writers"] = writers;
-    this.setState({ exam: exam });
+    if (!this.state.loading) {
+      let exam = this.state.exam;
+      let examID = Object.keys(exam)[0];
+      let writers = exam[examID]["writers"];
+
+      writers.splice(index, 1);
+      exam[examID]["writers"] = writers;
+      this.setState({ exam: exam });
+    }
   };
 
   render() {
@@ -201,6 +244,7 @@ export class EditExam extends Component {
                   name={examName + "_edit"}
                   className="modelTitle_edit_input"
                   style={{ fontSize: "medium" }}
+                  disabled={this.state.loading}
                   onChange={(e) => this.examNameChanged(e)}
                 />
                 <input
@@ -209,6 +253,7 @@ export class EditExam extends Component {
                   name={examDate + "_edit"}
                   className="modelTitle_edit_input"
                   style={{ fontSize: "medium" }}
+                  disabled={this.state.loading}
                   onChange={(e) => this.examDateChanged(e)}
                 />
               </div>
@@ -236,6 +281,7 @@ export class EditExam extends Component {
                           name={writer + "_edit"}
                           className="modelTitle_edit_input"
                           style={{ width: "70%" }}
+                          disabled={this.state.loading}
                           onChange={(e) => this.writersChanged(e, index)}
                         />
                         <span
@@ -262,6 +308,9 @@ export class EditExam extends Component {
                   Edit Questions
                 </div>
               </div>
+            </div>
+            <div className="col-centered courses_loading">
+              <RotateLoader css={override} loading={this.state.loading} />
             </div>
           </div>
         </Bounce>

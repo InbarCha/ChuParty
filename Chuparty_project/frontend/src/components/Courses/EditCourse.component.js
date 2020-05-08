@@ -56,8 +56,12 @@ export class EditCourse extends Component {
           .then((data) => {
             console.log(data);
             this.props.deleteFromSonComponents(this.props.index);
+            this.setState({ loading: false });
           })
-          .catch((err) => console.error("error while fetching courses:", err));
+          .catch((err) => {
+            console.error("error while fetching courses:", err);
+            this.setState({ loading: false });
+          });
       }
     }
   };
