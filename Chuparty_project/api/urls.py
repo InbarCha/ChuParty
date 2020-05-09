@@ -2,8 +2,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.index),
-
     # subject
     path('getSubjects', views.getSubjects), 
     path('editSubject', views.editSubject),
@@ -28,6 +26,7 @@ urlpatterns = [
     # question
     path('setQuestion', views.setQuestion),
     path('editQuestion', views.editQuestion),
+    path('editMultipleQuestions', views.editMultipleQuestions),
     path('getQuestions', views.getQuestions),
     path('getQuestionByBody', views.getQuestionByBody),
     path('deleteQuestion', views.deleteQuestion),

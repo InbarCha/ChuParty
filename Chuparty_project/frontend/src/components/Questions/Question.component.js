@@ -29,6 +29,7 @@ export class Question extends Component {
 
   editQuestion = (e) => {
     e.stopPropagation();
+    this.props.setEdit(true);
     this.props.changeQuestionComponent(this.props.index, "EDIT");
   };
 

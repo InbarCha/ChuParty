@@ -1,6 +1,8 @@
 from api.models import *
 from api.HelpFuncs_Subjects import *
 from api.HelpFuncs_Courses import * 
+from api.HelpFuncs_General import *
+from django.http import JsonResponse
 
 #####################################
 # createQuestion()
@@ -142,3 +144,133 @@ def changeQuestionTemplate(question):
     questionJson[question.body]['difficulty'] = question.difficulty
 
     return questionJson
+
+
+########################################################
+# editQuestion(request)
+# Help Function
+########################################################
+def editQuestion_helpFunc(requestBody):
+    changedCourseFlg = False
+    changedSubjectFlg = False
+    changedAnswersFlg = False
+    changedCorrectAnswerFlg = False
+    changedBodyFlg = False
+    changeDifficultyFlg = False
+
+    if 'body' not in requestBody.keys():
+        return JsonResponse({"Status": "Can't Edit Question: 'body' field in not in request body"}, status=500)
+    body = requestBody['body']
+
+    questionObj = Question.objects.get(body=body)
+
+    # change the question's course
+    if 'ChangeCourse' in requestBody.keys():
+        newCourse = requestBody['ChangeCourse']
+
+        ret_tuple = createCourseOrAddSubject(newCourse)
+        isCourseReturned = ret_tuple[0]
+
+        if isCourseReturned is None:
+            return JsonResponse({"Status": ret_tuple[1]}, status=500)
+
+        courseObj = ret_tuple[1]
+        if courseObj.name != questionObj.course.name:
+            questionObj.course = courseObj
+            changedCourseFlg = True
+
+    # change the question's subject
+    if 'ChangeSubject' in requestBody.keys():
+        newSubject = requestBody['ChangeSubject']
+
+        ret_tuple = createSubject(newSubject)
+        isSubjectReturned = ret_tuple[0]
+
+        if isSubjectReturned is None:
+            return JsonResponse({"Status": ret_tuple[1]}, status=500)
+
+        subjectObj = ret_tuple[1]
+        if subjectObj.name != questionObj.subject.name:
+            questionObj.subject = subjectObj
+            changedSubjectFlg = True
+
+    # change the question's answers list
+    if 'ChangeAnswers' in requestBody.keys():
+        oldAnswersList = questionObj.answers
+        newAnswersList = requestBody['ChangeAnswers']
+
+        filteredListNew = [
+            string for string in newAnswersList if string not in oldAnswersList]
+        filteredListOld = [
+            string for string in oldAnswersList if string not in newAnswersList]
+        if filteredListNew or filteredListOld:
+            questionObj.answers = newAnswersList
+            changedAnswersFlg = True
+
+    # change the question's correct answer
+    if 'ChangeCorrectAnswer' in requestBody.keys():
+        newCorrectAnswer = int(requestBody['ChangeCorrectAnswer'])
+        if questionObj.correctAnswer != newCorrectAnswer:
+            questionObj.correctAnswer = newCorrectAnswer
+            changedCorrectAnswerFlg = True
+
+    if 'ChangeDifficulty' in requestBody.keys():
+        newDifficulty = int(requestBody['ChangeDifficulty'])
+        if questionObj.difficulty != newDifficulty:
+            questionObj.difficulty = newDifficulty
+            changeDifficultyFlg = True
+
+    # change the question's body
+    if 'ChangeBody' in requestBody.keys():
+        newBody = requestBody['ChangeBody']
+        if newBody != questionObj.body:
+            questionObj.body = newBody
+            changedBodyFlg = True
+
+    # if one of the question's fileds has been changed:
+    # delete the old question from db
+    # try to create the new question
+    # if successful, return
+    # if not successful, save the old question back to the DB and return
+    if changedCourseFlg == True or changedSubjectFlg == True or changedAnswersFlg == True or \
+            changedCorrectAnswerFlg == True or changedBodyFlg == True or changeDifficultyFlg == True:
+
+        Question.objects.filter(body=body).delete()
+        questionObj.save()
+
+    ret_json = dict()
+    ret_json["Edited Question"] = changeQuestionTemplate(questionObj)
+
+    if changedCourseFlg == True:
+        ret_json['Changed Course'] = "True"
+    else:
+        ret_json['Changed Course'] = "False"
+
+    if changedSubjectFlg == True:
+        ret_json['Changed Subject'] = "True"
+    else:
+        ret_json['Changed Subject'] = "False"
+
+    if changedAnswersFlg == True:
+        ret_json['Changed Answers'] = "True"
+    else:
+        ret_json['Changed Answers'] = "False"
+
+    if changedCorrectAnswerFlg == True:
+        ret_json['Changed Correct Answer'] = "True"
+    else:
+        ret_json['Changed Correct Answer'] = "False"
+
+    if changeDifficultyFlg == True:
+        ret_json['Changed Difficulty'] = "True"
+    else:
+        ret_json['Changed Difficulty'] = "False"
+
+    if changedBodyFlg == True:
+        ret_json['Changed Body'] = "True"
+    else:
+        ret_json['Changed Body'] = "False"
+
+    updateQuestionInExams(questionObj, body)
+
+    return ret_json

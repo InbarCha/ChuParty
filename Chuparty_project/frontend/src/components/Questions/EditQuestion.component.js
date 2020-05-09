@@ -30,6 +30,7 @@ export class EditQuestion extends Component {
       course: null,
       subject: null,
       loading: false,
+      loading_parent: this.props.loading,
     };
   }
 
@@ -198,6 +199,7 @@ export class EditQuestion extends Component {
   cancelEdit = (e) => {
     e.stopPropagation();
     if (!this.state.loading) {
+      this.props.setEdit(false);
       this.props.changeQuestionComponent(this.props.index, "QUESTION");
     }
   };
@@ -242,7 +244,7 @@ export class EditQuestion extends Component {
     if (!this.state.loading) {
       let newVal = e.target.value;
 
-      if (newVal > 1 && newVal <= this.state.answers.length) {
+      if (newVal >= 1 && newVal <= this.state.answers.length) {
         let question = this.state.question;
         let body = Object.keys(question)[0];
 
@@ -311,7 +313,7 @@ export class EditQuestion extends Component {
             defaultValue={this.state.body}
             name={this.state.body + "_edit"}
             className="question_body_edit_input"
-            disabled={this.state.loading}
+            disabled={this.state.loading || this.state.loading_parent}
             onChange={(e) => this.bodyChanged(e)}
           />
         </div>
@@ -336,7 +338,7 @@ export class EditQuestion extends Component {
                 value={elm}
                 name={elm + "_edit"}
                 className="question_edit_input"
-                disabled={this.state.loading}
+                disabled={this.state.loading || this.state.loading_parent}
                 onChange={(e) => this.answersChanged(e, index)}
               />
             </div>
@@ -349,7 +351,7 @@ export class EditQuestion extends Component {
           defaultValue={this.state.difficulty || ""}
           name={"question_difficulty_edit"}
           className="question_difficulty_edit_input"
-          disabled={this.state.loading}
+          disabled={this.state.loading || this.state.loading_parent}
           onChange={(e) => this.difficultyChanged(e)}
         />
         <br /> <br />
@@ -358,8 +360,9 @@ export class EditQuestion extends Component {
           type="number"
           defaultValue={this.state.correctAnswer || ""}
           name={"correctAnswer_edit"}
+          max={this.state.answers.length}
           className="correctAnswer_edit_input"
-          disabled={this.state.loading}
+          disabled={this.state.loading || this.state.loading_parent}
           onChange={(e) => this.correctAnswerChanged(e)}
         />
         <br /> <br />
@@ -369,7 +372,7 @@ export class EditQuestion extends Component {
           defaultValue={this.state.subject || ""}
           name={"question_subject_edit"}
           className="question_subject_edit_input"
-          disabled={this.state.loading}
+          disabled={this.state.loading || this.state.loading_parent}
           onChange={(e) => this.subjectChanged(e)}
         />
         <br />

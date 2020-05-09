@@ -11,16 +11,8 @@ from api.HelpFuncs_Questions import *
 from api.HelpFuncs_User import *
 from api.HelpFuncs_Schools import *
 from api.HelpFuncs_Exams import *
+from api.HelpFuncs_General import *
 
-'''
-TODO: in "get all documents from model" functions, change document template to - for example -
-{
-  "computer Science":
-        {
-          "subjects":{...}
-        }
-}
-'''
 
 # TODO: take care of case-senstitive issues (for example in MongoDB queries)
 
@@ -28,15 +20,6 @@ TODO: in "get all documents from model" functions, change document template to -
 #      For example, two courses with the same name could exist (that belong to different schools),
 #      so handling course name as its ID is not good enough
 #      NEEDED? or will every school have its own DB?
-
-
-def parseRequestBody(request):
-    body_unicode = request.body.decode('utf-8')
-    return json.loads(body_unicode)
-
-
-def index(request):
-    return render(request, 'frontend/index.html')
 
 
 ##################################################
@@ -942,133 +925,76 @@ POST body example:
 @csrf_exempt
 def editQuestion(request):
     if request.method == "POST":
-        changedCourseFlg = False
-        changedSubjectFlg = False
-        changedAnswersFlg = False
-        changedCorrectAnswerFlg = False
-        changedBodyFlg = False
-        changeDifficultyFlg = False
-
-        # decode request body
-        requestBody = parseRequestBody(request)
-
-        if 'body' not in requestBody.keys():
-            return JsonResponse({"Status": "Can't Edit Question: 'body' field in not in request body"}, status=500)
-        body = requestBody['body']
-
         try:
-            questionObj = Question.objects.get(body=body)
+            # decode request body
+            requestBody = parseRequestBody(request)
 
-            # change the question's course
-            if 'ChangeCourse' in requestBody.keys():
-                newCourse = requestBody['ChangeCourse']
-
-                ret_tuple = createCourseOrAddSubject(newCourse)
-                isCourseReturned = ret_tuple[0]
-
-                if isCourseReturned is None:
-                    return JsonResponse({"Status": ret_tuple[1]}, status=500)
-
-                courseObj = ret_tuple[1]
-                if courseObj.name != questionObj.course.name:
-                    questionObj.course = courseObj
-                    changedCourseFlg = True
-
-            # change the question's subject
-            if 'ChangeSubject' in requestBody.keys():
-                newSubject = requestBody['ChangeSubject']
-
-                ret_tuple = createSubject(newSubject)
-                isSubjectReturned = ret_tuple[0]
-
-                if isSubjectReturned is None:
-                    return JsonResponse({"Status": ret_tuple[1]}, status=500)
-
-                subjectObj = ret_tuple[1]
-                if subjectObj.name != questionObj.subject.name:
-                    questionObj.subject = subjectObj
-                    changedSubjectFlg = True
-
-            # change the question's answers list
-            if 'ChangeAnswers' in requestBody.keys():
-                oldAnswersList = questionObj.answers
-                newAnswersList = requestBody['ChangeAnswers']
-
-                filteredListNew = [
-                    string for string in newAnswersList if string not in oldAnswersList]
-                filteredListOld = [
-                    string for string in oldAnswersList if string not in newAnswersList]
-                if filteredListNew or filteredListOld:
-                    questionObj.answers = newAnswersList
-                    changedAnswersFlg = True
-
-            # change the question's correct answer
-            if 'ChangeCorrectAnswer' in requestBody.keys():
-                newCorrectAnswer = int(requestBody['ChangeCorrectAnswer'])
-                if questionObj.correctAnswer != newCorrectAnswer:
-                    questionObj.correctAnswer = newCorrectAnswer
-                    changedCorrectAnswerFlg = True
-
-            if 'ChangeDifficulty' in requestBody.keys():
-                newDifficulty = int(requestBody['ChangeDifficulty'])
-                if questionObj.difficulty != newDifficulty:
-                    questionObj.difficulty = newDifficulty
-                    changeDifficultyFlg = True
-
-            # change the question's body
-            if 'ChangeBody' in requestBody.keys():
-                newBody = requestBody['ChangeBody']
-                if newBody != questionObj.body:
-                    questionObj.body = newBody
-                    changedBodyFlg = True
-
-            # if one of the question's fileds has been changed:
-            # delete the old question from db
-            # try to create the new question
-            # if successful, return
-            # if not successful, save the old question back to the DB and return
-            if changedCourseFlg == True or changedSubjectFlg == True or changedAnswersFlg == True or \
-                    changedCorrectAnswerFlg == True or changedBodyFlg == True or changeDifficultyFlg == True:
-
-                Question.objects.filter(body=body).delete()
-                questionObj.save()
-
-            ret_json = dict()
-            ret_json["Edited Question"] = changeQuestionTemplate(questionObj)
-
-            if changedCourseFlg == True:
-                ret_json['Changed Course'] = "True"
-            else:
-                ret_json['Changed Course'] = "False"
-
-            if changedSubjectFlg == True:
-                ret_json['Changed Subject'] = "True"
-            else:
-                ret_json['Changed Subject'] = "False"
-
-            if changedAnswersFlg == True:
-                ret_json['Changed Answers'] = "True"
-            else:
-                ret_json['Changed Answers'] = "False"
-
-            if changedCorrectAnswerFlg == True:
-                ret_json['Changed Correct Answer'] = "True"
-            else:
-                ret_json['Changed Correct Answer'] = "False"
-
-            if changeDifficultyFlg == True:
-                ret_json['Changed Difficulty'] = "True"
-            else:
-                ret_json['Changed Difficulty'] = "False"
-
-            if changedBodyFlg == True:
-                ret_json['Changed Body'] = "True"
-            else:
-                ret_json['Changed Body'] = "False"
-
-            updateQuestionInExams(questionObj, body)
-
+            ret_json = editQuestion_helpFunc(requestBody)
             return JsonResponse(ret_json)
+
+        except Exception as e:
+            return JsonResponse(
+                {
+                        "Exception": str(e),
+                        "Status": "Can't Edit Question"
+                    },
+                status=500
+            )
+
+    else:
+        return JsonResponse(
+            {
+                "Status": "editQuestion() only accepts POST requests"
+            },
+            status=500
+        )
+
+
+##################################################
+'''
+editMultipleQuestions()
+method: POST
+POST body example:
+[
+    {
+        "body": "What Is Encapsulation?",
+        "ChangeCourse":
+                {
+                    "name":"Computer Networks"
+                },
+        "ChangeSubject":
+                {
+                    "name": "DNS"
+                },
+        "ChangeBody": "What Is DNS?",
+        "ChangeAnswers":[
+                "bundling of data with the methods that operate on that data",
+                "blah blah",
+                "bleh beh",
+                "blu blue"
+            ],
+        "ChangeCorrectAnswer": 2,
+        "ChangeDifficulty: 4
+    },
+    {
+        ...............
+    }
+]
+'''
+##################################################
+@csrf_exempt
+def editMultipleQuestions(request):
+    if request.method == "POST":
+        try:
+            # decode request body
+            requestBody = list(parseRequestBody(request))
+            ret_json_list = list()
+
+            for question in requestBody:
+                ret_json = editQuestion_helpFunc(question)
+                ret_json_list.append(ret_json)
+
+            return JsonResponse(ret_json_list, safe=False)
 
         except Exception as e:
             return JsonResponse(

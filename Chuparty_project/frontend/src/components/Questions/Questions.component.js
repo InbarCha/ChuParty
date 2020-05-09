@@ -11,10 +11,10 @@ const EXAM_BY_ID_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/getExamByID?examID="
     : "/api/getExamByID?examID=";
-const EDIT_QUESTION_ROUTE =
+const EDIT_MULTIPLE_QUESTIONS_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
-    ? "http://localhost:8000/api/editQuestion"
-    : "/api/editQuestion";
+    ? "http://localhost:8000/api/editMultipleQuestions"
+    : "/api/editMultipleQuestions";
 
 const override = css`
   display: block;
@@ -62,6 +62,16 @@ export class Questions extends Component {
       let question_copy = this.createDeepCopyQuestion(question);
       questions_copy = [...questions_copy, question_copy];
     });
+
+    this.setState({ questions_copy: questions_copy });
+  };
+
+  refreshDeepCopyQuestionByIndex = (index) => {
+    let questions_copy = this.state.questions_copy;
+
+    let question_orig = this.state.questions[index];
+    let question_copy = this.createDeepCopyQuestion(question_orig);
+    questions_copy[index] = question_copy;
 
     this.setState({ questions_copy: questions_copy });
   };
@@ -143,15 +153,13 @@ export class Questions extends Component {
     console.log(component);
     let sonComponents = this.state.sonComponents;
     let question_orig = "";
-    let question_copy = "";
     if (index !== -1) {
-      this.refreshDeepCopyQuestions();
       question_orig = this.state.questions[index];
-      question_copy = this.state.questions_copy[index];
     }
 
     switch (component) {
       case "EDIT":
+        this.refreshDeepCopyQuestionByIndex(index);
         sonComponents[index] = (
           <EditQuestion
             question={this.state.questions_copy[index]}
@@ -162,10 +170,13 @@ export class Questions extends Component {
             changedQuestion={this.changedQuestion}
             deleteFromSonComponents={this.deleteFromSonComponents}
             questionCopyChanged={this.questionCopyChanged}
+            setEdit={this.setEdit}
+            loading={this.state.loading}
           />
         );
         break;
       case "QUESTION":
+        this.refreshDeepCopyQuestionByIndex(index);
         sonComponents[index] = (
           <Question
             question={this.state.questions[index]}
@@ -202,7 +213,7 @@ export class Questions extends Component {
           />
         );
       } else if (component === "EDIT_QUESTION") {
-        this.refreshDeepCopyQuestions();
+        //this.refreshDeepCopyQuestions();
         let question_orig = this.state.questions[index];
 
         newQuestion = (
@@ -215,6 +226,8 @@ export class Questions extends Component {
             changedQuestion={this.changedQuestion}
             deleteFromSonComponents={this.deleteFromSonComponents}
             questionCopyChanged={this.questionCopyChanged}
+            setEdit={this.setEdit}
+            loading={this.state.loading}
           />
         );
       } else {
@@ -246,39 +259,44 @@ export class Questions extends Component {
   saveAllQuestions = (e) => {
     e.stopPropagation();
 
-    this.state.questions_copy.forEach((question, index) =>
-      this.saveQuestion(question, index)
-    );
-  };
-
-  saveQuestion = (question, index) => {
     this.setState({ loading: true });
-    let question_orig = this.state.questions[index];
-    let oldBody = Object.keys(question_orig)[0];
-    let newBody = Object.keys(question)[0];
+    let request_body_all = [];
 
-    let request_body = {};
-    request_body["body"] = oldBody;
-    request_body["ChangeSubject"] = { name: question[newBody]["subject"] };
-    request_body["ChangeBody"] = newBody;
-    request_body["ChangeAnswers"] = question[newBody]["answers"];
-    request_body["ChangeCorrectAnswer"] = question[newBody]["correctAnswer"];
-    request_body["ChangeDiffuculty"] = question[newBody]["difficulty"];
+    this.state.questions_copy.forEach((question, index) => {
+      let question_orig = this.state.questions[index];
+      let oldBody = Object.keys(question_orig)[0];
+      let newBody = Object.keys(question)[0];
 
-    fetch(EDIT_QUESTION_ROUTE, {
+      let request_body = {};
+      request_body["body"] = oldBody;
+      request_body["ChangeSubject"] = { name: question[newBody]["subject"] };
+      request_body["ChangeBody"] = newBody;
+      request_body["ChangeAnswers"] = question[newBody]["answers"];
+      request_body["ChangeCorrectAnswer"] = question[newBody]["correctAnswer"];
+      request_body["ChangeDifficulty"] = question[newBody]["difficulty"];
+
+      request_body_all = [...request_body_all, request_body];
+    });
+
+    console.log(request_body_all);
+    fetch(EDIT_MULTIPLE_QUESTIONS_ROUTE, {
       method: "post",
-      body: JSON.stringify(request_body),
+      body: JSON.stringify(request_body_all),
     })
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
+        data.forEach((elm, index) => {
+          this.changedQuestion(elm["Edited Question"], index);
+          this.changeQuestionComponent(index, "QUESTION");
+        });
         this.setState({ loading: false });
-        this.changedQuestion(data["Edited Question"], this.props.index);
-        this.changeQuestionComponent(this.props.index, "QUESTION");
+        this.setEdit(false);
       })
       .catch((err) => {
         console.error("error while editing question:", err);
         this.setState({ loading: false });
+        this.setEdit(false);
       });
   };
 
