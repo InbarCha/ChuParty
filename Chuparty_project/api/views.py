@@ -935,7 +935,7 @@ POST body example:
             "blu blue"
 		],
 	"ChangeCorrectAnswer": 2,
-    "ChangeDiffuculty: 4
+    "ChangeDifficulty: 4
 }
 '''
 ##################################################
@@ -1009,8 +1009,8 @@ def editQuestion(request):
                     questionObj.correctAnswer = newCorrectAnswer
                     changedCorrectAnswerFlg = True
 
-            if 'changeDifficulty' in requestBody.keys():
-                newDifficulty = int(requestBody['changeDifficulty'])
+            if 'ChangeDifficulty' in requestBody.keys():
+                newDifficulty = int(requestBody['ChangeDifficulty'])
                 if questionObj.difficulty != newDifficulty:
                     questionObj.difficulty = newDifficulty
                     changeDifficultyFlg = True
@@ -1034,6 +1034,7 @@ def editQuestion(request):
                 questionObj.save()
 
             ret_json = dict()
+            ret_json["Edited Question"] = changeQuestionTemplate(questionObj)
 
             if changedCourseFlg == True:
                 ret_json['Changed Course'] = "True"

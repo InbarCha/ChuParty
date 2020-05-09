@@ -336,9 +336,35 @@ nav {
 .question_edit_input {
   text-align: center;
   border-radius: 7px;
-  width: 80%;
+  width: 75%;
   margin-left: 15px;
   background-color: rgb(208, 230, 243);
+}
+.correctAnswer_edit_input {
+  text-align: center;
+  border-radius: 7px;
+  width: 40px;
+  margin-left: 15px;
+  background-color: rgb(208, 230, 243);
+}
+.question_subject_edit_input {
+  text-align: center;
+  border-radius: 7px;
+  width: 55%;
+  margin-left: 15px;
+  background-color: rgb(208, 230, 243);
+}
+.question_difficulty_edit_input {
+  text-align: center;
+  border-radius: 7px;
+  width: 40px;
+  margin-left: 15px;
+  background-color: rgb(208, 230, 243);
+}
+.correctAnswer_edit_title,
+.question_detail_edit_title {
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
 }
 .question_body_edit_input {
   text-align: center;

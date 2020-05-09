@@ -22,7 +22,7 @@ export default class Exams extends Component {
   constructor() {
     super();
     this.state = {
-      exams: null,
+      exams: [],
       activeCourse: localStorage["activeCourse"],
       sonComponents: [],
     };
@@ -191,7 +191,7 @@ export default class Exams extends Component {
 
   render() {
     let res =
-      this.state.exams !== null ? (
+      this.state.exams.length !== 0 ? (
         <React.Fragment>
           <div className="page_title"> Exams </div>
           {this.state.activeCourse !== "" && (

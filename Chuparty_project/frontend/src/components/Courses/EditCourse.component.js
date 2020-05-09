@@ -146,10 +146,12 @@ export class EditCourse extends Component {
   subjectChanged = (e, index) => {
     let newVal = e.target.value;
 
-    let addedSubjects = this.state.addedSubjects;
-    addedSubjects[index] = newVal;
+    if (!this.state.loading) {
+      let addedSubjects = this.state.addedSubjects;
+      addedSubjects[index] = newVal;
 
-    this.setState({ addedSubjects: addedSubjects });
+      this.setState({ addedSubjects: addedSubjects });
+    }
   };
 
   courseNameChanged = (e) => {
