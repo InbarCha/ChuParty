@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Searchbar from "./Searchbar.component";
 import Sidebar from "./Sidebar.component";
-import Main from "./Main.component";
+import Schools from "./Schools/Schools.component";
 import Courses from "./Courses/Courses.component";
 import Exams from "./Exams/Exams.component";
 import Feedback from "./Feedback.component";
@@ -20,7 +20,7 @@ export default class Home extends Component {
     this.state = {
       currentPageStatus: "waiting",
       currentCourse: "",
-      currentContentView: <Main />,
+      currentContentView: <Schools />,
     };
   }
 
@@ -28,7 +28,7 @@ export default class Home extends Component {
     console.log(clickMsg);
     switch (clickMsg) {
       case "HOME":
-        this.setState({ currentContentView: <Main /> });
+        this.setState({ currentContentView: <Schools /> });
         break;
       case "COURSES":
         this.setState({

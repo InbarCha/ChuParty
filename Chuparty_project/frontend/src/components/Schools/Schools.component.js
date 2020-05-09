@@ -1,10 +1,18 @@
 import React, { Component } from "react";
+import { css } from "@emotion/core";
+import RotateLoader from "react-spinners/ClipLoader";
+
 const SCHOOLS_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/getSchools"
     : "/api/getSchools";
 
-export default class Main extends Component {
+const override = css`
+  display: block;
+  margin: 0 auto;
+`;
+
+export default class Schools extends Component {
   constructor() {
     super();
     this.state = {
@@ -51,10 +59,11 @@ export default class Main extends Component {
       this.state.schools !== null ? (
         this.getSchoolsArr()
       ) : (
-        <div>
-          <span>Loading Schools..</span>
-        </div>
-      );
+          <div className="col-centered models_loading">
+            <div className="loading_title"> Loading Schools... </div>
+            <RotateLoader css={override} size={50} />
+          </div>
+        );
     return res;
   }
 }
