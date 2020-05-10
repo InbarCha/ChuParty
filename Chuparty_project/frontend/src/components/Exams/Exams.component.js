@@ -30,11 +30,12 @@ export default class Exams extends Component {
 
   componentDidMount() {
     if (this.state.activeCourse !== undefined) {
+      this.setState({ loading: true });
       fetch(EXAMS_FROM_COURSE_ROUTE + this.state.activeCourse)
         .then((res) => res.json())
         .then((data) => {
           console.log(data);
-          this.setState({ exams: data });
+          this.setState({ exams: data, loading: false });
           this.SetSonComponents();
         })
         .catch((err) => console.error("error while fetching exams 1:", err));
@@ -136,6 +137,19 @@ export default class Exams extends Component {
     this.setState({ exams: exams, sonComponents: sonComponents });
   };
 
+  addExamToSonComponents = (exam) => {
+    let sonComponents = this.state.sonComponents;
+    sonComponents.pop();
+
+    let exams = this.state.exams;
+    this.setState({
+      exams: [...exams, exam],
+      sonComponents: sonComponents,
+    });
+
+    this.SetSonComponents();
+  };
+
   changeExamComponent = (index, component) => {
     let sonComponents = this.state.sonComponents;
     let exam_orig = "";
@@ -173,9 +187,25 @@ export default class Exams extends Component {
         );
         break;
       case "ADD_EXAM":
+        //create default empty exam
+        let exam = {};
+        exam["examID"] = {};
+        exam["examID"]["course"] = this.state.activeCourse;
+        exam["examID"]["date"] = "2020-01-01";
+        exam["examID"]["name"] = "";
+        exam["examID"]["questions"] = [];
+        exam["examID"]["subjects"] = ["None"];
+        exam["examID"]["writers"] = [""];
+
         sonComponents = [
           ...sonComponents,
-          <AddExam key={sonComponents.length} index={sonComponents.length} />,
+          <AddExam
+            key={sonComponents.length}
+            index={sonComponents.length}
+            exam={exam}
+            deleteFromSonComponents={this.deleteFromSonComponents}
+            addExamToSonComponents={this.addExamToSonComponents}
+          />,
         ];
         break;
       default:
@@ -215,7 +245,7 @@ export default class Exams extends Component {
       ) : this.state.activeCourse !== undefined ? (
         <div className="col-centered models_loading">
           <div className="loading_title"> Loading Exams... </div>
-          <RotateLoader css={override} size={50} />
+          <RotateLoader css={override} size={50} loading={this.state.loading} />
         </div>
       ) : (
         <React.Fragment>

@@ -53,8 +53,8 @@ class Course(models.Model):
 # ###################################################
 class School(models.Model):
     name = models.CharField(max_length=30)
-    courses = models.ArrayField(
-        model_container=Course,
+    courses = models.ListField(
+        models.CharField(max_length=50)
     )
     objects = models.DjongoManager()
 
@@ -130,7 +130,6 @@ class Exam(models.Model):
         model_container=Course
     )
 
-    # the subjects specified in the exam
     questions = models.ArrayField(
         model_container=Question
     ) 

@@ -21,30 +21,20 @@ export class AddQuestion extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      question: "",
+      question: this.props.question,
       body: "Question Body",
       answers: [""],
       correctAnswer: 1,
       difficulty: 1,
-      course: this.props.course,
+      course: this.props.question[Object.keys(this.props.question)[0]][
+        "course"
+      ],
       subject: "",
       loading: false,
-      loading_parent: this.props.loading,
     };
   }
 
   componentDidMount() {
-    //create default empty course
-    let question = {};
-    question["Question Body"] = {};
-    question["Question Body"]["subject"] = "";
-    question["Question Body"]["answers"] = [];
-    question["Question Body"]["correctAnswer"] = 1;
-    question["Question Body"]["difficulty"] = 1;
-    question["Question Body"]["course"] = this.props.course;
-
-    this.setState({ question: question, loading: false });
-
     //scroll down to new component
     scrollToComponent(this, {
       offset: 0,
@@ -57,7 +47,11 @@ export class AddQuestion extends Component {
   cancelEdit = (e) => {
     e.stopPropagation();
     if (!this.state.loading) {
-      this.props.deleteFromSonComponents(this.props.index);
+      this.props.deleteFromSonComponents(
+        this.props.index_questions,
+        true,
+        false
+      );
     }
   };
 
@@ -75,6 +69,7 @@ export class AddQuestion extends Component {
       newQuestion[newVal]["difficulty"] = this.state.difficulty;
 
       this.setState({ question: newQuestion, body: newVal });
+      this.props.questionAddedChanged(this.props.index, newQuestion);
     }
   };
 
@@ -91,6 +86,7 @@ export class AddQuestion extends Component {
         question[body]["answers"] = answers;
 
         this.setState({ question: question, answers: answers });
+        this.props.questionAddedChanged(this.props.index, question);
       }
     }
   };
@@ -107,6 +103,7 @@ export class AddQuestion extends Component {
       question[body]["answers"] = answers;
 
       this.setState({ question: question, answers: answers });
+      this.props.questionAddedChanged(this.props.index, question);
     }
   };
 
@@ -122,6 +119,7 @@ export class AddQuestion extends Component {
       question[body]["answers"] = answers;
 
       this.setState({ answers: answers, question: question });
+      this.props.questionAddedChanged(this.props.index, question);
     }
   };
 
@@ -138,6 +136,7 @@ export class AddQuestion extends Component {
         question[body]["difficulty"] = newVal;
 
         this.setState({ question: question, difficulty: newVal });
+        this.props.questionAddedChanged(this.props.index, question);
       }
     }
   };
@@ -155,6 +154,7 @@ export class AddQuestion extends Component {
         question[body]["correctAnswer"] = newVal;
 
         this.setState({ question: question, correctAnswer: newVal });
+        this.props.questionAddedChanged(this.props.index, question);
       }
     }
   };
@@ -171,6 +171,7 @@ export class AddQuestion extends Component {
       question[body]["subject"] = newVal;
 
       this.setState({ question: question, subject: newVal });
+      this.props.questionAddedChanged(this.props.index, question);
     }
   };
 
@@ -194,14 +195,14 @@ export class AddQuestion extends Component {
         this.saveChangesToDb();
       } else if (question[body]["subject"] === "" && body === "Question Body") {
         window.alert(
-          "Can't save changed: 'Subject' is empty & You haven't set the question's body!"
+          "Can't save question: 'Subject' is empty & You haven't set the question's body!"
         );
       } else if (body === "Question Body") {
         window.alert(
-          "Can't save changed: You haven't set the question's body!"
+          "Can't save question: You haven't set the question's body!"
         );
       } else {
-        window.alert("Can't save changed: 'Subject' is empty!");
+        window.alert("Can't save question: 'Subject' is empty!");
       }
     }
   };
@@ -297,7 +298,7 @@ export class AddQuestion extends Component {
             defaultValue={this.state.body}
             name={this.state.body + "_edit"}
             className="question_body_edit_input"
-            disabled={this.state.loading || this.state.loading_parent}
+            disabled={this.state.loading}
             onChange={(e) => this.bodyChanged(e)}
           />
         </div>
@@ -322,7 +323,7 @@ export class AddQuestion extends Component {
                 value={elm}
                 name={elm + "_edit"}
                 className="question_edit_input"
-                disabled={this.state.loading || this.state.loading_parent}
+                disabled={this.state.loading}
                 onChange={(e) => this.answersChanged(e, index)}
               />
             </div>
@@ -335,7 +336,7 @@ export class AddQuestion extends Component {
           defaultValue={this.state.difficulty || ""}
           name={"question_difficulty_edit"}
           className="question_difficulty_edit_input"
-          disabled={this.state.loading || this.state.loading_parent}
+          disabled={this.state.loading}
           onChange={(e) => this.difficultyChanged(e)}
         />
         <br /> <br />
@@ -346,7 +347,7 @@ export class AddQuestion extends Component {
           name={"correctAnswer_edit"}
           max={this.state.answers.length}
           className="correctAnswer_edit_input"
-          disabled={this.state.loading || this.state.loading_parent}
+          disabled={this.state.loading}
           onChange={(e) => this.correctAnswerChanged(e)}
         />
         <br /> <br />
@@ -356,7 +357,7 @@ export class AddQuestion extends Component {
           defaultValue={this.state.subject || ""}
           name={"question_subject_edit"}
           className="question_subject_edit_input"
-          disabled={this.state.loading || this.state.loading_parent}
+          disabled={this.state.loading}
           onChange={(e) => this.subjectChanged(e)}
         />
         <br />

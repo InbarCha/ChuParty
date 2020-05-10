@@ -30,6 +30,7 @@ urlpatterns = [
     path('getQuestions', views.getQuestions),
     path('getQuestionByBody', views.getQuestionByBody),
     path('deleteQuestion', views.deleteQuestion),
+    path('setMultipleQuestions', views.setMultipleQuestions),
 
     # exam
     path('setExam', views.setExam),

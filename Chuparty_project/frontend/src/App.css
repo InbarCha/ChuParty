@@ -170,7 +170,7 @@ form {
   width: 20px;
   font-size: 30px !important;
   cursor: pointer;
-  margin-right: 10px;
+  margin-right: 10vw;
 }
 .btn_center_wrapper {
   display: flex;

@@ -189,7 +189,7 @@ export class EditQuestion extends Component {
           .then((data) => {
             console.log(data);
             this.setState({ loading: false });
-            this.props.deleteFromSonComponents(this.props.index);
+            this.props.deleteFromSonComponents(this.props.index, false, true);
           })
           .catch((err) => {
             console.error("error while editing exam:", err);

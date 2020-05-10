@@ -854,8 +854,7 @@ def setQuestion(request):
                 {
                     "Returned Question" : changeQuestionTemplate(ret_tuple[1]),
                     "Status": "Question Already Exists"
-                },
-                status=500
+                }
             )
 
     else:
@@ -866,6 +865,87 @@ def setQuestion(request):
             status=500
         )
 
+
+##################################################
+'''
+setQuestion()
+method: POST
+POST body example:
+[
+    {
+        "subject":
+        {
+            "name": "UDP"    
+        },          
+        "course": 
+            {
+                "name" : "Computer Networks"
+            },
+        "body": "What is UDP?",
+        "answers": [
+            "bleh bel",
+            "bbbb",
+            "User Datagram Protocol",
+            "Deformation of Name Servers"
+        ],
+        "correctAnswer": 3,
+        "difficulty": 1
+    },
+    {......}
+]
+'''
+##################################################
+@csrf_exempt
+def setMultipleQuestions(request):
+    if request.method == "POST":
+        try:
+            # decode request body
+            requestBody = list(parseRequestBody(request))
+            ret_json_list = list()
+
+            for question in requestBody:
+                # create Question if it doesn't already exist in DB
+                ret_tuple = createQuestion(question)
+                isNewQuestionCreated = ret_tuple[0]
+
+                if isNewQuestionCreated is None:
+                    ret_json = dict()
+                    ret_json_list.append({"Status": changeQuestionTemplate(ret_tuple[1])});
+
+                elif isNewQuestionCreated == True:
+                    ret_json_list.append(
+                        {
+                            "Returned Question" : changeQuestionTemplate(ret_tuple[1]),
+                            "Status": "Question Created"
+                        }
+                    )
+
+                else:
+                    ret_json_list.append(
+                        {
+                            "Returned Question" : changeQuestionTemplate(ret_tuple[1]),
+                            "Status": "Question Already Exists"
+                        }
+                    )
+
+            return JsonResponse(ret_json_list, safe=False)
+
+        except Exception as e:
+            return JsonResponse(
+                {
+                        "Exception": str(e),
+                        "Status": "Can't Create Question in setMultipleQuestions"
+                    },
+                status=500
+            )
+
+    else:
+        return JsonResponse(
+            {
+                "Status": "setMultipleQuestions() only accepts POST requests"
+            },
+            status=500
+        )
 
 ##################################################
 '''
@@ -1229,6 +1309,7 @@ def setExam(request):
 
             return JsonResponse(
                 {
+                    "New Exam" : changeExamTemplate(newExam),
                     "Status": "Created Exam",
                 }
             )

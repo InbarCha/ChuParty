@@ -16,6 +16,14 @@ const EDIT_MULTIPLE_QUESTIONS_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/editMultipleQuestions"
     : "/api/editMultipleQuestions";
+const SET_MULTIPLE_QUESTIONS_ROUTE =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/setMultipleQuestions"
+    : "/api/setMultipleQuestions";
+const EDIT_EXAM_ROUTE =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/editExam"
+    : "/api/editExam";
 
 const override = css`
   display: block;
@@ -30,6 +38,7 @@ export class Questions extends Component {
       examDate: "",
       questions: [],
       questions_copy: [],
+      questions_added: [],
       activeExamsID: localStorage["activeExamID"],
       activeCourse: localStorage["activeCourse"],
       sonComponents: [],
@@ -40,6 +49,7 @@ export class Questions extends Component {
 
   componentDidMount() {
     if (this.state.activeExamsID !== undefined) {
+      this.setState({ loading: true });
       fetch(EXAM_BY_ID_ROUTE + this.state.activeExamsID)
         .then((res) => res.json())
         .then((data) => {
@@ -50,7 +60,6 @@ export class Questions extends Component {
           } else {
             this.SetSonComponents("QUESTION");
           }
-          console.log(this.state.questions);
         })
         .catch((err) => console.error("error while fetching exmas:", err));
     }
@@ -87,12 +96,28 @@ export class Questions extends Component {
     sonComponents.pop();
 
     let questions = this.state.questions;
+    questions = [...questions, question];
     this.setState({
-      questions: [...questions, question],
+      questions: questions,
       sonComponents: sonComponents,
     });
 
     this.SetSonComponents("QUESTION");
+  };
+
+  addQuestionToSonComponentWithoutCopy = (question) => {
+    let sonComponents = this.state.sonComponents;
+    sonComponents.pop();
+
+    let questions = this.state.questions;
+    questions = [...questions, question];
+    this.setState({
+      questions: questions,
+      sonComponents: sonComponents,
+    });
+
+    this.SetSonComponents("QUESTION");
+    this.refreshDeepCopyQuestions();
   };
 
   setOtherStateVars = () => {
@@ -111,19 +136,43 @@ export class Questions extends Component {
     }
   };
 
-  deleteFromSonComponents = (index) => {
+  deleteFromSonComponents = (
+    index,
+    deleteFromAddedQuestions,
+    deleteFromQuestions
+  ) => {
     let sonComponents = this.state.sonComponents;
+    let questions_added = this.state.questions_added;
+    let questions = this.state.questions;
+    let questions_copy = this.state.questions_copy;
 
     console.log(sonComponents.length - 1);
     console.log(index);
 
     if (index < sonComponents.length - 1) {
       sonComponents[index] = "";
+      if (deleteFromQuestions) {
+        questions[index] = "";
+        questions_copy[index] = "";
+      }
+      if (deleteFromAddedQuestions) {
+        questions_added[index] = "";
+      }
     } else if (index === sonComponents.length - 1) {
       sonComponents.pop();
+      if (deleteFromQuestions) {
+        questions.pop();
+        questions_copy.pop();
+      }
+      if (deleteFromAddedQuestions) {
+        questions_added.pop();
+      }
     }
 
-    this.setState({ sonComponents: sonComponents });
+    this.setState({
+      sonComponents: sonComponents,
+      questions_added: questions_added,
+    });
   };
 
   createDeepCopyQuestion = (question) => {
@@ -157,6 +206,12 @@ export class Questions extends Component {
     let questions_copy = this.state.questions_copy;
     questions_copy[question_copy_index] = question;
     this.setState({ questions_copy: questions_copy });
+  };
+
+  questionAddedChanged = (question_added_index, question) => {
+    let questions_added = this.state.questions_added;
+    questions_added[question_added_index] = question;
+    this.setState({ question_added_index: question_added_index });
   };
 
   changeQuestionComponent = (index, component) => {
@@ -199,14 +254,31 @@ export class Questions extends Component {
         );
         break;
       case "ADD_QUESTION":
+        let question = {};
+        question["Question Body"] = {};
+        question["Question Body"]["subject"] = "";
+        question["Question Body"]["answers"] = [];
+        question["Question Body"]["correctAnswer"] = 1;
+        question["Question Body"]["difficulty"] = 1;
+        question["Question Body"]["course"] = this.state.exam[
+          this.state.activeExamsID
+        ]["course"];
+
+        this.setState({
+          questions_added: [...this.state.questions_added, question],
+        });
+
         sonComponents = [
           ...sonComponents,
           <AddQuestion
             key={sonComponents.length}
-            index={sonComponents.length}
+            index={this.state.questions_added.length}
+            index_questions={sonComponents.length}
             deleteFromSonComponents={this.deleteFromSonComponents}
             addQuestionToSonComponents={this.addQuestionToSonComponents}
-            course={this.state.exam[this.state.activeExamsID]["course"]}
+            changeQuestionComponent={this.changeQuestionComponent}
+            questionAddedChanged={this.questionAddedChanged}
+            question={question}
           />,
         ];
         break;
@@ -257,6 +329,13 @@ export class Questions extends Component {
       sonComponents.push(newQuestion);
     });
 
+    let addedQuestionsComponents = this.state.sonComponents.filter(
+      (elm, index) => index >= sonComponents.length
+    );
+    if (addedQuestionsComponents.length > 0) {
+      sonComponents = [...sonComponents, ...addedQuestionsComponents];
+    }
+
     this.setState({ sonComponents: sonComponents });
   };
 
@@ -280,14 +359,14 @@ export class Questions extends Component {
     this.setState({ edit: false });
   };
 
-  saveAllQuestions = (e) => {
-    e.stopPropagation();
-
-    this.setState({ loading: true });
+  saveAllEditedQuestionsToDb = () => {
     let request_body_all = [];
 
     this.state.questions_copy.forEach((question, index) => {
       let question_orig = this.state.questions[index];
+      if (question_orig === undefined) {
+        question_orig = this.state.questions_copy[index];
+      }
       let oldBody = Object.keys(question_orig)[0];
       let newBody = Object.keys(question)[0];
 
@@ -302,26 +381,132 @@ export class Questions extends Component {
       request_body_all = [...request_body_all, request_body];
     });
 
-    console.log(request_body_all);
-    fetch(EDIT_MULTIPLE_QUESTIONS_ROUTE, {
+    if (request_body_all.length !== 0) {
+      console.log(request_body_all);
+      this.setState({ loading: true });
+
+      fetch(EDIT_MULTIPLE_QUESTIONS_ROUTE, {
+        method: "post",
+        body: JSON.stringify(request_body_all),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+          data.forEach((elm, index) => {
+            this.changedQuestion(elm["Edited Question"], index);
+            this.changeQuestionComponent(index, "QUESTION");
+          });
+          this.setState({ loading: false });
+          this.setEdit(false);
+        })
+        .catch((err) => {
+          console.error("error while editing question:", err);
+          this.setState({ loading: false });
+          this.setEdit(false);
+        });
+    }
+  };
+
+  saveAllAddedQuestionsToDb = () => {
+    let request_body_all = [];
+    let save_flag = true;
+
+    this.state.questions_added.forEach((question, index) => {
+      let body = Object.keys(question)[0];
+      let answers = question[body]["answers"];
+
+      //filter out empty strings in answers array
+      answers = [...answers.filter((answer) => answer !== "")];
+      question[body]["answers"] = answers;
+
+      if (question[body]["subject"] !== "" && body !== "Question Body") {
+        let request_body = {};
+        request_body["body"] = body;
+        request_body["subject"] = { name: question[body]["subject"] };
+        request_body["course"] = {
+          name: Object.keys(question[body]["course"])[0],
+        };
+        request_body["answers"] = question[body]["answers"];
+        request_body["correctAnswer"] = parseInt(
+          question[body]["correctAnswer"]
+        );
+        request_body["difficulty"] = parseInt(question[body]["difficulty"]);
+
+        request_body_all = [...request_body_all, request_body];
+      } else {
+        save_flag = false;
+      }
+    });
+
+    if (request_body_all.length !== 0 && save_flag) {
+      console.log(request_body_all);
+      this.setState({ loading: true });
+
+      fetch(SET_MULTIPLE_QUESTIONS_ROUTE, {
+        method: "post",
+        body: JSON.stringify(request_body_all),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+          data.forEach((elm, index) => {
+            this.addQuestionToSonComponentWithoutCopy(elm["Returned Question"]);
+          });
+          this.setState({ loading: false });
+          this.setEdit(false);
+        })
+        .then(() => {
+          this.editExamWithNewQuestions();
+          this.emptyAddedQuestionsArr();
+        })
+        .catch((err) => {
+          console.error("error while saving multiple question:", err);
+          this.setState({ loading: false });
+          this.setEdit(false);
+          this.emptyAddedQuestionsArr();
+        });
+    } else {
+      window.alert(
+        "Not saving added questions: one of them are missing 'subject' or 'body' fields"
+      );
+    }
+  };
+
+  emptyAddedQuestionsArr = () => {
+    this.setState({ questions_added: [] });
+  };
+
+  editExamWithNewQuestions = () => {
+    let request_body = {};
+    request_body["examID"] = localStorage["activeExamID"];
+    request_body["AddQuestions"] = this.state.questions_added.map(
+      (question, index) => {
+        return { body: Object.keys(question)[0] };
+      }
+    );
+    console.log(request_body);
+
+    fetch(EDIT_EXAM_ROUTE, {
       method: "post",
-      body: JSON.stringify(request_body_all),
+      body: JSON.stringify(request_body),
     })
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
-        data.forEach((elm, index) => {
-          this.changedQuestion(elm["Edited Question"], index);
-          this.changeQuestionComponent(index, "QUESTION");
-        });
         this.setState({ loading: false });
-        this.setEdit(false);
       })
       .catch((err) => {
-        console.error("error while editing question:", err);
+        console.error("error while editing exam:", err);
         this.setState({ loading: false });
-        this.setEdit(false);
       });
+  };
+
+  saveAllQuestions = (e) => {
+    e.stopPropagation();
+    if (!this.state.loading) {
+      this.saveAllEditedQuestionsToDb();
+      this.saveAllAddedQuestionsToDb();
+    }
   };
 
   render() {
@@ -348,6 +533,13 @@ export class Questions extends Component {
             </React.Fragment>
           )}
           <Container fluid>
+            <div
+              className="material-icons add_question_icon"
+              onClick={this.addQuestion}
+            >
+              add
+            </div>
+            <br />
             {this.state.questions.length > 0 && (
               <React.Fragment>
                 <Row className="narrow_row">
@@ -356,21 +548,43 @@ export class Questions extends Component {
                       <button
                         className="btn btn-dark questions_settings_icon"
                         onClick={(e) => this.editAllQuestions(e)}
-                        hidden={this.state.edit}
+                        hidden={
+                          this.state.sonComponents.filter(
+                            (sonComponent) =>
+                              sonComponent.type === EditQuestion ||
+                              sonComponent.type === AddQuestion
+                          ).length === this.state.sonComponents.length
+                        }
                       >
                         Edit All
                       </button>
                       <button
                         className="btn btn-dark questions_settings_icon"
                         onClick={(e) => this.saveAllQuestions(e)}
-                        hidden={!this.state.edit}
+                        hidden={
+                          !(
+                            this.state.sonComponents.filter(
+                              (sonComponent) =>
+                                sonComponent.type === EditQuestion ||
+                                sonComponent.type === AddQuestion
+                            ).length === this.state.sonComponents.length
+                          )
+                        }
                       >
                         Save All
                       </button>
                       <button
                         className="btn btn-dark questions_settings_icon"
                         onClick={(e) => this.cancelEditAllQuestions(e)}
-                        hidden={!this.state.edit}
+                        hidden={
+                          !(
+                            this.state.sonComponents.filter(
+                              (sonComponent) =>
+                                sonComponent.type === EditQuestion ||
+                                sonComponent.type === AddQuestion
+                            ).length === this.state.sonComponents.length
+                          )
+                        }
                         style={{ marginLeft: "5px" }}
                       >
                         Cancel Edit
@@ -381,12 +595,6 @@ export class Questions extends Component {
                 <Row className="row_top_margin_narrow">
                   <Col md={{ span: 6, offset: 3 }} sm={{ span: 8, offset: 2 }}>
                     <div className="questions_form">
-                      <span
-                        className="material-icons add_question_icon"
-                        onClick={this.addQuestion}
-                      >
-                        add
-                      </span>
                       <div className="col-centered model_loading">
                         <RotateLoader
                           css={override}
@@ -404,7 +612,7 @@ export class Questions extends Component {
       ) : this.state.activeExamsID !== undefined ? (
         <div className="col-centered models_loading">
           <div className="loading_title"> Loading Questions... </div>
-          <RotateLoader css={override} size={50} />
+          <RotateLoader css={override} size={50} loading={this.state.loading} />
         </div>
       ) : (
         <React.Fragment>
@@ -418,7 +626,6 @@ export class Questions extends Component {
           </div>
         </React.Fragment>
       );
-
     return res;
   }
 }

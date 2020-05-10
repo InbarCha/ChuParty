@@ -30,8 +30,6 @@ export class EditExam extends Component {
     super(props);
     this.state = {
       exam: this.props.exam,
-      addedQuestions: [],
-      deletedQuestions: [],
       loading: false,
     };
   }
@@ -202,7 +200,6 @@ export class EditExam extends Component {
   };
 
   removeWriter = (e, index) => {
-    console.log(index);
     e.stopPropagation();
 
     if (!this.state.loading) {
