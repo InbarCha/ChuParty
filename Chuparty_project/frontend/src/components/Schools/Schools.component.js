@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { css } from "@emotion/core";
+import { Container, Row } from "react-bootstrap";
 import RotateLoader from "react-spinners/ClipLoader";
+import School from "./School.component";
 
 const SCHOOLS_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
@@ -17,33 +19,18 @@ export default class Schools extends Component {
     super();
     this.state = {
       schools: null,
+      activeSchool: null,
+      sonComponents: []
     };
   }
   componentDidMount() {
     /* schools should look like the following:
-        //
-        { 
-            "name": "Computer Science",
-            "courses": [
-                {
-                "name": "Computer Networks",
-                "subjects": [
-                    {
-                        "name": "HTTP"
-                    },
-                    {
-                        "name": "UDP"
-                    },
-                    {
-                        "name": "DNS"
-                    }
-                ]
-                }
-            ]
-        }
-        */
+      [
+        {"name": "Comp.Sci", "courses": [<COURSE>]}
+      ]
+    */
     fetch(SCHOOLS_ROUTE)
-      .then((res) => res.json())
+      .then((res) => {console.log(res); return res.json()})
       .then((data) => {
         console.log(data);
         this.setState({ schools: data });
@@ -51,9 +38,54 @@ export default class Schools extends Component {
       .catch((err) => console.error("error while fetching schools:", err));
   }
 
-  getSchoolsArr() {
-    return <div>loaded :)</div>;
+  SetSonComponents() {
+    let sonComponents = [];
+
+    this.state.schools.forEach((elm, index) => {
+      let newSchool = (
+        <School
+          bounce={false}
+          school={elm}
+          index={index}
+          key={index}
+          chooseActiveSchool={this.chooseActiveSchool}
+          changeSchoolComponent={this.changeSchoolComponent}
+        />
+      );
+
+      sonComponents.push(newSchool);
+    });
+
+    this.setState({ sonComponents: sonComponents });
   }
+
+  getSchoolsArr() {
+    return (
+      <React.Fragment>
+        <div className="page_title"> Courses </div>
+        {this.state.activeSchool !== "" && (
+          <React.Fragment>
+            <div className="active_model_title">
+              <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
+                Select School:{" "}
+              </span>
+              <span className="active_model">{this.state.activeSchool}</span>
+            </div>
+          </React.Fragment>
+        )}
+        <Container fluid className="model_items_container">
+          <span
+            className="material-icons add_course_icon"
+            onClick={this.addCourse}
+          >
+            add
+            </span>
+          <Row>{this.state.sonComponents}</Row>
+        </Container>
+      </React.Fragment>
+    );
+  }
+
   render() {
     let res =
       this.state.schools !== null ? (
