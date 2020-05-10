@@ -49,10 +49,14 @@ export class Exam extends Component {
               })}
             </div>
             <div className="detail_container">
-              <div className="exam_detail">Subjects:</div>
-              {subjects.map((subject, index) => {
-                return <div key={index}>{subject}</div>;
-              })}
+              {subjects.length > 0 && (
+                <React.Fragment>
+                  <div className="exam_detail">Subjects:</div>
+                  {subjects.map((subject, index) => {
+                    return <div key={index}>{subject}</div>;
+                  })}
+                </React.Fragment>
+              )}
             </div>
             <div className="detail_container">
               <span className="exam_detail">Number of Questions:</span>

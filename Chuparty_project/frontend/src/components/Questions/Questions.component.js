@@ -36,7 +36,7 @@ export class Questions extends Component {
       exam: "",
       examName: "",
       examDate: "",
-      questions: [],
+      questions: null,
       questions_copy: [],
       questions_added: [],
       activeExamsID: localStorage["activeExamID"],
@@ -169,9 +169,27 @@ export class Questions extends Component {
       }
     }
 
+    let questions_filtered = questions.filter((question) => question !== "");
+    let questions_copy_filtered = questions_copy.filter(
+      (question) => question !== ""
+    );
+    let questions_added_filtered = questions_added.filter(
+      (question) => question !== ""
+    );
+    if (questions_filtered.length === 0) {
+      questions = questions_filtered;
+    }
+    if (questions_copy_filtered.length === 0) {
+      questions_copy = questions_copy_filtered;
+    }
+    if (questions_added_filtered.length === 0) {
+      questions_added = questions_filtered;
+    }
+
     this.setState({
       sonComponents: sonComponents,
       questions_added: questions_added,
+      questions_copy: questions_copy,
     });
   };
 
@@ -290,53 +308,55 @@ export class Questions extends Component {
   };
 
   SetSonComponents = (component) => {
-    let sonComponents = [];
+    if (this.state.questions !== null) {
+      let sonComponents = [];
 
-    this.state.questions.forEach((elm, index) => {
-      let newQuestion = "";
+      this.state.questions.forEach((elm, index) => {
+        let newQuestion = "";
 
-      if (component === "QUESTION") {
-        newQuestion = (
-          <Question
-            question={elm}
-            key={index}
-            index={index}
-            changeQuestionComponent={this.changeQuestionComponent}
-            setEdit={this.setEdit}
-          />
-        );
-      } else if (component === "EDIT_QUESTION") {
-        let question_orig = this.state.questions[index];
+        if (component === "QUESTION") {
+          newQuestion = (
+            <Question
+              question={elm}
+              key={index}
+              index={index}
+              changeQuestionComponent={this.changeQuestionComponent}
+              setEdit={this.setEdit}
+            />
+          );
+        } else if (component === "EDIT_QUESTION") {
+          let question_orig = this.state.questions[index];
 
-        newQuestion = (
-          <EditQuestion
-            question={this.state.questions_copy[index]}
-            question_orig={question_orig}
-            key={index}
-            index={index}
-            changeQuestionComponent={this.changeQuestionComponent}
-            changedQuestion={this.changedQuestion}
-            deleteFromSonComponents={this.deleteFromSonComponents}
-            questionCopyChanged={this.questionCopyChanged}
-            setEdit={this.setEdit}
-            loading={this.state.loading}
-          />
-        );
-      } else {
-        newQuestion = <div>Unrecogined component in setSonComponents()</div>;
+          newQuestion = (
+            <EditQuestion
+              question={this.state.questions_copy[index]}
+              question_orig={question_orig}
+              key={index}
+              index={index}
+              changeQuestionComponent={this.changeQuestionComponent}
+              changedQuestion={this.changedQuestion}
+              deleteFromSonComponents={this.deleteFromSonComponents}
+              questionCopyChanged={this.questionCopyChanged}
+              setEdit={this.setEdit}
+              loading={this.state.loading}
+            />
+          );
+        } else {
+          newQuestion = <div>Unrecogined component in setSonComponents()</div>;
+        }
+
+        sonComponents.push(newQuestion);
+      });
+
+      let addedQuestionsComponents = this.state.sonComponents.filter(
+        (elm, index) => index >= sonComponents.length
+      );
+      if (addedQuestionsComponents.length > 0) {
+        sonComponents = [...sonComponents, ...addedQuestionsComponents];
       }
 
-      sonComponents.push(newQuestion);
-    });
-
-    let addedQuestionsComponents = this.state.sonComponents.filter(
-      (elm, index) => index >= sonComponents.length
-    );
-    if (addedQuestionsComponents.length > 0) {
-      sonComponents = [...sonComponents, ...addedQuestionsComponents];
+      this.setState({ sonComponents: sonComponents });
     }
-
-    this.setState({ sonComponents: sonComponents });
   };
 
   addQuestion = () => {
@@ -511,7 +531,7 @@ export class Questions extends Component {
 
   render() {
     let res =
-      this.state.questions.length !== 0 ? (
+      this.state.questions !== null ? (
         <React.Fragment>
           <div className="page_title"> Questions </div>
           {this.state.activeExamsID !== "" && (
@@ -540,7 +560,8 @@ export class Questions extends Component {
               add
             </div>
             <br />
-            {this.state.questions.length > 0 && (
+            {(this.state.questions.length > 0 ||
+              this.state.questions_added.length > 0) && (
               <React.Fragment>
                 <Row className="narrow_row">
                   <Col md={{ span: 6, offset: 3 }} sm={{ span: 8, offset: 2 }}>

@@ -168,7 +168,7 @@ export class AddExam extends Component {
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
-        if (data["Status"] === "Exam Created") {
+        if (data["Status"] === "Created Exam") {
           this.props.addExamToSonComponents(data["New Exam"]);
         } else if (data["Status"] === "Exam Already Exists") {
           window.alert("Exam Already Exists!");
