@@ -4,6 +4,7 @@ import Question from "./Question.component";
 import EditQuestion from "./EditQuestion.component";
 import { css } from "@emotion/core";
 import RotateLoader from "react-spinners/ClipLoader";
+import AddQuestion from "./AddQuestion.component";
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
   console.log("DEV enabled");
@@ -81,6 +82,19 @@ export class Questions extends Component {
     this.createDeepCopyQuestions(questions);
   };
 
+  addQuestionToSonComponents = (question) => {
+    let sonComponents = this.state.sonComponents;
+    sonComponents.pop();
+
+    let questions = this.state.questions;
+    this.setState({
+      questions: [...questions, question],
+      sonComponents: sonComponents,
+    });
+
+    this.SetSonComponents("QUESTION");
+  };
+
   setOtherStateVars = () => {
     if (this.state.exam !== "") {
       let examID = Object.keys(this.state.exam)[0];
@@ -98,21 +112,18 @@ export class Questions extends Component {
   };
 
   deleteFromSonComponents = (index) => {
-    let questions = this.state.questions;
     let sonComponents = this.state.sonComponents;
 
     console.log(sonComponents.length - 1);
     console.log(index);
 
     if (index < sonComponents.length - 1) {
-      questions[index] = "";
       sonComponents[index] = "";
     } else if (index === sonComponents.length - 1) {
       sonComponents.pop();
-      questions.pop();
     }
 
-    this.setState({ questions: questions, sonComponents: sonComponents });
+    this.setState({ sonComponents: sonComponents });
   };
 
   createDeepCopyQuestion = (question) => {
@@ -188,6 +199,16 @@ export class Questions extends Component {
         );
         break;
       case "ADD_QUESTION":
+        sonComponents = [
+          ...sonComponents,
+          <AddQuestion
+            key={sonComponents.length}
+            index={sonComponents.length}
+            deleteFromSonComponents={this.deleteFromSonComponents}
+            addQuestionToSonComponents={this.addQuestionToSonComponents}
+            course={this.state.exam[this.state.activeExamsID]["course"]}
+          />,
+        ];
         break;
       default:
         console.log("no handler for:", component);
@@ -213,7 +234,6 @@ export class Questions extends Component {
           />
         );
       } else if (component === "EDIT_QUESTION") {
-        //this.refreshDeepCopyQuestions();
         let question_orig = this.state.questions[index];
 
         newQuestion = (
@@ -238,6 +258,10 @@ export class Questions extends Component {
     });
 
     this.setState({ sonComponents: sonComponents });
+  };
+
+  addQuestion = () => {
+    this.changeQuestionComponent(-1, "ADD_QUESTION");
   };
 
   editAllQuestions = (e) => {
@@ -357,6 +381,12 @@ export class Questions extends Component {
                 <Row className="row_top_margin_narrow">
                   <Col md={{ span: 6, offset: 3 }} sm={{ span: 8, offset: 2 }}>
                     <div className="questions_form">
+                      <span
+                        className="material-icons add_question_icon"
+                        onClick={this.addQuestion}
+                      >
+                        add
+                      </span>
                       <div className="col-centered model_loading">
                         <RotateLoader
                           css={override}

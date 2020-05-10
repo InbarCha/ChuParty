@@ -752,8 +752,12 @@ Returns all the existing schools in the DB
 def getSchools(request):
     if request.method == "GET":
         schools = School.objects.all()
-        schoolsList = changeSchoolsTemplateInList(schools)
-        return JsonResponse(schoolsList, safe=False)
+        if schools is not None:
+            schoolsList = changeSchoolsTemplateInList(schools)
+            return JsonResponse(schoolsList, safe=False)
+
+        else:
+            return JsonResponse([], safe=False)
 
     else:  # request.method isn't GET
         return JsonResponse(
@@ -840,17 +844,19 @@ def setQuestion(request):
         elif isNewQuestionCreated == True:
             return JsonResponse(
                 {
-                "Status": "Question Created"
-            }
-                )
+                    "Returned Question" : changeQuestionTemplate(ret_tuple[1]),
+                    "Status": "Question Created"
+                }
+            )
 
         else:
             return JsonResponse(
                 {
-                "Status": "Question Already Exists"
-            },
+                    "Returned Question" : changeQuestionTemplate(ret_tuple[1]),
+                    "Status": "Question Already Exists"
+                },
                 status=500
-                )
+            )
 
     else:
         return JsonResponse(

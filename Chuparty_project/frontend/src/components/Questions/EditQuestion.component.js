@@ -126,20 +126,23 @@ export class EditQuestion extends Component {
     e.stopPropagation();
 
     if (!this.state.loading) {
-      this.setState({ loading: true });
-
       let question = this.state.question;
       let body = this.state.body;
       let answers = this.state.answers;
 
-      //filter out empty strings in writers array
+      //filter out empty strings in answers array
       answers = [...answers.filter((answer) => answer !== "")];
       question[body]["answers"] = answers;
 
-      this.setState({ question: question, answers: answers });
+      if (question[body]["subject"] !== "") {
+        this.setState({ loading: true });
+        this.setState({ question: question, answers: answers });
 
-      //save changes to db and propagate changes to questions component
-      this.saveChangesToDb();
+        //save changes to db and propagate changes to questions component
+        this.saveChangesToDb();
+      } else {
+        window.alert("Can't save changed: 'Subject' is empty!");
+      }
     }
   };
 
@@ -392,7 +395,6 @@ export class EditQuestion extends Component {
   render() {
     return (
       <div className="question_container">
-        <div className="question_body"> {this.props.body}</div>
         <div> {this.getAnswers()} </div>
       </div>
     );
