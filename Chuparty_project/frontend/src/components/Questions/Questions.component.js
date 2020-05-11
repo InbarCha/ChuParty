@@ -69,7 +69,10 @@ export class Questions extends Component {
     let questions_copy = [];
 
     questions.forEach((question, index) => {
-      let question_copy = this.createDeepCopyQuestion(question);
+      let question_copy = "";
+      if (question !== "") {
+        question_copy = this.createDeepCopyQuestion(question);
+      }
       questions_copy = [...questions_copy, question_copy];
     });
 
@@ -97,11 +100,22 @@ export class Questions extends Component {
 
     let questions = this.state.questions;
     questions = [...questions, question];
+
+    let questions_added = this.state.questions_added;
+    questions_added = [
+      ...questions_added.filter((question_added) => {
+        let body = Object.keys(question_added)[0];
+        return body !== Object.keys(question)[0];
+      }),
+    ];
+
     this.setState({
       questions: questions,
+      questions_added: questions_added,
       sonComponents: sonComponents,
     });
 
+    this.refreshDeepCopyQuestions();
     this.SetSonComponents("QUESTION");
   };
 
@@ -183,7 +197,7 @@ export class Questions extends Component {
       questions_copy = questions_copy_filtered;
     }
     if (questions_added_filtered.length === 0) {
-      questions_added = questions_filtered;
+      questions_added = questions_added_filtered;
     }
 
     this.setState({
@@ -312,45 +326,49 @@ export class Questions extends Component {
       let sonComponents = [];
 
       this.state.questions.forEach((elm, index) => {
-        let newQuestion = "";
+        if (elm !== "" && elm !== null && elm !== undefined) {
+          let newQuestion = "";
 
-        if (component === "QUESTION") {
-          newQuestion = (
-            <Question
-              question={elm}
-              key={index}
-              index={index}
-              changeQuestionComponent={this.changeQuestionComponent}
-              setEdit={this.setEdit}
-            />
-          );
-        } else if (component === "EDIT_QUESTION") {
-          let question_orig = this.state.questions[index];
+          if (component === "QUESTION") {
+            newQuestion = (
+              <Question
+                question={elm}
+                key={index}
+                index={index}
+                changeQuestionComponent={this.changeQuestionComponent}
+                setEdit={this.setEdit}
+              />
+            );
+          } else if (component === "EDIT_QUESTION") {
+            let question_orig = this.state.questions[index];
 
-          newQuestion = (
-            <EditQuestion
-              question={this.state.questions_copy[index]}
-              question_orig={question_orig}
-              key={index}
-              index={index}
-              changeQuestionComponent={this.changeQuestionComponent}
-              changedQuestion={this.changedQuestion}
-              deleteFromSonComponents={this.deleteFromSonComponents}
-              questionCopyChanged={this.questionCopyChanged}
-              setEdit={this.setEdit}
-              loading={this.state.loading}
-            />
-          );
-        } else {
-          newQuestion = <div>Unrecogined component in setSonComponents()</div>;
+            newQuestion = (
+              <EditQuestion
+                question={this.state.questions_copy[index]}
+                question_orig={question_orig}
+                key={index}
+                index={index}
+                changeQuestionComponent={this.changeQuestionComponent}
+                changedQuestion={this.changedQuestion}
+                deleteFromSonComponents={this.deleteFromSonComponents}
+                questionCopyChanged={this.questionCopyChanged}
+                setEdit={this.setEdit}
+                loading={this.state.loading}
+              />
+            );
+          } else {
+            newQuestion = (
+              <div>Unrecogined component in setSonComponents()</div>
+            );
+          }
+
+          sonComponents.push(newQuestion);
         }
-
-        sonComponents.push(newQuestion);
       });
 
-      let addedQuestionsComponents = this.state.sonComponents.filter(
-        (elm, index) => index >= sonComponents.length
-      );
+      let addedQuestionsComponents = this.state.sonComponents
+        .filter((elm, index) => elm !== "")
+        .filter((elm, index) => index >= sonComponents.length);
       if (addedQuestionsComponents.length > 0) {
         sonComponents = [...sonComponents, ...addedQuestionsComponents];
       }
@@ -379,26 +397,29 @@ export class Questions extends Component {
     this.setState({ edit: false });
   };
 
-  saveAllEditedQuestionsToDb = () => {
+  saveAllEditedQuestionsToDb = (thenSavEAllAddedQuestionsFlag) => {
     let request_body_all = [];
 
     this.state.questions_copy.forEach((question, index) => {
-      let question_orig = this.state.questions[index];
-      if (question_orig === undefined) {
-        question_orig = this.state.questions_copy[index];
+      if (question !== "") {
+        let question_orig = this.state.questions[index];
+        if (question_orig === undefined) {
+          question_orig = this.state.questions_copy[index];
+        }
+        let oldBody = Object.keys(question_orig)[0];
+        let newBody = Object.keys(question)[0];
+
+        let request_body = {};
+        request_body["body"] = oldBody;
+        request_body["ChangeSubject"] = { name: question[newBody]["subject"] };
+        request_body["ChangeBody"] = newBody;
+        request_body["ChangeAnswers"] = question[newBody]["answers"];
+        request_body["ChangeCorrectAnswer"] =
+          question[newBody]["correctAnswer"];
+        request_body["ChangeDifficulty"] = question[newBody]["difficulty"];
+
+        request_body_all = [...request_body_all, request_body];
       }
-      let oldBody = Object.keys(question_orig)[0];
-      let newBody = Object.keys(question)[0];
-
-      let request_body = {};
-      request_body["body"] = oldBody;
-      request_body["ChangeSubject"] = { name: question[newBody]["subject"] };
-      request_body["ChangeBody"] = newBody;
-      request_body["ChangeAnswers"] = question[newBody]["answers"];
-      request_body["ChangeCorrectAnswer"] = question[newBody]["correctAnswer"];
-      request_body["ChangeDifficulty"] = question[newBody]["difficulty"];
-
-      request_body_all = [...request_body_all, request_body];
     });
 
     if (request_body_all.length !== 0) {
@@ -412,12 +433,20 @@ export class Questions extends Component {
         .then((res) => res.json())
         .then((data) => {
           console.log(data);
+          this.filterEmptyQuestions();
           data.forEach((elm, index) => {
             this.changedQuestion(elm["Edited Question"], index);
             this.changeQuestionComponent(index, "QUESTION");
           });
-          this.setState({ loading: false });
-          this.setEdit(false);
+          if (
+            thenSavEAllAddedQuestionsFlag &&
+            this.state.questions_added.length > 0
+          ) {
+            this.saveAllAddedQuestionsToDb();
+          } else {
+            this.setState({ loading: false });
+            this.setEdit(false);
+          }
         })
         .catch((err) => {
           console.error("error while editing question:", err);
@@ -425,6 +454,16 @@ export class Questions extends Component {
           this.setEdit(false);
         });
     }
+  };
+
+  filterEmptyQuestions = () => {
+    let questions = this.state.questions;
+    let questions_copy = this.state.questions_copy;
+
+    questions = [...questions.filter((question) => question !== "")];
+    questions_copy = [...questions_copy.filter((question) => question !== "")];
+
+    this.setState({ questions: questions, questions_copy: questions_copy });
   };
 
   saveAllAddedQuestionsToDb = () => {
@@ -469,6 +508,7 @@ export class Questions extends Component {
         .then((res) => res.json())
         .then((data) => {
           console.log(data);
+          this.filterEmptyQuestions();
           data.forEach((elm, index) => {
             this.addQuestionToSonComponentWithoutCopy(elm["Returned Question"]);
           });
@@ -485,7 +525,7 @@ export class Questions extends Component {
           this.setEdit(false);
           this.emptyAddedQuestionsArr();
         });
-    } else {
+    } else if (!save_flag) {
       window.alert(
         "Not saving added questions: one of them are missing 'subject' or 'body' fields"
       );
@@ -524,14 +564,13 @@ export class Questions extends Component {
   saveAllQuestions = (e) => {
     e.stopPropagation();
     if (!this.state.loading) {
-      this.saveAllEditedQuestionsToDb();
-      this.saveAllAddedQuestionsToDb();
+      this.saveAllEditedQuestionsToDb(true);
     }
   };
 
   render() {
     let res =
-      this.state.questions !== null ? (
+      this.state.questions !== null && this.state.questions !== undefined ? (
         <React.Fragment>
           <div className="page_title"> Questions </div>
           {this.state.activeExamsID !== "" && (

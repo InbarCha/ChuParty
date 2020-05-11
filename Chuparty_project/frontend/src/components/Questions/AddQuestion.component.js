@@ -245,6 +245,7 @@ export class AddQuestion extends Component {
       .then((data) => {
         console.log(data);
         this.props.addQuestionToSonComponents(data["Returned Question"]);
+        this.setState({ loading: false });
       })
       .then(() => {
         this.editExamWithNewQuestion();
@@ -267,11 +268,9 @@ export class AddQuestion extends Component {
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
-        this.setState({ loading: false });
       })
       .catch((err) => {
         console.error("error while editing exam:", err);
-        this.setState({ loading: false });
       });
   };
 

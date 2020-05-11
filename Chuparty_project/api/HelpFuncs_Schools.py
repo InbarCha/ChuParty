@@ -22,6 +22,6 @@ def changeSchoolsTemplateInList(schoolsList):
 def changeSchoolTemplate(school):
     schoolJson = dict()
     schoolJson[school.name] = dict()
-    schoolJson[school.name]['courses'] = changeCoursesTemplateInList(school.courses)
+    schoolJson[school.name]['courses'] = school.courses
 
     return schoolJson

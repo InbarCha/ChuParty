@@ -203,7 +203,7 @@ def editQuestion_helpFunc(requestBody):
             string for string in newAnswersList if string not in oldAnswersList]
         filteredListOld = [
             string for string in oldAnswersList if string not in newAnswersList]
-        if filteredListNew or filteredListOld:
+        if filteredListNew or filteredListOld or len(newAnswersList) != len(oldAnswersList):
             questionObj.answers = newAnswersList
             changedAnswersFlg = True
 
