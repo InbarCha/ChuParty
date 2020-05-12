@@ -127,17 +127,20 @@ export default class Courses extends Component {
       let sonComponents = [];
 
       this.state.courses.forEach((elm, index) => {
-        let newCourse = (
-          <Course
-            bounce={false}
-            course={elm}
-            index={index}
-            key={index}
-            chooseActiveCourse={this.chooseActiveCourse}
-            changeCourseComponent={this.changeCourseComponent}
-          />
-        );
-
+        let newCourse = "";
+        if (elm !== null && elm !== undefined && elm !== "") {
+          console.log(elm);
+          newCourse = (
+            <Course
+              bounce={false}
+              course={elm}
+              index={index}
+              key={index}
+              chooseActiveCourse={this.chooseActiveCourse}
+              changeCourseComponent={this.changeCourseComponent}
+            />
+          );
+        }
         sonComponents.push(newCourse);
       });
 
