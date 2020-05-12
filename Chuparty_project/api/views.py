@@ -355,7 +355,6 @@ def editCourse(request):
                         newSubjectsList.append(subjectObj)
                         addedToSubjectsFlg = True
 
-                        addSubjectToCoursesInSchools(name, subjectObj)
                         addSubjectToCourseInQuestions(name, subjectObj)
                         addSubjectToCourseInExams(name, subjectObj)
 
@@ -386,6 +385,7 @@ def editCourse(request):
             if addedToSubjectsFlg == True or deletedFromSubjectsFlg == True:
                 Course.objects.filter(name=name).update(
                     subjects=newSubjectsList)
+        
 
             # change course name
             if 'ChangeName' in body.keys():
@@ -393,6 +393,7 @@ def editCourse(request):
                 Course.objects.filter(name=name).update(name=newName)
                 courseObj.name = newName
                 changedNameFlg = True
+
 
                 updateCourseNameInSchools(name, newName)
                 updateCourseNameInQuestions(name, newName)

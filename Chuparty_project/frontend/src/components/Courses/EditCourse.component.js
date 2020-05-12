@@ -119,6 +119,8 @@ export class EditCourse extends Component {
         });
     }
 
+    console.log(request_body);
+
     fetch(EDIT_COURSE_ROUTE, {
       method: "post",
       body: JSON.stringify(request_body),

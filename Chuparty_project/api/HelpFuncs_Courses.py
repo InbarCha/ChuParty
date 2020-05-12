@@ -52,28 +52,9 @@ def updateCourseNameInSchools(name, newName):
     for school in schoolsList:
         coursesList = school.courses
         for course in coursesList:
-            if course.name == name:
-                course.name = newName
+            if course == name:
+                course = newName
 
-        School.objects.filter(name=school.name).delete()
-        school.save()
-
-#####################################
-# addSubjectToCoursesInSchools(courseName, subjectObj)
-# help function
-#####################################
-def addSubjectToCoursesInSchools(courseName, subjectObj):
-    # get all schools from DB
-    schoolsList = list(School.objects.all())
-
-    # iterate over all schools
-    # for every school, look as its course and add subject if necessary
-    for school in schoolsList:
-        coursesList = school.courses
-        for course in coursesList:
-            if course.name == courseName and subjectObj.name not in [subject.name for subject in course.subjects]:
-                course.subjects.append(subjectObj)
-        
         School.objects.filter(name=school.name).delete()
         school.save()
 
