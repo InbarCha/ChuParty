@@ -46,16 +46,19 @@ export default class Exams extends Component {
     let sonComponents = [];
 
     this.state.exams.forEach((elm, index) => {
-      let newExam = (
-        <Exam
-          bounce={false}
-          key={index}
-          index={index}
-          parentClickHandler={this.props.parentClickHandler}
-          exam={this.state.exams[index]}
-          changeExamComponent={this.changeExamComponent}
-        />
-      );
+      let newExam = "";
+      if (elm !== "" && (elm !== null) & (elm !== undefined)) {
+        newExam = (
+          <Exam
+            bounce={false}
+            key={index}
+            index={index}
+            parentClickHandler={this.props.parentClickHandler}
+            exam={this.state.exams[index]}
+            changeExamComponent={this.changeExamComponent}
+          />
+        );
+      }
       sonComponents.push(newExam);
     });
 
