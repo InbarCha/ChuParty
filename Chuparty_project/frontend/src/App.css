@@ -45,7 +45,7 @@
   padding-bottom: 3px;
   cursor: pointer;
 }
-form {
+#searchBtnContainer {
   display: inline-grid;
   column-count: 2;
 }
