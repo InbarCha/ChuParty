@@ -377,7 +377,6 @@ def editCourse(request):
                         courseObj.subjects = newSubjectsList
                         deletedFromSubjectsFlg = True
 
-                        deleteSubjectFromCoursesInSchools(name, subjectObj)
                         deleteSubjectFromCourseInQuestions(name, subjectObj)
                         deleteSubjectFromCourseInExams(name, subjectObj)
 

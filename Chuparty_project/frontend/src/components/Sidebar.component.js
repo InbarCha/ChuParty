@@ -57,7 +57,7 @@ export default class Home extends Component {
           <i className="material-icons">message</i>
         </div>
         <div className="side_description">
-          <span>Feedback</span>
+          <span>Statistics</span>
         </div>
 
         <div
