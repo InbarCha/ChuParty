@@ -14,7 +14,7 @@ export class School extends Component {
   };
 
   render() {
-    let SchoolName = Object.keys(this.props.school)[0];
+    let SchoolName = this.props.school.name;
     let newSchool = (
       <div
         className={"model col-centered"}
@@ -31,9 +31,9 @@ export class School extends Component {
             <img className="course_img" alt="" />
             <div className="course_name_text">{SchoolName}</div>
           </div>
-          {this.props.school[SchoolName].length >= 1 && (
+          {SchoolName.length >= 1 && (
             <div className="details_container">
-              {this.props.school[SchoolName]["courses"].map((elm, j_index) => {
+              {this.props.school.courses.map((elm, j_index) => {
                 return (
                   <div className="detail_container" key={j_index}>
                     {elm}
