@@ -29,17 +29,14 @@ export default class Schools extends Component {
   }
 
   componentDidMount() {
-    let dummySchools = [{ "id": 1, name: "Comp.Sci", courses: ["name", "name2"] }];
-    this.setSchools(dummySchools)
-      .then(() => this.setSonComponents())
-      .catch(err => console.log("error settings schools:", err));
-    // fetch(SCHOOLS_ROUTE)
-    //   .then((res) => {console.log(res); return res.json()})
-    //   .then((data) => {
-    //     console.log(data);
-    //     this.setState({ schools: data });
-    //   })
-    //   .catch((err) => console.error("error while fetching schools:", err));
+    fetch(SCHOOLS_ROUTE)
+      .then((res) => { console.log(res); return res.json() })
+      .then((data) => {
+        // this.setState({ schools: data });
+        data = data.map(e => { return { name: Object.keys(e)[0], courses: e[Object.keys(e)[0]].courses } });
+        this.setSchools(data)
+      }).then(() => this.setSonComponents())
+      .catch((err) => console.error("error while fetching schools:", err));
   }
 
   chooseActiveSchool(school) {
