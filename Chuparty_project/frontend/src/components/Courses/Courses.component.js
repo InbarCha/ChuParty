@@ -19,15 +19,17 @@ const override = css`
 `;
 
 export default class Courses extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       courses: null,
       activeCourse: localStorage["activeCourse"],
       sonComponents: [],
       loading: true,
+      searchStr: props.filterBy || ""
     };
   }
+
   componentDidMount() {
     // courses should look like the following:
     // [{"OOP": {subjects: ["Object-Oriented Principles"]}}, ...]
@@ -38,6 +40,15 @@ export default class Courses extends Component {
         this.SetSonComponents();
       })
       .catch((err) => console.error("error while fetching courses:", err));
+  }
+
+  componentDidUpdate(prevProps) {
+    console.log('new props filter:', this.props.filterBy);
+    if (this.props.filterBy !== this.state.searchStr) {
+      console.log(`searching for ${this.props.filterBy}`);
+      this.setState({ searchStr: this.props.filterBy.toLowerCase() })
+      this.SetSonComponents();
+    }
   }
 
   chooseActiveCourse = (courseName) => {
@@ -124,9 +135,13 @@ export default class Courses extends Component {
 
   SetSonComponents() {
     if (this.state.courses !== null) {
+      let courses = this.state.courses;
       let sonComponents = [];
-
-      this.state.courses.forEach((elm, index) => {
+      if (this.state.searchStr !== '')
+        courses = courses.filter(e => // filter by course name OR subject name
+          (Object.keys(e)[0].toLowerCase().indexOf(this.state.searchStr) !== -1) || (e[Object.keys(e)[0]]['subjects'].find(e => e.toLowerCase().indexOf(this.state.searchStr) !== -1))
+        );
+      courses.forEach((elm, index) => {
         let newCourse = "";
         if (elm !== null && elm !== undefined && elm !== "") {
           console.log(elm);
@@ -143,7 +158,6 @@ export default class Courses extends Component {
         }
         sonComponents.push(newCourse);
       });
-
       this.setState({ sonComponents: sonComponents });
     }
   }
@@ -209,11 +223,11 @@ export default class Courses extends Component {
           </Container>
         </React.Fragment>
       ) : (
-        <div className="col-centered models_loading">
-          <div className="loading_title"> Loading Courses... </div>
-          <RotateLoader css={override} size={50} />
-        </div>
-      );
+          <div className="col-centered models_loading">
+            <div className="loading_title"> Loading Courses... </div>
+            <RotateLoader css={override} size={50} />
+          </div>
+        );
     return res;
   }
 }
