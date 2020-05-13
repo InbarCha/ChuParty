@@ -135,12 +135,11 @@ export default class Courses extends Component {
 
   SetSonComponents() {
     if (this.state.courses !== null) {
-      let courses = this.state.courses;
-      let sonComponents = [];
-      if (this.state.searchStr !== '')
-        courses = courses.filter(e => // filter by course name OR subject name
+      let courses = (this.state.searchStr !== '') ?
+        this.state.courses.filter(e => // filter by course name OR subject name
           (Object.keys(e)[0].toLowerCase().indexOf(this.state.searchStr) !== -1) || (e[Object.keys(e)[0]]['subjects'].find(e => e.toLowerCase().indexOf(this.state.searchStr) !== -1))
-        );
+        ) : this.state.courses;
+      let sonComponents = [];
       courses.forEach((elm, index) => {
         let newCourse = "";
         if (elm !== null && elm !== undefined && elm !== "") {
