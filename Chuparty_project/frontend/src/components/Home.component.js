@@ -21,6 +21,7 @@ export default class Home extends Component {
       currentPageStatus: "waiting",
       currentCourse: "",
       currentContentView: <Schools />,
+      searchStr: ""
     };
   }
 
@@ -33,7 +34,10 @@ export default class Home extends Component {
       case "COURSES":
         this.setState({
           currentContentView: (
-            <Courses parentClickHandler={this.onSideBarClick} />
+            <Courses
+              parentClickHandler={this.onSideBarClick}
+              filterBy={this.state.searchStr}
+            />
           ),
         });
         break;
@@ -70,6 +74,17 @@ export default class Home extends Component {
     }
   };
 
+  filterBy(str) {
+    console.log(`filtering by ${str}`);
+    this.setState({ searchStr: str })
+    this.setState({
+      currentContentView: React.cloneElement(
+        this.state.currentContentView,
+        { filterBy: str }
+      )
+    })
+  }
+
   render() {
     return (
       <div className="Home">
@@ -77,7 +92,7 @@ export default class Home extends Component {
           <Switch>
             <Route exact path="/">
               <header>
-                <Searchbar />
+                <Searchbar filterBy={this.filterBy.bind(this)} />
               </header>
               <nav>
                 <Sidebar parentClickHandler={this.onSideBarClick} />
