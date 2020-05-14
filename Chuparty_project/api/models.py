@@ -179,7 +179,7 @@ def checkIfPermissionValid(permission):
 ###################################################
 # Users - abstract
 ###################################################
-class User(models.Model):
+class myUser(models.Model):
     email = models.EmailField()
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -206,7 +206,7 @@ class User(models.Model):
 #       student = Student(first_name="David", last_name="Shaulov", email="david@gmail.com", permissions = [ "Create Exam", "Delete Exam" ])
 #       student.save()
 ###################################################
-class Student(User):
+class Student(myUser):
     objects = models.DjongoManager() 
     
     # more fields unique to students
@@ -224,7 +224,7 @@ class Student(User):
         return json_dict
 
 
-class Lecturer(User):
+class Lecturer(myUser):
     objects = models.DjongoManager()
 
     # more fields unique to lecturers
@@ -241,7 +241,7 @@ class Lecturer(User):
 
         return json_dict
 
-class Admin(User):
+class Admin(myUser):
     objects = models.DjongoManager()
 
     # more fields unique to admins

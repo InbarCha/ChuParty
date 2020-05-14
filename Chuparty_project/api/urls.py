@@ -61,4 +61,10 @@ urlpatterns = [
     path('getAdminByEmail', views.getAdminByEmail),
     path('deleteAdmin', views.deleteAdmin),
 
+    # auth
+    path('isLoggedIn', views.isLoggedIn),
+    path('logIn', views.logIn),
+    path('logOut', views.logOut),
+    path('register', views.register)
+
 ]

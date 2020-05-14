@@ -1,5 +1,7 @@
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.shortcuts import render
-from api.models import *
+from api.models import Subject, Course, Question, Exam, School, Lecturer, Student, Admin
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
@@ -565,7 +567,7 @@ def setSchool(request):
                         return JsonResponse({"Status": ret_tuple[1]}, status=500)
 
                     course = ret_tuple[1]
-                    coursesList.append(course)
+                    coursesList.append(course.name)
 
             newShool = School(name=schoolName, courses=coursesList)
             newShool.save()
@@ -2409,3 +2411,154 @@ def getAdminByEmail(request):
                     },
         status=500
         )
+
+######################################################
+'''
+isLoggedIn()
+'''
+#####################################################
+@csrf_exempt
+def isLoggedIn(request):
+    if request.method == "GET":
+        if not request.user.is_authenticated:
+            return JsonResponse(
+                {
+                    "isLoggedIn": False,
+                },
+            )
+        else:
+            return JsonResponse(
+                {
+                    "isLoggedIn": True,
+                    "user": request.user.username
+                }
+            )
+
+
+    return JsonResponse(
+            {
+                "Status": "isLoggedIn() only accepts GET requests",
+            },
+            status=500
+        )
+
+
+######################################################
+'''
+logIn()
+'''
+#####################################################
+@csrf_exempt
+def logIn(request):
+    if request.method == "POST":
+        body = parseRequestBody(request)
+
+        if 'username' not in body.keys() or 'password' not in body.keys():
+            return JsonResponse(
+                {
+                    "isLoggedIn": False,
+                    "reason": "'username' or 'password' not in request body"
+                }
+            )
+        username = body["username"]
+        password = body["password"]
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return JsonResponse(
+                {
+                    "isLoggedIn": True,
+                    "username": user.username,
+                    "email": user.email
+                }
+            )
+        else:
+            return JsonResponse(
+                {
+                    "isLoggedIn": False,
+                }
+            )
+
+
+    return JsonResponse(
+            {
+                "Status": "logIn() only accepts POST requests",
+            },
+            status=500
+        )
+
+
+######################################################
+'''
+register()
+'''
+#####################################################
+@csrf_exempt
+def register(request):
+    if request.method == "POST":
+        body = parseRequestBody(request)
+
+        if 'username' not in body.keys() or 'first_name' not in body.keys() or 'last_name' not in body.keys() or 'password' not in body.keys() or 'email' not in body.keys(): 
+            return JsonResponse(
+                {
+                    "isRegistered": False,
+                    "reason": "'username' or 'first_name' or 'last_name' or 'password' not in request body"
+                }
+            )
+
+        username = body["username"]
+        if User.objects.filter(username=username).exists():
+            return JsonResponse(
+                {
+                    "isRegistered": False,
+                    "reason": "User already exists"
+                }
+            )
+
+        first_name = body["first_name"]
+        last_name = body["last_name"]
+        password = body["password"]
+        email = body['email']
+
+        user = User(username=username, password=password, first_name=first_name, last_name=last_name, email=email)
+        user.save()
+
+        return JsonResponse(
+            {
+                "isRegistered": True,
+                "username": user.username,
+                "email": user.email
+            }
+        )
+  
+
+
+    return JsonResponse(
+            {
+                "Status": "register() only accepts POST requests",
+            },
+            status=500
+        )
+
+######################################################
+'''
+logOut()
+'''
+#####################################################
+@csrf_exempt
+def logOut(request):
+    if request.method == "GET":
+        logout(request)
+        return JsonResponse(
+            {
+                "isLoggedOut": True,
+            }
+        )
+
+    else:
+        return JsonResponse(
+                {
+                    "Status": "logout() only accepts GET requests",
+                },
+                status=500
+            )
