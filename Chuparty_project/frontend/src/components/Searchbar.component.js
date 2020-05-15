@@ -33,7 +33,7 @@ export default class Home extends Component {
             </button>
           </div>
         </div>
-        <span class="material-icons account_icon">account_circle</span>
+        <span className="material-icons account_icon">account_circle</span>
       </div>
     );
   }

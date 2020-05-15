@@ -11,6 +11,12 @@ import Questions from "./Questions/Questions.component";
 import Login from "./Auth/Login.component";
 import Register from "./Auth/Register.component";
 import Profile from "./Auth/Profile.component";
+import NonAuthenticated from "./Auth/NonAuthenticatedcomponent";
+
+const IS_LOGGEDIN_ROUTE =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/isLoggedIn"
+    : "/api/isLoggedIn";
 
 export default class Home extends Component {
   _isMounted = false;
@@ -20,9 +26,22 @@ export default class Home extends Component {
     this.state = {
       currentPageStatus: "waiting",
       currentCourse: "",
-      currentContentView: <Schools />,
-      searchStr: ""
+      currentContentView: (
+        <NonAuthenticated parentClickHandler={this.onSideBarClick} />
+      ),
+      searchStr: "",
+      isLoggedIn: false,
     };
+  }
+
+  componentDidMount() {
+    fetch(IS_LOGGEDIN_ROUTE)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        this.setState({ isLoggedIn: data["isLoggedIn"] });
+      })
+      .catch((err) => console.error("error while fetching exmas:", err));
   }
 
   onSideBarClick = (clickMsg) => {
@@ -60,11 +79,25 @@ export default class Home extends Component {
       case "ADMIN":
         this.setState({ currentContentView: <Admin /> });
         break;
+      case "NON_AUTHENTICATED":
+        this.setState({
+          currentContentView: (
+            <NonAuthenticated parentClickHandler={this.onSideBarClick} />
+          ),
+        });
+        break;
       case "REGISTER":
         this.setState({ currentContentView: <Register /> });
         break;
       case "LOGIN":
-        this.setState({ currentContentView: <Login /> });
+        this.setState({
+          currentContentView: (
+            <Login
+              parentClickHandler={this.onSideBarClick}
+              setLoggedIn={this.setLoggedIn}
+            />
+          ),
+        });
         break;
       case "PROFILE":
         this.setState({ currentContentView: <Profile /> });
@@ -74,15 +107,18 @@ export default class Home extends Component {
     }
   };
 
+  setLoggedIn = (flg) => {
+    this.setState({ isLoggedIn: flg });
+  };
+
   filterBy(str) {
     console.log(`filtering by ${str}`);
-    this.setState({ searchStr: str })
+    this.setState({ searchStr: str });
     this.setState({
-      currentContentView: React.cloneElement(
-        this.state.currentContentView,
-        { filterBy: str }
-      )
-    })
+      currentContentView: React.cloneElement(this.state.currentContentView, {
+        filterBy: str,
+      }),
+    });
   }
 
   render() {
@@ -92,12 +128,16 @@ export default class Home extends Component {
           <Switch>
             <Route exact path="/">
               <header>
-                <Searchbar filterBy={this.filterBy.bind(this)} />
+                <Searchbar
+                  filterBy={this.filterBy.bind(this)}
+                  parentClickHandler={this.onSideBarClick}
+                />
               </header>
-              <nav>
-                <Sidebar parentClickHandler={this.onSideBarClick} />
-              </nav>
-              {/* TODO: check if user is logged in*/}
+              {this.state.isLoggedIn && (
+                <nav>
+                  <Sidebar parentClickHandler={this.onSideBarClick} />
+                </nav>
+              )}
               <div id="content_container">{this.state.currentContentView}</div>
             </Route>
           </Switch>

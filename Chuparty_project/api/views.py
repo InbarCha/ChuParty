@@ -2446,6 +2446,11 @@ def isLoggedIn(request):
 ######################################################
 '''
 logIn()
+POST request body:
+{
+	"username": "inbar",
+	"password": "12345678"
+}
 '''
 #####################################################
 @csrf_exempt
@@ -2491,6 +2496,14 @@ def logIn(request):
 ######################################################
 '''
 register()
+POST request body:
+{
+	"username": "david",
+	"password": "12345678",
+	"first_name": "david",
+	"last_name": "shaulov",
+	"email": "david@gmail.com"
+}
 '''
 #####################################################
 @csrf_exempt

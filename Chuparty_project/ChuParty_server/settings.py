@@ -78,7 +78,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ChuParty_server.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 DATABASES = {

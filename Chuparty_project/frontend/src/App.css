@@ -24,6 +24,52 @@
   color: rgb(59, 128, 173);
   font-family: "Courier New", Courier, monospace;
 }
+.page_title_unauth {
+  text-align: center;
+  font-size: xxx-large;
+  font-weight: bold;
+  color: rgb(59, 128, 173);
+  font-family: "Courier New", Courier, monospace;
+  margin-top: 30px;
+  width: 100%;
+}
+hr {
+  border: none;
+  height: 20px;
+  width: 60%;
+  height: 50px;
+  margin-top: 0;
+  border-bottom: 1px solid #1f1209;
+  box-shadow: 0 20px 20px -20px #333;
+  margin: -50px auto 10px;
+}
+.unauth_description {
+  text-align: center;
+  font-size: x-large;
+  font-weight: bold;
+  color: rgb(59, 128, 173);
+  font-family: "Courier New", Courier, monospace;
+  margin-top: 50px;
+  width: 100%;
+}
+.chuparty_banner {
+  content: url("./assets/chuparty_banner.png");
+  margin-top: 30px;
+  width: 30%;
+}
+.login_icon_unauth {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  font-size: 40px;
+  cursor: pointer;
+}
+.login_icon_unauth:hover {
+  transform: scale(1.3, 1.3);
+}
+.login_form {
+  text-align: center;
+  padding: 10px;
+}
 .title img {
   width: 72px;
   height: 40px;
@@ -120,7 +166,7 @@
 }
 .account_icon {
   position: absolute;
-  right: 10px;
+  right: 30px;
   font-size: 40px;
 }
 .search-container input[type="text"] {
@@ -428,4 +474,90 @@ nav {
 .model_loading {
   padding-top: 10px;
   padding-bottom: 10px;
+}
+/* Grid
+-------------------------------------- */
+/* Define the default grid (it's all in one column) */
+.form {
+  display: grid;
+  grid-row-gap: 5px;
+  text-align: center;
+}
+
+/* Switch to two columns in wider viewports */
+@media (min-width: 29.375rem) {
+  .form {
+    grid-column-gap: 25px;
+    grid-template-areas:
+      "label-name  label-email"
+      "field-name  field-email"
+      "label-msg   ."
+      "field-msg   field-msg"
+      "button      .";
+  }
+}
+
+/* The values below correspond to the values shown in grid-template-areas above, placing the items on the grid accordingly. Note that the grid-area value does NOT have to match the class name. For example, .field-message has field-msg as its grid-area. */
+@media (min-width: 29.375rem) {
+  .label-name {
+    grid-area: label-name;
+  }
+  .label-email {
+    grid-area: label-email;
+  }
+  .label-message {
+    grid-area: label-msg;
+  }
+  .field-name {
+    grid-area: field-name;
+  }
+  .field-email {
+    grid-area: field-email;
+  }
+  .field-message {
+    grid-area: field-msg;
+  }
+  .button {
+    grid-area: button;
+  }
+}
+
+/* Generic styles for demo purposes
+-------------------------------------- */
+.form {
+  margin-top: 30px;
+  background-color: #eee;
+  font-family: Helvetica, Arial, sans-serif;
+  max-width: 600px;
+  padding: 25px;
+  box-shadow: 0 0 2px 2px darkgray;
+}
+
+.field {
+  border: 1px solid #ccc;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 10px;
+}
+
+@media (max-width: 29.3125rem) {
+  .label-email {
+    margin-top: 20px;
+  }
+}
+
+.label-message {
+  margin-top: 20px;
+}
+
+.button {
+  appearance: none;
+  background-color: rgb(146, 195, 228);
+  border: none;
+  font-size: 0.9375rem;
+  margin-top: 20px;
+  padding: 10px;
+  /* without this, the button would be as 
+  wide as its column (and the Name field) */
+  justify-self: start;
 }
