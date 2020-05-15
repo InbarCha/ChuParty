@@ -572,18 +572,21 @@ export class Questions extends Component {
     let res =
       this.state.questions !== null && this.state.questions !== undefined ? (
         <React.Fragment>
-          <div className="page_title"> Questions </div>
+          <div className="page_title" dir="RTL">
+            {" "}
+            שאלות{" "}
+          </div>
           {this.state.activeExamsID !== "" && (
             <React.Fragment>
               <div className="active_model_title">
                 <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
-                  Course:
+                  קורס:
                 </span>
                 <span className="active_model"> {this.state.activeCourse}</span>
               </div>
               <div className="active_model_title">
                 <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
-                  Exam:
+                  מבחן:
                 </span>
                 <span className="active_model">
                   {" " + this.state.examName + " " + this.state.examDate}
@@ -616,7 +619,7 @@ export class Questions extends Component {
                           ).length === this.state.sonComponents.length
                         }
                       >
-                        Edit All
+                        ערוך הכל
                       </button>
                       <button
                         className="btn btn-dark questions_settings_icon"
@@ -631,7 +634,7 @@ export class Questions extends Component {
                           )
                         }
                       >
-                        Save All
+                        שמור הכל
                       </button>
                       <button
                         className="btn btn-dark questions_settings_icon"
@@ -647,7 +650,7 @@ export class Questions extends Component {
                         }
                         style={{ marginLeft: "5px" }}
                       >
-                        Cancel Edit
+                        בטל עריכה
                       </button>
                     </div>
                   </Col>
@@ -670,18 +673,18 @@ export class Questions extends Component {
           </Container>
         </React.Fragment>
       ) : this.state.activeExamsID !== undefined ? (
-        <div className="col-centered models_loading">
-          <div className="loading_title"> Loading Questions... </div>
+        <div className="col-centered models_loading" dir="RTL">
+          <div className="loading_title"> טוען שאלות... </div>
           <RotateLoader css={override} size={50} loading={this.state.loading} />
         </div>
       ) : (
-        <React.Fragment>
-          <div className="page_title"> Questions </div>
+        <React.Fragment dir="RTL">
+          <div className="page_title"> שאלות </div>
           <div className="active_model_title">
             <span
               style={{ fontStyle: "italic", fontSize: "x-large", color: "red" }}
             >
-              Error Loading Exam: No Exam Chosen
+              בעיה בטעינת שאלות: לא נבחר אף מבחן
             </span>
           </div>
         </React.Fragment>

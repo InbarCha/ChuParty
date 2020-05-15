@@ -191,7 +191,7 @@ export class AddExam extends Component {
     let subjects = this.state.exam[examID]["subjects"];
 
     return (
-      <div className={"model col-centered"} onClick={this.chooseExam}>
+      <div className={"model col-centered"} onClick={this.chooseExam} dir="RTL">
         <div className="model_container">
           <div className="model_name">
             <span
@@ -210,6 +210,7 @@ export class AddExam extends Component {
             <input
               type="text"
               defaultValue={examName}
+              dir="RTL"
               name={examName + "_edit"}
               className="modelTitle_edit_input"
               style={{ fontSize: "medium" }}
@@ -220,6 +221,7 @@ export class AddExam extends Component {
               type="date"
               defaultValue={examDate}
               name={examDate + "_edit"}
+              dir="RTL"
               className="modelTitle_edit_input"
               style={{ fontSize: "medium" }}
               disabled={this.state.loading}
@@ -234,7 +236,7 @@ export class AddExam extends Component {
               add
             </span>
             <div className="detail_container">
-              <div style={{ fontStyle: "italic" }}>Exam Writers:</div>
+              <div style={{ fontStyle: "italic" }}>כותבי המבחן:</div>
               {writers.map((writer, index) => {
                 return (
                   <div key={index}>
@@ -244,6 +246,7 @@ export class AddExam extends Component {
                       name={writer + "_edit"}
                       className="modelTitle_edit_input"
                       style={{ width: "70%" }}
+                      dir="RTL"
                       disabled={this.state.loading}
                       onChange={(e) => this.writersChanged(e, index)}
                     />

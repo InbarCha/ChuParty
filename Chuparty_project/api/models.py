@@ -177,36 +177,13 @@ def checkIfPermissionValid(permission):
 
 
 ###################################################
-# Users - abstract
-###################################################
-class myUser(models.Model):
-    email = models.EmailField()
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    permissions = models.ListField(
-        models.CharField(max_length=20)
-    )
-
-    def as_json(self):
-        json_dict = dict(
-            first_name = self.first_name,
-            last_name = self.last_name,
-            email = self.email,
-            permissions = self.permissions
-        )
-
-        return json_dict
-
-    class Meta:
-        abstract = True
-
-###################################################
 # Student
 # To add new student:
 #       student = Student(first_name="David", last_name="Shaulov", email="david@gmail.com", permissions = [ "Create Exam", "Delete Exam" ])
 #       student.save()
 ###################################################
-class Student(myUser):
+class Student(models.Model):
+    username = models.CharField(max_length=30, default='inbar')
     objects = models.DjongoManager() 
     
     # more fields unique to students
@@ -224,7 +201,8 @@ class Student(myUser):
         return json_dict
 
 
-class Lecturer(myUser):
+class Lecturer(models.Model):
+    username = models.CharField(max_length=30, default='inbar')
     objects = models.DjongoManager()
 
     # more fields unique to lecturers
@@ -241,7 +219,8 @@ class Lecturer(myUser):
 
         return json_dict
 
-class Admin(myUser):
+class Admin(models.Model):
+    username = models.CharField(max_length=30, default='inbar')
     objects = models.DjongoManager()
 
     # more fields unique to admins

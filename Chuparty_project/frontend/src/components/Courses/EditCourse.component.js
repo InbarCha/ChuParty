@@ -234,6 +234,7 @@ export class EditCourse extends Component {
                 <input
                   type="text"
                   defaultValue={courseName}
+                  dir="RTL"
                   name={courseName + "_edit"}
                   className="modelTitle_edit_input"
                   disabled={this.state.loading}
@@ -285,6 +286,7 @@ export class EditCourse extends Component {
                       <input
                         type="text"
                         value={elm}
+                        dir="RTL"
                         name={elm + "_edit"}
                         className="subject_edit_input"
                         disabled={this.state.loading}

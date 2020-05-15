@@ -315,13 +315,14 @@ export class EditQuestion extends Component {
             type="text"
             defaultValue={this.state.body}
             name={this.state.body + "_edit"}
+            dir="RTL"
             className="question_body_edit_input"
             disabled={this.state.loading || this.state.loading_parent}
             onChange={(e) => this.bodyChanged(e)}
           />
         </div>
         <span
-          className="material-icons plus_subjec_icon"
+          className="material-icons plus_subjec_icon_question"
           onClick={(e) => this.addAnswer(e)}
         >
           add
@@ -338,6 +339,7 @@ export class EditQuestion extends Component {
               </span>
               <input
                 type="text"
+                dir="RTL"
                 value={elm}
                 name={elm + "_edit"}
                 className="question_edit_input"
@@ -348,32 +350,35 @@ export class EditQuestion extends Component {
           );
         })}
         <br />
-        <span className="question_detail_edit_title">Difficulty:</span>
+        <span className="question_detail_edit_title">רמת קושי: </span>
         <input
           type="number"
           defaultValue={this.state.difficulty || ""}
           name={"question_difficulty_edit"}
+          dir="RTL"
           className="question_difficulty_edit_input"
           disabled={this.state.loading || this.state.loading_parent}
           onChange={(e) => this.difficultyChanged(e)}
         />
         <br /> <br />
-        <span className="correctAnswer_edit_title">Correct Answer:</span>
+        <span className="correctAnswer_edit_title">תשובה נכונה: </span>
         <input
           type="number"
           defaultValue={this.state.correctAnswer || ""}
           name={"correctAnswer_edit"}
           max={this.state.answers.length}
+          dir="RTL"
           className="correctAnswer_edit_input"
           disabled={this.state.loading || this.state.loading_parent}
           onChange={(e) => this.correctAnswerChanged(e)}
         />
         <br /> <br />
-        <span className="question_detail_edit_title">Subject:</span>
+        <span className="question_detail_edit_title">נושא: </span>
         <input
           type="text"
           defaultValue={this.state.subject || ""}
           name={"question_subject_edit"}
+          dir="RTL"
           className="question_subject_edit_input"
           disabled={this.state.loading || this.state.loading_parent}
           onChange={(e) => this.subjectChanged(e)}
@@ -394,7 +399,7 @@ export class EditQuestion extends Component {
 
   render() {
     return (
-      <div className="question_container">
+      <div className="question_container" dir="RTL">
         <div> {this.getAnswers()} </div>
       </div>
     );

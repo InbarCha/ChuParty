@@ -51,9 +51,9 @@ export class Question extends Component {
 
   render() {
     return (
-      <div className="question_container">
+      <div className="question_container" dir="RTL">
         <span
-          className="material-icons settings_icon"
+          className="material-icons settings_icon_question"
           onClick={(e) => this.editQuestion(e)}
         >
           settings

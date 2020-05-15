@@ -26,7 +26,7 @@ export default class Courses extends Component {
       activeCourse: localStorage["activeCourse"],
       sonComponents: [],
       loading: true,
-      searchStr: props.filterBy || ""
+      searchStr: props.filterBy || "",
     };
   }
 
@@ -43,10 +43,10 @@ export default class Courses extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    console.log('new props filter:', this.props.filterBy);
+    console.log("new props filter:", this.props.filterBy);
     if (this.props.filterBy !== this.state.searchStr) {
       console.log(`searching for ${this.props.filterBy}`);
-      this.setState({ searchStr: this.props.filterBy.toLowerCase() })
+      this.setState({ searchStr: this.props.filterBy.toLowerCase() });
       this.SetSonComponents();
     }
   }
@@ -137,9 +137,16 @@ export default class Courses extends Component {
     if (this.state.courses !== null) {
       let courses = this.state.courses;
       let sonComponents = [];
-      if (this.state.searchStr !== '')
-        courses = courses.filter(e => // filter by course name OR subject name
-          (Object.keys(e)[0].toLowerCase().indexOf(this.state.searchStr) !== -1) || (e[Object.keys(e)[0]]['subjects'].find(e => e.toLowerCase().indexOf(this.state.searchStr) !== -1))
+      if (this.state.searchStr !== "")
+        courses = courses.filter(
+          (
+            e // filter by course name OR subject name
+          ) =>
+            Object.keys(e)[0].toLowerCase().indexOf(this.state.searchStr) !==
+              -1 ||
+            e[Object.keys(e)[0]]["subjects"].find(
+              (e) => e.toLowerCase().indexOf(this.state.searchStr) !== -1
+            )
         );
       courses.forEach((elm, index) => {
         let newCourse = "";
@@ -200,13 +207,13 @@ export default class Courses extends Component {
   render() {
     let res =
       this.state.courses !== null ? (
-        <React.Fragment>
-          <div className="page_title"> Courses </div>
+        <React.Fragment dir="RTL">
+          <div className="page_title"> קורסים </div>
           {this.state.activeCourse !== "" && (
             <React.Fragment>
-              <div className="active_model_title">
+              <div className="active_model_title" dir="RTL">
                 <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
-                  Active Course:{" "}
+                  קורס פעיל:{" "}
                 </span>
                 <span className="active_model">{this.state.activeCourse}</span>
               </div>
@@ -223,11 +230,11 @@ export default class Courses extends Component {
           </Container>
         </React.Fragment>
       ) : (
-          <div className="col-centered models_loading">
-            <div className="loading_title"> Loading Courses... </div>
-            <RotateLoader css={override} size={50} />
-          </div>
-        );
+        <div className="col-centered models_loading" dir="RTL">
+          <div className="loading_title"> טוען קורסים... </div>
+          <RotateLoader css={override} size={50} />
+        </div>
+      );
     return res;
   }
 }

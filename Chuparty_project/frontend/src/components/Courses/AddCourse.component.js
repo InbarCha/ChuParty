@@ -203,8 +203,9 @@ export class AddCourse extends Component {
                 <div style={{ fontSize: "x-large", fontWeight: "bold" }}>
                   <input
                     type="text"
-                    placeholder="Course Name"
-                    name="course_namw"
+                    dir="RTL"
+                    placeholder="שם הקורס"
+                    name="course_name"
                     className="modelTitle_edit_input"
                     disabled={this.state.loading}
                     onChange={(e) => this.courseNameChanged(e)}
@@ -224,6 +225,7 @@ export class AddCourse extends Component {
                     <div className="detail_container" key={j_index}>
                       <input
                         type="text"
+                        dir="RTL"
                         value={elm}
                         name={elm + "_edit"}
                         className="subject_edit_input"

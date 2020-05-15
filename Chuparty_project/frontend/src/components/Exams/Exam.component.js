@@ -27,7 +27,7 @@ export class Exam extends Component {
     let subjects = this.props.exam[examID]["subjects"];
 
     let newExam = (
-      <div className={"model col-centered"} onClick={this.chooseExam}>
+      <div className={"model col-centered"} onClick={this.chooseExam} dir="RTL">
         <div className="model_container">
           <div className="model_name">
             <span
@@ -43,7 +43,7 @@ export class Exam extends Component {
           </div>
           <div className="details_container">
             <div className="detail_container">
-              <div className="exam_detail">Exam Writers:</div>
+              <div className="exam_detail">כותבי המבחן:</div>
               {writers.map((writer, index) => {
                 return <div key={index}>{writer}</div>;
               })}
@@ -51,7 +51,7 @@ export class Exam extends Component {
             <div className="detail_container">
               {subjects.length > 0 && (
                 <React.Fragment>
-                  <div className="exam_detail">Subjects:</div>
+                  <div className="exam_detail">נושאי המבחן:</div>
                   {subjects.map((subject, index) => {
                     return <div key={index}>{subject}</div>;
                   })}
@@ -59,7 +59,7 @@ export class Exam extends Component {
               )}
             </div>
             <div className="detail_container">
-              <span className="exam_detail">Number of Questions:</span>
+              <span className="exam_detail">מספר השאלות במבחן:</span>
               {" " + questions.length}
             </div>
           </div>

@@ -51,7 +51,7 @@ export class EditExam extends Component {
     if (!this.state.loading) {
       this.setState({ loading: true });
 
-      //TODO: change to message-box
+      //TODO: change to message-boxן
       if (window.confirm("Are you sure you want to delete this exam?")) {
         let exam = this.props.exam_orig;
         let examID = Object.keys(exam)[0];
@@ -234,7 +234,11 @@ export class EditExam extends Component {
     return (
       <Col xs={12} sm={12} md={6} lg={6} xl={4}>
         <Bounce className="bounce_div">
-          <div className={"model col-centered"} onClick={this.chooseExam}>
+          <div
+            className={"model col-centered"}
+            onClick={this.chooseExam}
+            dir="RTL"
+          >
             <div className="model_container">
               <div className="model_name">
                 <span
@@ -256,12 +260,14 @@ export class EditExam extends Component {
                   name={examName + "_edit"}
                   className="modelTitle_edit_input"
                   style={{ fontSize: "medium" }}
+                  dir="RTL"
                   disabled={this.state.loading}
                   onChange={(e) => this.examNameChanged(e)}
                 />
                 <input
                   type="date"
                   defaultValue={examDate}
+                  dir="RTL"
                   name={examDate + "_edit"}
                   className="modelTitle_edit_input"
                   style={{ fontSize: "medium" }}
@@ -283,13 +289,14 @@ export class EditExam extends Component {
                   save
                 </span>
                 <div className="detail_container">
-                  <div style={{ fontStyle: "italic" }}>Exam Writers:</div>
+                  <div style={{ fontStyle: "italic" }}>כותבי המבחן:</div>
                   {writers.map((writer, index) => {
                     return (
                       <div key={index}>
                         <input
                           type="text"
                           defaultValue={writer}
+                          dir="RTL"
                           name={writer + "_edit"}
                           className="modelTitle_edit_input"
                           style={{ width: "70%" }}
@@ -307,12 +314,14 @@ export class EditExam extends Component {
                   })}
                 </div>
                 <div className="detail_container">
-                  <span style={{ fontStyle: "italic" }}>Subjects:</span>
-                  {" " + subjects.join(", ")}
+                  <span style={{ fontStyle: "italic" }}>נושאי המבחן:</span>
+                  {subjects.map((subject, index) => {
+                    return <div key={index}>{subject}</div>;
+                  })}
                 </div>
                 <div className="detail_container">
                   <span style={{ fontStyle: "italic" }}>
-                    Number of Questions:
+                    מספר השאלות במבחן:
                   </span>
                   {" " + questions.length}
                 </div>
@@ -320,7 +329,7 @@ export class EditExam extends Component {
                   className="btn btn-dark edit_questions_btn"
                   onClick={(e) => this.editQuestions(e)}
                 >
-                  Edit Questions
+                  עריכת השאלות
                 </div>
                 <div className="col-centered model_loading">
                   <RotateLoader css={override} loading={this.state.loading} />

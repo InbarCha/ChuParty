@@ -17,7 +17,7 @@ export default class Home extends Component {
           <i className="material-icons">home</i>
         </div>
         <div className="side_description">
-          <span>Home</span>
+          <span>עמוד הבית</span>
         </div>
 
         <div
@@ -27,7 +27,7 @@ export default class Home extends Component {
           <i className="material-icons">school</i>
         </div>
         <div className="side_description">
-          <span>Courses</span>
+          <span>קורסים</span>
         </div>
 
         <div
@@ -37,7 +37,7 @@ export default class Home extends Component {
           <i className="material-icons">web</i>
         </div>
         <div className="side_description">
-          <span>Exams</span>
+          <span>מבחנים</span>
         </div>
 
         <div
@@ -47,7 +47,7 @@ export default class Home extends Component {
           <i className="material-icons">question_answer</i>
         </div>
         <div className="side_description">
-          <span>Questions</span>
+          <span>שאלות</span>
         </div>
 
         <div
@@ -57,7 +57,7 @@ export default class Home extends Component {
           <i className="material-icons">message</i>
         </div>
         <div className="side_description">
-          <span>Statistics</span>
+          <span>סטטיסטיקה</span>
         </div>
 
         <div
@@ -67,7 +67,7 @@ export default class Home extends Component {
           <i className="material-icons">widgets</i>
         </div>
         <div className="side_description">
-          <span>Admin</span>
+          <span>אדמין</span>
         </div>
       </div>
     );
