@@ -1,6 +1,7 @@
 .title {
   /* z-index: 999; */
   /* position: fixed; */
+  align-items: center;
   display: inline-flex;
   margin: 0px;
   padding-top: 5px;
@@ -116,6 +117,11 @@
 .search-container {
   margin-left: 15vw;
   margin-right: 15vw;
+}
+.account_icon {
+  position: absolute;
+  right: 10px;
+  font-size: 40px;
 }
 .search-container input[type="text"] {
   grid-row: 1;
