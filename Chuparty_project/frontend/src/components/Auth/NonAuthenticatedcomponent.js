@@ -27,7 +27,7 @@ export class NonAauthenticated extends Component {
             input
           </span>
           <br />
-          <img className="chuparty_banner"></img>
+          <img className="chuparty_banner" alt="not found"></img>
         </div>
       </div>
     );

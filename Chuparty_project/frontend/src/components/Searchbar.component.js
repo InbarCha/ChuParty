@@ -1,11 +1,20 @@
 import React, { Component } from "react";
 import Logo from "./../assets/logo.png";
+
+const LOGOUT_ROUTE =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/logOut"
+    : "/api/logOut";
+
 export default class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
       searchInput: "",
     };
+
+    this.logout = this.logout.bind(this);
+    this.toProfile = this.toProfile.bind(this);
   }
   submitSearch(e) {
     this.props.filterBy(this.state.searchInput);
@@ -14,6 +23,23 @@ export default class Home extends Component {
   updateSearchInput(e) {
     this.setState({ searchInput: e.target.value });
     this.props.filterBy(e.target.value);
+  }
+
+  logout() {
+    fetch(LOGOUT_ROUTE)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data["isLoggedOut"] === true) {
+          localStorage.removeItem("loggedUsername");
+          this.props.setLoggedIn(false);
+          this.props.parentClickHandler("NON_AUTHENTICATED");
+        }
+      })
+      .catch((err) => console.error("error while logging out:", err));
+  }
+
+  toProfile() {
+    this.props.parentClickHandler("PROFILE");
   }
 
   render() {
@@ -33,7 +59,22 @@ export default class Home extends Component {
             </button>
           </div>
         </div>
-        <span className="material-icons account_icon">account_circle</span>
+        {this.props.isLoggedIn && (
+          <React.Fragment>
+            <span
+              className="material-icons account_icon"
+              onClick={this.toProfile}
+            >
+              account_circle
+            </span>
+            <span
+              className="material-icons account_icon_leave"
+              onClick={this.logout}
+            >
+              exit_to_app
+            </span>
+          </React.Fragment>
+        )}
       </div>
     );
   }

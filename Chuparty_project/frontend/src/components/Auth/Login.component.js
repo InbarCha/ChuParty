@@ -44,7 +44,7 @@ export class Login extends Component {
       this.setState({ isWaiting: true });
 
       fetch(LOGIN_ROUTE, {
-        method: "post",
+        method: "POST",
         body: JSON.stringify(request_body),
       })
         .then((res) => res.json())
@@ -70,6 +70,10 @@ export class Login extends Component {
     }
   };
 
+  register = (e) => {
+    this.props.parentClickHandler("REGISTER");
+  };
+
   render() {
     return (
       <div>
@@ -90,7 +94,7 @@ export class Login extends Component {
             onChange={(e) => this.usernameChanged(e)}
           />
 
-          <label htmlFor="email" className="label-email">
+          <label htmlFor="email" className="label-password">
             Password
           </label>
           <input
@@ -98,7 +102,7 @@ export class Login extends Component {
             id="password"
             name="password"
             maxLength="40"
-            className="field field-email"
+            className="field field-password"
             onChange={(e) => this.passwordChanged(e)}
           />
 
@@ -107,6 +111,12 @@ export class Login extends Component {
             value="Login"
             className="button"
             onClick={(e) => this.login(e)}
+          />
+          <input
+            type="submit"
+            value="Not logged in? Register!"
+            className="button-register"
+            onClick={(e) => this.register(e)}
           />
         </form>
         <div className="col-centered model_loading">

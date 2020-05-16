@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import render
 from api.models import Subject, Course, Question, Exam, School, Lecturer, Student, Admin
 from django.views.decorators.csrf import csrf_exempt
+from django.middleware.csrf import get_token
 import json
 from django.http import JsonResponse
 from datetime import datetime
@@ -2443,6 +2444,10 @@ def isLoggedIn(request):
         )
 
 
+def get_csrf(request):
+    csrf_token = get_token(request)
+    return JsonResponse({'csrf_token':csrf_token})
+
 ######################################################
 '''
 logIn()
@@ -2467,6 +2472,8 @@ def logIn(request):
             )
         username = body["username"]
         password = body["password"]
+        print(username)
+        print(password)
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
@@ -2533,7 +2540,8 @@ def register(request):
         password = body["password"]
         email = body['email']
 
-        user = User(username=username, password=password, first_name=first_name, last_name=last_name, email=email)
+        user = User(username=username, first_name=first_name, last_name=last_name, email=email)
+        user.set_password(password)
         user.save()
 
         return JsonResponse(

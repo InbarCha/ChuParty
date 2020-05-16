@@ -29,6 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS =  []
 
 # Application definition
+CORS_ORIGIN_ALLOW_ALL=True
 
 INSTALLED_APPS = [
     'corsheaders',

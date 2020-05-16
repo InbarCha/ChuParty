@@ -13,11 +13,6 @@ import Register from "./Auth/Register.component";
 import Profile from "./Auth/Profile.component";
 import NonAuthenticated from "./Auth/NonAuthenticatedcomponent";
 
-const IS_LOGGEDIN_ROUTE =
-  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
-    ? "http://localhost:8000/api/isLoggedIn"
-    : "/api/isLoggedIn";
-
 export default class Home extends Component {
   _isMounted = false;
 
@@ -35,13 +30,12 @@ export default class Home extends Component {
   }
 
   componentDidMount() {
-    fetch(IS_LOGGEDIN_ROUTE)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        this.setState({ isLoggedIn: data["isLoggedIn"] });
-      })
-      .catch((err) => console.error("error while fetching exmas:", err));
+    if (
+      localStorage["loggedUsername"] !== "" &&
+      localStorage["loggedUsername"] !== undefined
+    ) {
+      this.setState({ isLoggedIn: true, currentContentView: <Schools /> });
+    }
   }
 
   onSideBarClick = (clickMsg) => {
@@ -87,7 +81,14 @@ export default class Home extends Component {
         });
         break;
       case "REGISTER":
-        this.setState({ currentContentView: <Register /> });
+        this.setState({
+          currentContentView: (
+            <Register
+              parentClickHandler={this.onSideBarClick}
+              setLoggedIn={this.setLoggedIn}
+            />
+          ),
+        });
         break;
       case "LOGIN":
         this.setState({
@@ -131,6 +132,8 @@ export default class Home extends Component {
                 <Searchbar
                   filterBy={this.filterBy.bind(this)}
                   parentClickHandler={this.onSideBarClick}
+                  setLoggedIn={this.setLoggedIn}
+                  isLoggedIn={this.state.isLoggedIn}
                 />
               </header>
               {this.state.isLoggedIn && (

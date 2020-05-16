@@ -187,8 +187,6 @@ export class AddExam extends Component {
     let examName = this.state.exam[examID]["name"];
     let examDate = this.state.exam[examID]["date"];
     let writers = this.state.exam[examID]["writers"];
-    let questions = this.state.exam[examID]["questions"];
-    let subjects = this.state.exam[examID]["subjects"];
 
     return (
       <div className={"model col-centered"} onClick={this.chooseExam} dir="RTL">

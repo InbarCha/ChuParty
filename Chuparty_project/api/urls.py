@@ -65,6 +65,8 @@ urlpatterns = [
     path('isLoggedIn', views.isLoggedIn),
     path('logIn', views.logIn),
     path('logOut', views.logOut),
-    path('register', views.register)
+    path('register', views.register),
+
+    path('get_csrf', views.get_csrf)
 
 ]

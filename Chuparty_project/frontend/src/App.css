@@ -168,6 +168,13 @@ hr {
   position: absolute;
   right: 30px;
   font-size: 40px;
+  cursor: pointer;
+}
+.account_icon_leave {
+  position: absolute;
+  right: 80px;
+  font-size: 40px;
+  cursor: pointer;
 }
 .search-container input[type="text"] {
   grid-row: 1;
@@ -489,11 +496,14 @@ nav {
   .form {
     grid-column-gap: 25px;
     grid-template-areas:
-      "label-name  label-email"
-      "field-name  field-email"
-      "label-msg   ."
-      "field-msg   field-msg"
-      "button      .";
+      "label-name  label-password"
+      "field-name  field-password"
+      "label-first-name  label-last-name"
+      "field-first-name  field-last-name"
+      "label-email ."
+      "field-email ."
+      "button      ."
+      "button-register      .";
   }
 }
 
@@ -502,23 +512,38 @@ nav {
   .label-name {
     grid-area: label-name;
   }
+  .label-password {
+    grid-area: label-password;
+  }
+  .label-first-name {
+    grid-area: label-first-name;
+  }
+  .label-last-name {
+    grid-area: label-last-name;
+  }
   .label-email {
     grid-area: label-email;
-  }
-  .label-message {
-    grid-area: label-msg;
   }
   .field-name {
     grid-area: field-name;
   }
+  .field-password {
+    grid-area: field-password;
+  }
+  .field-first-name {
+    grid-area: field-first-name;
+  }
+  .field-last-name {
+    grid-area: field-last-name;
+  }
   .field-email {
     grid-area: field-email;
   }
-  .field-message {
-    grid-area: field-msg;
-  }
   .button {
     grid-area: button;
+  }
+  .button-register {
+    grid-area: button-register;
   }
 }
 
@@ -553,6 +578,16 @@ nav {
 .button {
   appearance: none;
   background-color: rgb(146, 195, 228);
+  border: none;
+  font-size: 0.9375rem;
+  margin-top: 20px;
+  padding: 10px;
+  /* without this, the button would be as 
+  wide as its column (and the Name field) */
+  justify-self: start;
+}
+.button-register {
+  background-color: rgb(170, 169, 169);
   border: none;
   font-size: 0.9375rem;
   margin-top: 20px;
