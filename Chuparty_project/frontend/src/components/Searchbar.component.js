@@ -26,16 +26,18 @@ export default class Home extends Component {
   }
 
   logout() {
-    fetch(LOGOUT_ROUTE)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data["isLoggedOut"] === true) {
-          localStorage.removeItem("loggedUsername");
-          this.props.setLoggedIn(false);
-          this.props.parentClickHandler("NON_AUTHENTICATED");
-        }
-      })
-      .catch((err) => console.error("error while logging out:", err));
+    if (window.confirm("Are you sure you want to logout?")) {
+      fetch(LOGOUT_ROUTE)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data["isLoggedOut"] === true) {
+            localStorage.removeItem("loggedUsername");
+            this.props.setLoggedIn(false);
+            this.props.parentClickHandler("NON_AUTHENTICATED");
+          }
+        })
+        .catch((err) => console.error("error while logging out:", err));
+    }
   }
 
   toProfile() {
@@ -71,7 +73,7 @@ export default class Home extends Component {
               className="material-icons account_icon_leave"
               onClick={this.logout}
             >
-              exit_to_app
+              meeting_room
             </span>
           </React.Fragment>
         )}
