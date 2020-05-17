@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { css } from "@emotion/core";
 import RotateLoader from "react-spinners/ClipLoader";
-import { Container, Row, Col } from "react-bootstrap";
+import { Row, Col } from "react-bootstrap";
 import { MDBContainer, MDBRow, MDBCol, MDBBtn } from "mdbreact";
 import "mdbreact/dist/css/mdb.css";
 
@@ -46,10 +46,10 @@ export class Login extends Component {
     let password = this.state.password;
 
     if (username === "") {
-      this.setState({ usernameWarning: "שדה 'שם המשתמש' ריק" });
+      this.setState({ usernameWarning: "'Username' field is empty!" });
     }
     if (password === "") {
-      this.setState({ passwordWarning: "שדה 'סיסמא' ריק" });
+      this.setState({ passwordWarning: "'Password' field is empty!" });
     }
 
     if (username !== "" && password !== "") {
@@ -70,7 +70,9 @@ export class Login extends Component {
             this.props.setLoggedIn(true);
             this.props.parentClickHandler("HOME");
           } else {
-            this.setState({ loginWarning: "'שם המשתמש' או 'סיסמא' לא נכונים" });
+            this.setState({
+              loginWarning: "'Username' or 'Password' are incorrect!",
+            });
           }
         })
         .catch((err) => {
@@ -115,6 +117,9 @@ export class Login extends Component {
                       className="form-control"
                       onChange={this.usernameChanged}
                     />
+                    <label style={{ color: "red" }}>
+                      {this.state.usernameWarning}
+                    </label>
                     <br />
                     <label
                       htmlFor="defaultFormLoginPasswordEx"
@@ -128,6 +133,9 @@ export class Login extends Component {
                       className="form-control"
                       onChange={this.passwordChanged}
                     />
+                    <label style={{ color: "red" }}>
+                      {this.state.passwordWarning}
+                    </label>
                     <div className="text-center mt-4">
                       <MDBBtn color="indigo" type="submit" onClick={this.login}>
                         Login
@@ -139,6 +147,9 @@ export class Login extends Component {
                       >
                         No Account? Register!
                       </MDBBtn>
+                      <label style={{ color: "red" }}>
+                        {this.state.loginWarning}
+                      </label>
                     </div>
                     <div className="col-centered model_loading">
                       <RotateLoader

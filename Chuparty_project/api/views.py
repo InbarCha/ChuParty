@@ -11,10 +11,10 @@ from urllib.parse import unquote
 from api.HelpFuncs_Subjects import *
 from api.HelpFuncs_Courses import *
 from api.HelpFuncs_Questions import *
-from api.HelpFuncs_User import *
 from api.HelpFuncs_Schools import *
 from api.HelpFuncs_Exams import *
 from api.HelpFuncs_General import *
+from api.HelpFuncs_Users import *
 
 
 # TODO: take care of case-senstitive issues (for example in MongoDB queries)
@@ -138,7 +138,7 @@ def setSubject(request):
             )
         else:
             return JsonResponse(
-                {
+                    {
                         "Status": "Subject Already Exists",
                     },
                 status=500
@@ -505,30 +505,7 @@ method: POST
 POST body example:
 {
 	"name": "Colman",
-	"courses": [
-		{
-			"name" : "Advanced Programming",
-			"subjects": [
-				{
-					"name": "Java"
-				},
-				{
-					"name": "Design Patterns"
-				}
-			]
-		},
-		{
-			"name" : "OOP",
-			"subjects": [
-				{
-					"name": "C++"
-				},
-				{
-					"name": "Polymorphism"
-				}
-			]
-		}
-	]
+	"courses": [ {"name" : "Advanced Programming"}, {"name":"OOP"}]
 }
 '''
 ##################################################
@@ -1658,20 +1635,14 @@ setStudent()
 method: POST
 POST body example:
 {
-	"first_name" : "David",
-	"last_name" : "Shaulov",
-	"email": "david@gmail.com",
-	"permissions": [
-		"Create Exam",
-		"Delete Exam"
-	],
+	"username": "inbar",
 	"relevantCourses":[
-		{
-			"name": "Advanced Programming"
-		},
-		{
-			"name": "OOP"
-		}
+        {
+        	"name": "Computer Networks"
+        },
+        {
+        	"name":"OOP"
+        }
 	]
 }
 '''
@@ -1682,64 +1653,34 @@ def setStudent(request):
         # decode request body
         body = parseRequestBody(request)
 
-        ret_list = getUserFields(body)
-        if ret_list[0] is None:
-            return JsonResponse({"Status": "Can't Create Student, " + str(ret_list[1])}, status=500)
+        ret_tuple = createStudent(body)
+        isNewStudentCreated = ret_tuple[0]
 
-        first_name = ret_list[0]
-        last_name = ret_list[1]
-        email = ret_list[2]
-        permissions = ret_list[3]
+        if isNewStudentCreated is None:
+            return JsonResponse({"Status": ret_tuple[1]}, status=500)
 
-        try:
-            Student.objects.get(email=email)
-            print(f"Student {email} already exists")
+        elif isNewStudentCreated == True:
             return JsonResponse(
                 {
-                    "Status": "Student Already Exists",
+                    "Status":"Created Student"
+                }
+            )
+        
+        else:
+            return JsonResponse(
+                {
+                    "Status": "Student Already Exists"
                 },
                 status=500
             )
 
-        except:
-            coursesList = []
-
-            if 'relevantCourses' in body.keys():
-                relevantCourses = body['relevantCourses']
-
-                # iterate over courses given in the request body
-                # for each course, if it doesn't exist in the db, create it
-                for doc in relevantCourses:
-                    ret_tuple = createCourseOrAddSubject(doc)
-                    isCourseReturned = ret_tuple[0]
-                    if isCourseReturned is None:
-                        return JsonResponse({"Status": ret_tuple[1]}, status=500)
-                    course = ret_tuple[1]
-                    coursesList.append(course)
-
-            for permission in permissions:
-                if permission not in PermissionEnum.choices():
-                    status = f"Can't create student, permission {permission} is not allowed. Choose from PermissionEnum values"
-                    return JsonResponse({"Status": status}, status=500)
-
-            newStudent = Student(first_name=first_name, last_name=last_name,
-                                 email=email, permissions=permissions, relevantCourses=coursesList)
-            newStudent.save()
-
-            return JsonResponse(
-                {
-                    "Status": "Added Student",
-                }
-            )
-
     else:
-        return JsonResponse(
+         return JsonResponse(
             {
                 "Status": "setStudent() only accepts POST requests"
             },
             status=500
         )
-
 
 ######################################################
 '''
@@ -1747,67 +1688,61 @@ def setStudent(request):
  Method: POST
  POST body example:
 {
-	"email":"inbarcha1@gmail.com",
-	"ChangeFirstName": "Inbarrrr",
-	"ChangeLastName":"Hachmonnn",
-	"ChangePermissions":[
-			"Create Exam"
-		]
+	"username":"inbarcha",
+    "changeRelevantCourses": 
+    [
+        {
+        	"name": "Computer Networks"
+        },
+        {
+        	"name":"OOP"
+        }
+    ]
 }
 '''
 ######################################################
 @csrf_exempt
 def editStudent(request):
     if request.method == "POST":
+        changedCoursesFlg = False
+
         # decode request body
         body = parseRequestBody(request)
 
-        if 'email' not in body.keys():
-            return JsonResponse({"Status": "Can't Edit Student: 'email' field in not in request body"}, status=500)
-        email = body['email']
+        if 'username' not in body.keys():
+            return JsonResponse({"Status": "Can't Edit Student: 'username' field in not in request body"}, status=500)
+        username = body['username']
 
         try:
-            studentObj = Student.objects.get(email=email)
-            ret_list = editUser(studentObj, body)
+            studentObj = Student.objects.get(username=username)
+            
+            # get students courses list. If it changed, change in DB
+            if "changeRelevantCourses" in body.keys():
+                newRelevantCourses = body["changeRelevantCourses"]
+                oldRelevantCourses = studentObj.relevantCourses
 
-            if ret_list[0] is None:
-                return JsonResponse({"Status": ret_list[1]})
+                newCoursesFiltered = [course for course in newRelevantCourses if course not in oldRelevantCourses]
+                oldCoursesFiltered = [course for course in oldRelevantCourses if course not in newRelevantCourses]
 
-            newStudentObj = ret_list[0]
-            changedEmailFlg = ret_list[1]
-            changedFirstNameFlg = ret_list[2]
-            changedLastNameFlg = ret_list[3]
-            changedPermissionsFlag = ret_list[4]
+                if newCoursesFiltered or oldCoursesFiltered:
+                    changedCoursesFlg = True
+
+                    # iterate over courses given in the request body
+                    # for each course, if it doesn't exist in the db, create it
+                    for doc in newRelevantCourses:
+                        ret_tuple = createCourseOrAddSubject(doc)
+                        isCourseReturned = ret_tuple[0]
+                        if isCourseReturned is None:
+                            return JsonResponse({"Status": ret_tuple[1]}, status=500)
+                    
+                    Student.objects.filter(username=username).update(relevantCourses=newRelevantCourses)
 
             ret_json = dict()
 
-            if changedFirstNameFlg == True:
-                Student.objects.filter(email=email).update(
-                    first_name=newStudentObj.first_name)
-                ret_json['Changed First Name'] = "True"
+            if changedCoursesFlg == True:
+                ret_json['Changed Courses'] = "True"
             else:
-                ret_json['Changed First Name'] = "False"
-
-            if changedLastNameFlg == True:
-                Student.objects.filter(email=email).update(
-                    last_name=newStudentObj.last_name)
-                ret_json['Changed Last Name'] = "True"
-            else:
-                ret_json['Changed Last Name'] = "False"
-
-            if changedPermissionsFlag == True:
-                Student.objects.filter(email=email).update(
-                    permissions=newStudentObj.permissions)
-                ret_json['Changed Permissions'] = "True"
-            else:
-                ret_json['Changed Permissions'] = "False"
-
-            if changedEmailFlg == True:
-                Student.objects.filter(email=email).update(
-                    email=newStudentObj.email)
-                ret_json['Changed Email'] = "True"
-            else:
-                ret_json['Changed Email'] = "False"
+                ret_json['Changed Courses'] = "False"
 
             return JsonResponse(ret_json)
 
@@ -1857,23 +1792,24 @@ def getStudents(request):
 '''
 deleteStudent()
 method: GET
-GET params: email of student to delete
+GET params: username of student to delete
 '''
 #####################################################
 @csrf_exempt
 def deleteStudent(request):
     if request.method == "GET":
-        email = request.GET.get("email")
+        username = request.GET.get("username")
 
         try:
-            Student.objects.filter(email=email).delete()
-            return JsonResponse({"Status": f"Deleted Student '{email}'"})
+            Student.objects.get(username=username)
+            Student.objects.filter(username=username).delete()
+            return JsonResponse({"Status": f"Deleted Student '{username}'"})
 
         except Exception as e:
             return JsonResponse(
                 {
                         "Exception": str(e),
-                        "Status": f"Can't delete student {email}",
+                        "Status": f"Can't delete student {username}",
                     },
                 status=500
             )
@@ -1889,26 +1825,26 @@ def deleteStudent(request):
 
 ######################################################
 '''
-getStudentByEmail()
+getStudentByUsername()
 method: GET
-Returns student by its email (if it exists in DB)
+Returns student by its username (if it exists in DB)
 '''
 #####################################################
 @csrf_exempt
-def getStudentByEmail(request):
+def getStudentByUsername(request):
     if request.method == "GET":
-        email = request.GET.get("email")
+        username = request.GET.get("username")
 
         try:
-            studentObj = Student.objects.get(email=email)
+            studentObj = Student.objects.get(username=username)
             return JsonResponse(studentObj.as_json())
 
         except:
-            return JsonResponse({"Status": f"Student {email} doesn't exist in DB"}, status=500)
+            return JsonResponse({"Status": f"Student {username} doesn't exist in DB"}, status=500)
 
     return JsonResponse(
         {
-                        "Status": "getStudentByEmail() only accepts GET requests",
+                        "Status": "getStudentByUsername() only accepts GET requests",
                     },
         status=500
         )
@@ -1920,21 +1856,8 @@ setLecturer()
 method: POST
 POST body example:
 {
-	"first_name" : "Eliav",
-	"last_name" : "Menache",
-	"email": "Eliav@gmail.com",
-	"permissions": [
-		"Create Exam",
-		"Delete Exam"
-	],
-	"coursesTeaching":[
-		{
-			"name": "Computer Networks"
-		},
-		{
-			"name": "iOS"
-		}
-	]
+    "username": "eliavme"
+	"coursesTeaching": [{"name": "Computer Networks", {"name": iOS"}]
 }
 '''
 #####################################################
@@ -1944,56 +1867,28 @@ def setLecturer(request):
         # decode request body
         body = parseRequestBody(request)
 
-        ret_list = getUserFields(body)
-        if ret_list[0] is None:
-            return JsonResponse({"Status": "Can't Create Lecturer, " + str(ret_list[1])}, status=500)
+        ret_tuple = createLecturer(body)
+        isNewLecturerCreated = ret_tuple[0]
 
-        first_name = ret_list[0]
-        last_name = ret_list[1]
-        email = ret_list[2]
-        permissions = ret_list[3]
+        if isNewLecturerCreated is None:
+            return JsonResponse({"Status": ret_tuple[1]}, status=500)
 
-        try:
-            Lecturer.objects.get(email=email)
-            print(f"Lecturer {email} already exists")
+        elif isNewLecturerCreated == True:
             return JsonResponse(
                 {
-                    "Status": "Lecturer Already Exists",
+                    "Status":"Created Lecturer"
+                }
+            )
+        
+        else:
+            return JsonResponse(
+                {
+                    "Status": "Lecturer Already Exists"
                 },
                 status=500
             )
 
-        except:
-            coursesList = []
-
-            if 'coursesTeaching' in body.keys():
-                coursesTeaching = body['coursesTeaching']
-
-                # iterate over courses given in the request body
-                # for each course, if it doesn't exist in the db, create it
-                for doc in coursesTeaching:
-                    ret_tuple = createCourseOrAddSubject(doc)
-                    isCourseReturned = ret_tuple[0]
-                    if isCourseReturned is None:
-                        return JsonResponse({"Status": ret_tuple[1]}, status=500)
-                    courseObj = ret_tuple[1]
-                    coursesList.append(courseObj)
-
-            for permission in permissions:
-                if permission not in PermissionEnum.choices():
-                    status = f"Can't create Lecturer, permission {permission} is not allowed. Choose from PermissionEnum values"
-                    return JsonResponse({"Status": status}, status=500)
-
-            newLecturer = Lecturer(first_name=first_name, last_name=last_name,
-                                   email=email, permissions=permissions, coursesTeaching=coursesList)
-            newLecturer.save()
-
-            return JsonResponse(
-                {
-                    "Status": "Added Lecturer",
-                }
-            )
-
+        
     else:
         return JsonResponse(
             {
@@ -2009,67 +1904,52 @@ def setLecturer(request):
  Method: POST
  POST body example:
  {
-	"email":"inbarcha1@gmail.com",
-	"ChangeFirstName": "Inbarrrr",
-	"ChangeLastName":"Hachmonnn",
-	"ChangePermissions":[
-			"Create Exam"
-		]
+    "username": "eliavme"
+	"changeCoursesTeaching": [ "Computer Networks", ...]
 }
 '''
 ########################################################
 @csrf_exempt
 def editLecturer(request):
     if request.method == "POST":
+        changedCoursesFlg = False
+
         # decode request body
         body = parseRequestBody(request)
 
-        if 'email' not in body.keys():
-            return JsonResponse({"Status": "Can't Edit Lecturer: 'email' field in not in request body"}, status=500)
-        email = body['email']
+        if 'username' not in body.keys():
+            return JsonResponse({"Status": "Can't Edit Lecturer: 'username' field in not in request body"}, status=500)
+        username = body['username']
 
         try:
-            lecturerObj = Lecturer.objects.get(email=email)
-            ret_list = editUser(lecturerObj, body)
+            lecturerObj = Lecturer.objects.get(username=username)
 
-            if ret_list[0] is None:
-                return JsonResponse({"Status": ret_list[1]})
+            if "changeCoursesTeaching" in body.keys():
+                newCoursesTeaching = body["changeCoursesTeaching"]
+                oldCoursesTeaching = lecturerObj.coursesTeaching
 
-            newLecturerObj = ret_list[0]
-            changedEmailFlg = ret_list[1]
-            changedFirstNameFlg = ret_list[2]
-            changedLastNameFlg = ret_list[3]
-            changedPermissionsFlag = ret_list[4]
+                newCoursesFiltered = [course for course in newCoursesTeaching if course not in oldCoursesTeaching]
+                oldCoursesFiltered = [course for course in oldCoursesTeaching if course not in newCoursesTeaching]
+
+                if newCoursesFiltered or oldCoursesFiltered:
+                    changedCoursesFlg = True
+
+                    # iterate over courses given in the request body
+                    # for each course, if it doesn't exist in the db, create it
+                    for doc in newCoursesTeaching:
+                        ret_tuple = createCourseOrAddSubject(doc)
+                        isCourseReturned = ret_tuple[0]
+                        if isCourseReturned is None:
+                            return JsonResponse({"Status": ret_tuple[1]}, status=500)
+                    
+                    Lecturer.objects.filter(username=username).update(coursesTeaching=newCoursesTeaching)
 
             ret_json = dict()
 
-            if changedFirstNameFlg == True:
-                Lecturer.objects.filter(email=email).update(
-                    first_name=newLecturerObj.first_name)
-                ret_json['Changed First Name'] = "True"
+            if changedCoursesFlg == True:
+                ret_json['Changed Courses'] = "True"
             else:
-                ret_json['Changed First Name'] = "False"
-
-            if changedLastNameFlg == True:
-                Lecturer.objects.filter(email=email).update(
-                    last_name=newLecturerObj.last_name)
-                ret_json['Changed Last Name'] = "True"
-            else:
-                ret_json['Changed Last Name'] = "False"
-
-            if changedPermissionsFlag == True:
-                Lecturer.objects.filter(email=email).update(
-                    permissions=newLecturerObj.permissions)
-                ret_json['Changed Permissions'] = "True"
-            else:
-                ret_json['Changed Permissions'] = "False"
-
-            if changedEmailFlg == True:
-                Lecturer.objects.filter(email=email).update(
-                    email=newLecturerObj.email)
-                ret_json['Changed Email'] = "True"
-            else:
-                ret_json['Changed Email'] = "False"
+                ret_json['Changed Courses'] = "False"
 
             return JsonResponse(ret_json)
 
@@ -2095,23 +1975,24 @@ def editLecturer(request):
 '''
 deleteLecturer()
 method: GET
-GET params: email of lecturer to delete
+GET params: username of lecturer to delete
 '''
 #####################################################
 @csrf_exempt
 def deleteLecturer(request):
     if request.method == "GET":
-        email = request.GET.get("email")
+        username = request.GET.get("username")
 
         try:
-            Lecturer.objects.filter(email=email).delete()
-            return JsonResponse({"Status": f"Deleted Lecturer '{email}'"})
+            Lecturer.objects.get(username=username)
+            Lecturer.objects.filter(username=username).delete()
+            return JsonResponse({"Status": f"Deleted Lecturer '{username}'"})
 
         except Exception as e:
             return JsonResponse(
                 {
                         "Exception": str(e),
-                        "Status": f"Can't delete lecturer {email}",
+                        "Status": f"Can't delete lecturer {username}",
                     },
                 status=500
             )
@@ -2151,26 +2032,26 @@ def getLecturers(request):
 
 ######################################################
 '''
-getLecturerByEmail()
+getLecturerByUsername()
 method: GET
-Returns lecturer by its email (if it exists in DB)
+Returns lecturer by its username (if it exists in DB)
 '''
 #####################################################
 @csrf_exempt
-def getLecturerByEmail(request):
+def getLecturerByUsername(request):
     if request.method == "GET":
-        email = request.GET.get("email")
+        username = request.GET.get("username")
 
         try:
-            lecturerObj = Lecturer.objects.get(email=email)
+            lecturerObj = Lecturer.objects.get(username=username)
             return JsonResponse(lecturerObj.as_json())
 
         except:
-            return JsonResponse({"Status": f"Lecturer {email} doesn't exist in DB"}, status=500)
+            return JsonResponse({"Status": f"Lecturer {username} doesn't exist in DB"}, status=500)
 
     return JsonResponse(
         {
-                        "Status": "getLecturerByEmail() only accepts GET requests",
+                        "Status": "getLecturerByUsername() only accepts GET requests",
                     },
         status=500
         )
@@ -2182,34 +2063,21 @@ setAdmin()
 method: POST
 POST body example:
 {
-	"first_name" : "David",
-	"last_name" : "Shaulov",
-	"email": "david@gmail.com",
-	"permissions": [
-		"Create Exam",
-		"Delete Exam"
-	]
+	"username" : "David",
 }
 '''
-# 3
+###################################################
 @csrf_exempt
 def setAdmin(request):
     if request.method == "POST":
         # decode request body
         body = parseRequestBody(request)
 
-        ret_list = getUserFields(body)
-        if ret_list[0] is None:
-            return JsonResponse({"Status": "Can't Create Admin, " + str(ret_list[1])}, status=500)
-
-        first_name = ret_list[0]
-        last_name = ret_list[1]
-        email = ret_list[2]
-        permissions = ret_list[3]
+        username = body["username"]
 
         try:
-            Admin.objects.get(email=email)
-            print(f"Admin {email} already exists")
+            Admin.objects.get(username=username)
+            print(f"Admin {username} already exists")
             return JsonResponse(
                 {
                     "Status": "Admin Already Exists",
@@ -2218,13 +2086,7 @@ def setAdmin(request):
             )
 
         except:
-            for permission in permissions:
-                if permission not in PermissionEnum.choices():
-                    status = f"Can't create Admin, permission {permission} is not allowed. Choose from PermissionEnum values"
-                    return JsonResponse({"Status": status}, status=500)
-
-            newAdmin = Admin(first_name=first_name, last_name=last_name,
-                             email=email, permissions=permissions)
+            newAdmin = Admin(username=username)
             newAdmin.save()
 
             return JsonResponse(
@@ -2242,91 +2104,91 @@ def setAdmin(request):
         )
 
 
-######################################################
-'''
- editAdmin(request)
- Method: POST
- POST body example:
-{
-	"email":"inbarcha1@gmail.com",
-	"ChangeFirstName": "Inbarrrr",
-	"ChangeLastName":"Hachmonnn",
-	"ChangePermissions":[
-			"Create Exam"
-		]
-}
-'''
-######################################################
-@csrf_exempt
-def editAdmin(request):
-    if request.method == "POST":
-        # decode request body
-        body = parseRequestBody(request)
+# ######################################################
+# '''
+#  editAdmin(request)
+#  Method: POST
+#  POST body example:
+# {
+# 	"email":"inbarcha1@gmail.com",
+# 	"ChangeFirstName": "Inbarrrr",
+# 	"ChangeLastName":"Hachmonnn",
+# 	"ChangePermissions":[
+# 			"Create Exam"
+# 		]
+# }
+# '''
+# ######################################################
+# @csrf_exempt
+# def editAdmin(request):
+#     if request.method == "POST":
+#         # decode request body
+#         body = parseRequestBody(request)
 
-        if 'email' not in body.keys():
-            return JsonResponse({"Status": "Can't Edit Admin: 'email' field in not in request body"}, status=500)
-        email = body['email']
+#         if 'email' not in body.keys():
+#             return JsonResponse({"Status": "Can't Edit Admin: 'email' field in not in request body"}, status=500)
+#         email = body['email']
 
-        try:
-            adminObj = Admin.objects.get(email=email)
-            ret_list = editUser(adminObj, body)
+#         try:
+#             adminObj = Admin.objects.get(email=email)
+#             ret_list = editUser(adminObj, body)
 
-            if ret_list[0] is None:
-                return JsonResponse({"Status": ret_list[1]})
+#             if ret_list[0] is None:
+#                 return JsonResponse({"Status": ret_list[1]})
 
-            newAdminObj = ret_list[0]
-            changedEmailFlg = ret_list[1]
-            changedFirstNameFlg = ret_list[2]
-            changedLastNameFlg = ret_list[3]
-            changedPermissionsFlag = ret_list[4]
+#             newAdminObj = ret_list[0]
+#             changedEmailFlg = ret_list[1]
+#             changedFirstNameFlg = ret_list[2]
+#             changedLastNameFlg = ret_list[3]
+#             changedPermissionsFlag = ret_list[4]
 
-            ret_json = dict()
-            if changedFirstNameFlg == True:
-                Admin.objects.filter(email=email).update(
-                    first_name=newAdminObj.first_name)
-                ret_json['Changed First Name'] = "True"
-            else:
-                ret_json['Changed First Name'] = "False"
+#             ret_json = dict()
+#             if changedFirstNameFlg == True:
+#                 Admin.objects.filter(email=email).update(
+#                     first_name=newAdminObj.first_name)
+#                 ret_json['Changed First Name'] = "True"
+#             else:
+#                 ret_json['Changed First Name'] = "False"
 
-            if changedLastNameFlg == True:
-                Admin.objects.filter(email=email).update(
-                    last_name=newAdminObj.last_name)
-                ret_json['Changed Last Name'] = "True"
-            else:
-                ret_json['Changed Last Name'] = "False"
+#             if changedLastNameFlg == True:
+#                 Admin.objects.filter(email=email).update(
+#                     last_name=newAdminObj.last_name)
+#                 ret_json['Changed Last Name'] = "True"
+#             else:
+#                 ret_json['Changed Last Name'] = "False"
 
-            if changedPermissionsFlag == True:
-                Admin.objects.filter(email=email).update(
-                    permissions=newAdminObj.permissions)
-                ret_json['Changed Permissions'] = "True"
-            else:
-                ret_json['Changed Permissions'] = "False"
+#             if changedPermissionsFlag == True:
+#                 Admin.objects.filter(email=email).update(
+#                     permissions=newAdminObj.permissions)
+#                 ret_json['Changed Permissions'] = "True"
+#             else:
+#                 ret_json['Changed Permissions'] = "False"
 
-            if changedEmailFlg == True:
-                Admin.objects.filter(email=email).update(
-                    email=newAdminObj.email)
-                ret_json['Changed Email'] = "True"
-            else:
-                ret_json['Changed Email'] = "False"
+#             if changedEmailFlg == True:
+#                 Admin.objects.filter(email=email).update(
+#                     email=newAdminObj.email)
+#                 ret_json['Changed Email'] = "True"
+#             else:
+#                 ret_json['Changed Email'] = "False"
 
-            return JsonResponse(ret_json)
+#             return JsonResponse(ret_json)
 
-        except Exception as e:
-            return JsonResponse(
-                {
-                        "Exception": str(e),
-                        "Status": "Can't Edit Admin"
-                    },
-                status=500
-            )
+#         except Exception as e:
+#             return JsonResponse(
+#                 {
+#                         "Exception": str(e),
+#                         "Status": "Can't Edit Admin"
+#                     },
+#                 status=500
+#             )
 
-    else:
-        return JsonResponse(
-            {
-                "Status": "editAdmin() only accepts POST requests"
-            },
-            status=500
-        )
+#     else:
+#         return JsonResponse(
+#             {
+#                 "Status": "editAdmin() only accepts POST requests"
+#             },
+#             status=500
+#         )
 
 
 ##################################################
@@ -2357,23 +2219,23 @@ def getAdmins(request):
 '''
 deleteAdmin()
 method: GET
-GET params: email of admin to delete
+GET params: username of admin to delete
 '''
 #####################################################
 @csrf_exempt
 def deleteAdmin(request):
     if request.method == "GET":
-        email = request.GET.get("email")
+        username = request.GET.get("username")
 
         try:
-            Admin.objects.filter(email=email).delete()
-            return JsonResponse({"Status": f"Deleted Admin '{email}'"})
+            Admin.objects.filter(username=username).delete()
+            return JsonResponse({"Status": f"Deleted Admin '{username}'"})
 
         except Exception as e:
             return JsonResponse(
                 {
                         "Exception": str(e),
-                        "Status": f"Can't delete admin {email}",
+                        "Status": f"Can't delete admin {username}",
                     },
                 status=500
             )
@@ -2389,26 +2251,26 @@ def deleteAdmin(request):
 
 ######################################################
 '''
-getAdminByEmail()
+getAdminByUsername()
 method: GET
-Returns admin by its email (if it exists in DB)
+Returns admin by its username (if it exists in DB)
 '''
 #####################################################
 @csrf_exempt
-def getAdminByEmail(request):
+def getAdminByUsername(request):
     if request.method == "GET":
-        email = request.GET.get("email")
+        username = request.GET.get("username")
 
         try:
-            adminObj = Admin.objects.get(email=email)
+            adminObj = Admin.objects.get(username=username)
             return JsonResponse(adminObj.as_json())
 
         except:
-            return JsonResponse({"Status": f"Admin {email} doesn't exist in DB"}, status=500)
+            return JsonResponse({"Status": f"Admin {username} doesn't exist in DB"}, status=500)
 
     return JsonResponse(
         {
-                        "Status": "getAdminByEmail() only accepts GET requests",
+                        "Status": "getAdminByUsername() only accepts GET requests",
                     },
         status=500
         )
@@ -2509,7 +2371,8 @@ POST request body:
 	"password": "12345678",
 	"first_name": "david",
 	"last_name": "shaulov",
-	"email": "david@gmail.com"
+	"email": "david@gmail.com".
+    "type": "Student"
 }
 '''
 #####################################################
@@ -2518,7 +2381,8 @@ def register(request):
     if request.method == "POST":
         body = parseRequestBody(request)
 
-        if 'username' not in body.keys() or 'first_name' not in body.keys() or 'last_name' not in body.keys() or 'password' not in body.keys() or 'email' not in body.keys(): 
+        if 'username' not in body.keys() or 'first_name' not in body.keys() or 'last_name' not in body.keys() \
+             or 'password' not in body.keys() or 'email' not in body.keys() or 'type' not in body.keys(): 
             return JsonResponse(
                 {
                     "isRegistered": False,
@@ -2539,17 +2403,57 @@ def register(request):
         last_name = body["last_name"]
         password = body["password"]
         email = body['email']
+        accountType = body['type']
 
         user = User(username=username, first_name=first_name, last_name=last_name, email=email)
         user.set_password(password)
         user.save()
 
-        return JsonResponse(
-            {
+        ret_json = {
                 "isRegistered": True,
                 "username": user.username,
-                "email": user.email
+                "email": user.email,
+                "type": accountType
             }
+        
+        if accountType == "Student":
+            ret_tuple = createStudent({"username": username})
+            isNewStudentCreated = ret_tuple[0]
+
+            if isNewStudentCreated is None:
+                ret_json["Status"] =  ret_tuple[1]
+
+            elif isNewStudentCreated == True:
+                ret_json["Status"] =  "Created Student"
+            
+            else:
+                ret_json["Status"] =  "Student Already Exists"
+
+        elif accountType == "Lecturer":
+            ret_tuple = createLecturer({"username": username})
+            isNewLecturerCreated = ret_tuple[0]
+
+            if isNewLecturerCreated is None:
+                ret_json["Status"] =  ret_tuple[1]
+
+            elif isNewLecturerCreated == True:
+                ret_json["Status"] =  "Created Lecturer"
+            
+            else:
+                ret_json["Status"] =  "Lecturer Already Exists"
+
+        elif accountType == "Admin":
+            try:
+                Admin.objects.get(username=username)
+                ret_json["Status"] = "Admin Already Exists"
+            except:
+                newAdmin = Admin(username=username)
+                newAdmin.save()
+                ret_json["Status"] = "Created Admin"
+
+
+        return JsonResponse(
+            ret_json
         )
   
 

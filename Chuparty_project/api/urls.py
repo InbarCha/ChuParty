@@ -44,21 +44,21 @@ urlpatterns = [
     path('setStudent', views.setStudent),
     path('editStudent', views.editStudent),
     path('getStudents', views.getStudents),
-    path('getStudentByEmail', views.getStudentByEmail),
+    path('getStudentByUsername', views.getStudentByUsername),
     path('deleteStudent', views.deleteStudent),
 
     # lecturer
     path('setLecturer', views.setLecturer),
     path('editLecturer', views.editLecturer),
     path('getLecturers', views.getLecturers),
-    path('getLecturerByEmail', views.getLecturerByEmail),
+    path('getLecturerByUsername', views.getLecturerByUsername),
     path('deleteLecturer', views.deleteLecturer),
 
     # admin
     path('setAdmin', views.setAdmin),
-    path('editAdmin', views.editAdmin),
+    # path('editAdmin', views.editAdmin),
     path('getAdmins', views.getAdmins),
-    path('getAdminByEmail', views.getAdminByEmail),
+    path('getAdminByUsername', views.getAdminByUsername),
     path('deleteAdmin', views.deleteAdmin),
 
     # auth

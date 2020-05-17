@@ -187,16 +187,14 @@ class Student(models.Model):
     objects = models.DjongoManager() 
     
     # more fields unique to students
-    relevantCourses = models.ArrayField(
-        model_container=Course,
+    relevantCourses = models.ListField(
+        models.CharField(max_length=50)
     )
 
     def as_json(self):
-        json_dict = super().as_json()
-        json_dict['relevantCourses'] = list()
-
-        for course in list(self.relevantCourses):
-            json_dict['relevantCourses'].append(course.as_json())
+        json_dict = dict()
+        json_dict["username"] = self.username
+        json_dict['relevantCourses'] = self.relevantCourses
 
         return json_dict
 
@@ -206,16 +204,14 @@ class Lecturer(models.Model):
     objects = models.DjongoManager()
 
     # more fields unique to lecturers
-    coursesTeaching = models.ArrayField(
-        model_container=Course,
+    coursesTeaching = models.ListField(
+        models.CharField(max_length=50)
     )
 
     def as_json(self):
-        json_dict = super().as_json()
-        json_dict['coursesTeaching'] = list()
-        
-        for course in list(self.coursesTeaching):
-            json_dict['coursesTeaching'].append(course.as_json())
+        json_dict = dict()
+        json_dict["username"] = self.username
+        json_dict['coursesTeaching'] = self.coursesTeaching
 
         return json_dict
 
@@ -226,7 +222,8 @@ class Admin(models.Model):
     # more fields unique to admins
 
     def as_json(self):
-        json_dict = super().as_json()
+        json_dict = dict()
+        json_dict["username"] = self.username
 
         return json_dict
 
