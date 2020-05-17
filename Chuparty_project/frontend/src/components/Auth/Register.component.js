@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { css } from "@emotion/core";
 import RotateLoader from "react-spinners/ClipLoader";
+import { Container, Row, Col } from "react-bootstrap";
+import { MDBContainer, MDBRow, MDBCol, MDBBtn } from "mdbreact";
 
 const REGISTER_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
@@ -50,6 +52,7 @@ export class Register extends Component {
     this.setState({ email: newVal });
   };
 
+  //TODO: when registering, set whether the new user is student, lecturer or admin. Then create a user in the matching model
   register = (e) => {
     e.preventDefault();
     console.log("login");
@@ -104,6 +107,10 @@ export class Register extends Component {
     }
   };
 
+  toLogin = () => {
+    this.props.parentClickHandler("LOGIN");
+  };
+
   render() {
     return (
       <div>
@@ -111,70 +118,111 @@ export class Register extends Component {
           ברוכים הבאים לChuparty!{" "}
         </div>
         <hr />
-        <form className="form col-centered">
-          <label htmlFor="name" className="label-name">
-            Username
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            maxLength="40"
-            className="field field-name"
-            onChange={(e) => this.usernameChanged(e)}
-          />
-
-          <label htmlFor="email" className="label-password">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            maxLength="40"
-            className="field field-password"
-            onChange={(e) => this.passwordChanged(e)}
-          />
-          <label htmlFor="first-name" className="label-first-name">
-            First Name
-          </label>
-          <input
-            type="text"
-            id="first-name"
-            name="first-name"
-            maxLength="40"
-            className="field field-first-name"
-            onChange={(e) => this.firstNameChanged(e)}
-          />
-          <label htmlFor="last-name" className="label-last-name">
-            Last Name
-          </label>
-          <input
-            type="text"
-            id="last-name"
-            name="last-name"
-            maxLength="40"
-            className="field field-last-name"
-            onChange={(e) => this.lastNameChanged(e)}
-          />
-          <label htmlFor="email" className="label-email">
-            Email
-          </label>
-          <input
-            type="text"
-            id="last-email"
-            name="email"
-            maxLength="40"
-            className="field field-email"
-            onChange={(e) => this.emailChanged(e)}
-          />
-          <input
-            type="submit"
-            value="Register"
-            className="button-register"
-            onClick={(e) => this.register(e)}
-          />
-        </form>
+        <Row>
+          <Col
+            lg={{ span: 4, offset: 4 }}
+            md={{ span: 6, offset: 3 }}
+            sm={{ span: 8, offset: 2 }}
+            className="login_wrapper"
+          >
+            <MDBContainer>
+              <MDBRow>
+                <MDBCol className="col col-cen">
+                  <form className="login_form">
+                    <p className="h4 text-center mb-4">Register</p>
+                    <label
+                      htmlFor="defaultFormLoginEmailEx"
+                      className="grey-text"
+                    >
+                      Your Username
+                    </label>
+                    <input
+                      type="text"
+                      id="defaultFormLoginEmailEx"
+                      className="form-control"
+                      onChange={this.usernameChanged}
+                    />
+                    <br />
+                    <label
+                      htmlFor="defaultFormLoginPasswordEx"
+                      className="grey-text"
+                    >
+                      Your password
+                    </label>
+                    <input
+                      type="password"
+                      id="defaultFormLoginPasswordEx"
+                      className="form-control"
+                      onChange={this.passwordChanged}
+                    />{" "}
+                    <br />
+                    <label
+                      htmlFor="defaultFormLoginEmailEx"
+                      className="grey-text"
+                    >
+                      Your First Name
+                    </label>
+                    <input
+                      type="text"
+                      id="defaultFormLoginEmailEx"
+                      className="form-control"
+                      onChange={this.firstNameChanged}
+                    />
+                    <br />
+                    <label
+                      htmlFor="defaultFormLoginEmailEx"
+                      className="grey-text"
+                    >
+                      Your Last Name
+                    </label>
+                    <input
+                      type="text"
+                      id="defaultFormLoginEmailEx"
+                      className="form-control"
+                      onChange={this.lastNameChanged}
+                    />
+                    <br />
+                    <label
+                      htmlFor="defaultFormLoginEmailEx"
+                      className="grey-text"
+                    >
+                      Email
+                    </label>
+                    <input
+                      type="text"
+                      id="defaultFormLoginEmailEx"
+                      className="form-control"
+                      onChange={this.emailChanged}
+                    />
+                    <div className="text-center mt-4">
+                      <MDBBtn
+                        color="indigo"
+                        type="submit"
+                        onClick={this.register}
+                      >
+                        Register
+                      </MDBBtn>
+                      <MDBBtn
+                        color="indigo"
+                        type="submit"
+                        onClick={this.toLogin}
+                      >
+                        Back to Login
+                      </MDBBtn>
+                    </div>
+                    <div className="col-centered model_loading">
+                      <RotateLoader
+                        css={override}
+                        loading={this.state.isWaiting}
+                      />
+                    </div>
+                    <img className="login_img" alt="not found" />
+                  </form>
+                </MDBCol>
+              </MDBRow>
+            </MDBContainer>
+          </Col>
+        </Row>
         <div className="col-centered model_loading">
           <RotateLoader css={override} loading={this.state.isWaiting} />
         </div>
