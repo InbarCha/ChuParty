@@ -1,6 +1,13 @@
 import React, { Component } from "react";
-import { Container, Row } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import { css } from "@emotion/core";
+import {
+  MDBBtn,
+  MDBDropdown,
+  MDBDropdownToggle,
+  MDBDropdownMenu,
+  MDBDropdownItem,
+} from "mdbreact";
 import RotateLoader from "react-spinners/ClipLoader";
 import Course from "./Course.component";
 import EditCourse from "./EditCourse.component";
@@ -26,6 +33,7 @@ export default class Courses extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      all_courses: [],
       courses: null,
       activeCourse: localStorage["activeCourse"],
       activeSchool: localStorage["activeSchool"],
@@ -41,7 +49,17 @@ export default class Courses extends Component {
     fetch(COURSES_ROUTE_FROM_SCHOOL + this.state.activeSchool)
       .then((res) => res.json())
       .then((data) => {
-        this.setState({ courses: data });
+        console.log(localStorage["logged_courses"]);
+        let all_courses = data;
+        let courses = [
+          ...all_courses.filter(
+            (course) =>
+              localStorage["logged_courses"].indexOf(Object.keys(course)[0]) >
+              -1
+          ),
+        ];
+        console.log(courses);
+        this.setState({ all_courses: data, courses: courses });
         this.SetSonComponents();
       })
       .catch((err) => console.error("error while fetching courses:", err));
@@ -141,6 +159,7 @@ export default class Courses extends Component {
   SetSonComponents() {
     if (this.state.courses !== null) {
       let courses = this.state.courses;
+      console.log(courses);
       let sonComponents = [];
       if (this.state.searchStr !== "")
         courses = courses.filter(
@@ -197,8 +216,10 @@ export default class Courses extends Component {
     sonComponents.pop();
 
     let courses = this.state.courses;
+    let all_courses = this.state.all_courses;
     this.setState({
       courses: [...courses, course],
+      all_courses: [...all_courses, course],
       sonComponents: sonComponents,
     });
 
@@ -208,6 +229,18 @@ export default class Courses extends Component {
   addCourse = () => {
     this.changeCourseComponent(-1, "ADD_COURSE");
   };
+
+  showDropdown = () => {
+    this.setState({ showDropdownCourses: !this.state.showDropdownCourses });
+  };
+
+  async addToMyCourses(e, course) {
+    let courses = this.state.courses;
+    await this.setState({ courses: [...courses, course] });
+    this.SetSonComponents();
+  }
+
+  saveChangesInMyCourses = (e) => {};
 
   render() {
     let res =
@@ -236,12 +269,54 @@ export default class Courses extends Component {
               </React.Fragment>
             )}
           <Container fluid className="model_items_container">
+            {(localStorage["logged_type"] === "Admin" ||
+              localStorage["logged_type"] === "Lecturer") && (
+              <span
+                className="material-icons add_course_icon"
+                onClick={this.addCourse}
+              >
+                add
+              </span>
+            )}
             <span
-              className="material-icons add_course_icon"
-              onClick={this.addCourse}
+              className="material-icons save_icon"
+              style={{ cursor: "pointer" }}
+              onClick={(e) => this.saveChangesInMyCourses(e)}
             >
-              add
+              save
             </span>
+            <Row className="narrow_row">
+              <Col className="text-center">
+                {this.state.all_courses.filter(
+                  (course) =>
+                    this.state.courses
+                      .map((innerCourse) => Object.keys(innerCourse)[0])
+                      .indexOf(Object.keys(course)[0]) < 0
+                ).length > 0 && (
+                  <MDBDropdown>
+                    <MDBDropdownToggle caret color="info">
+                      {"הוסף לקורסים שלך "}
+                    </MDBDropdownToggle>
+                    <MDBDropdownMenu basic>
+                      {this.state.all_courses
+                        .filter(
+                          (course) => this.state.courses.indexOf(course) < 0
+                        )
+                        .map((course, index) => {
+                          return (
+                            <MDBDropdownItem
+                              key={index}
+                              onClick={(e) => this.addToMyCourses(e, course)}
+                            >
+                              {Object.keys(course)[0]}
+                            </MDBDropdownItem>
+                          );
+                        })}
+                    </MDBDropdownMenu>
+                  </MDBDropdown>
+                )}
+              </Col>
+            </Row>
             <Row>{this.state.sonComponents}</Row>
           </Container>
         </div>

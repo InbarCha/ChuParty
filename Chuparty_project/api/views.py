@@ -2508,7 +2508,8 @@ def register(request):
                 "last_name" : user.last_name,
                 "email": user.email,
                 "type": accountType,
-                "school": school
+                "school": school,
+                "courses": []
             }
         
         if accountType == "Student":
