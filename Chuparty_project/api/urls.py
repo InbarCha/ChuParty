@@ -14,6 +14,7 @@ urlpatterns = [
     path('editCourse', views.editCourse),
     path('getCourses', views.getCourses), 
     path('getCourseByName', views.getCourseByName),
+    path('getCoursesFromSchool', views.getCoursesFromSchool),
     path('deleteCourse', views.deleteCourse),
 
     # school
@@ -44,21 +45,29 @@ urlpatterns = [
     path('setStudent', views.setStudent),
     path('editStudent', views.editStudent),
     path('getStudents', views.getStudents),
-    path('getStudentByEmail', views.getStudentByEmail),
+    path('getStudentByUsername', views.getStudentByUsername),
     path('deleteStudent', views.deleteStudent),
 
     # lecturer
     path('setLecturer', views.setLecturer),
     path('editLecturer', views.editLecturer),
     path('getLecturers', views.getLecturers),
-    path('getLecturerByEmail', views.getLecturerByEmail),
+    path('getLecturerByUsername', views.getLecturerByUsername),
     path('deleteLecturer', views.deleteLecturer),
 
     # admin
     path('setAdmin', views.setAdmin),
-    path('editAdmin', views.editAdmin),
+    # path('editAdmin', views.editAdmin),
     path('getAdmins', views.getAdmins),
-    path('getAdminByEmail', views.getAdminByEmail),
+    path('getAdminByUsername', views.getAdminByUsername),
     path('deleteAdmin', views.deleteAdmin),
+
+    # auth
+    path('isLoggedIn', views.isLoggedIn),
+    path('logIn', views.logIn),
+    path('logOut', views.logOut),
+    path('register', views.register),
+
+    path('get_csrf', views.get_csrf)
 
 ]

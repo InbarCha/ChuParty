@@ -12,6 +12,10 @@ const COURSES_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/getCourses"
     : "/api/getCourses";
+const COURSES_ROUTE_FROM_SCHOOL =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/getCoursesFromSchool?school="
+    : "/api/getCoursesFromSchool?school=";
 
 const override = css`
   display: block;
@@ -24,16 +28,17 @@ export default class Courses extends Component {
     this.state = {
       courses: null,
       activeCourse: localStorage["activeCourse"],
+      activeSchool: localStorage["activeSchool"],
       sonComponents: [],
       loading: true,
-      searchStr: props.filterBy || ""
+      searchStr: props.filterBy || "",
     };
   }
 
   componentDidMount() {
     // courses should look like the following:
     // [{"OOP": {subjects: ["Object-Oriented Principles"]}}, ...]
-    fetch(COURSES_ROUTE)
+    fetch(COURSES_ROUTE_FROM_SCHOOL + this.state.activeSchool)
       .then((res) => res.json())
       .then((data) => {
         this.setState({ courses: data });
@@ -43,10 +48,10 @@ export default class Courses extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    console.log('new props filter:', this.props.filterBy);
+    console.log("new props filter:", this.props.filterBy);
     if (this.props.filterBy !== this.state.searchStr) {
       console.log(`searching for ${this.props.filterBy}`);
-      this.setState({ searchStr: this.props.filterBy.toLowerCase() })
+      this.setState({ searchStr: this.props.filterBy.toLowerCase() });
       this.SetSonComponents();
     }
   }
@@ -135,11 +140,19 @@ export default class Courses extends Component {
 
   SetSonComponents() {
     if (this.state.courses !== null) {
-      let courses = (this.state.searchStr !== '') ?
-        this.state.courses.filter(e => // filter by course name OR subject name
-          (Object.keys(e)[0].toLowerCase().indexOf(this.state.searchStr) !== -1) || (e[Object.keys(e)[0]]['subjects'].find(e => e.toLowerCase().indexOf(this.state.searchStr) !== -1))
-        ) : this.state.courses;
+      let courses = this.state.courses;
       let sonComponents = [];
+      if (this.state.searchStr !== "")
+        courses = courses.filter(
+          (
+            e // filter by course name OR subject name
+          ) =>
+            Object.keys(e)[0].toLowerCase().indexOf(this.state.searchStr) !==
+              -1 ||
+            e[Object.keys(e)[0]]["subjects"].find(
+              (e) => e.toLowerCase().indexOf(this.state.searchStr) !== -1
+            )
+        );
       courses.forEach((elm, index) => {
         let newCourse = "";
         if (elm !== null && elm !== undefined && elm !== "") {
@@ -199,18 +212,29 @@ export default class Courses extends Component {
   render() {
     let res =
       this.state.courses !== null ? (
-        <React.Fragment>
-          <div className="page_title"> Courses </div>
-          {this.state.activeCourse !== "" && (
-            <React.Fragment>
-              <div className="active_model_title">
-                <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
-                  Active Course:{" "}
-                </span>
-                <span className="active_model">{this.state.activeCourse}</span>
-              </div>
-            </React.Fragment>
-          )}
+        <div dir="RTL">
+          <div className="page_title"> קורסים </div>
+          {this.state.activeCourse !== "" &&
+            this.state.activeCourse !== undefined && (
+              <React.Fragment>
+                <div className="active_model_title" dir="RTL">
+                  <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
+                    בית ספר פעיל:{" "}
+                  </span>
+                  <span className="active_model">
+                    {this.state.activeSchool}
+                  </span>
+                </div>
+                <div className="active_model_title" dir="RTL">
+                  <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
+                    קורס פעיל:{" "}
+                  </span>
+                  <span className="active_model">
+                    {this.state.activeCourse}
+                  </span>
+                </div>
+              </React.Fragment>
+            )}
           <Container fluid className="model_items_container">
             <span
               className="material-icons add_course_icon"
@@ -220,13 +244,13 @@ export default class Courses extends Component {
             </span>
             <Row>{this.state.sonComponents}</Row>
           </Container>
-        </React.Fragment>
+        </div>
       ) : (
-          <div className="col-centered models_loading">
-            <div className="loading_title"> Loading Courses... </div>
-            <RotateLoader css={override} size={50} />
-          </div>
-        );
+        <div className="col-centered models_loading" dir="RTL">
+          <div className="loading_title"> טוען קורסים... </div>
+          <RotateLoader css={override} size={50} />
+        </div>
+      );
     return res;
   }
 }

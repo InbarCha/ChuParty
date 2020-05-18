@@ -10,16 +10,19 @@ export default class Home extends Component {
   render() {
     return (
       <div className="sidebar">
-        <div
-          className="side_item"
-          onClick={(e) => this.state.parentClickHandler("HOME")}
-        >
-          <i className="material-icons">home</i>
-        </div>
-        <div className="side_description">
-          <span>Home</span>
-        </div>
-
+        {localStorage["logged_type"] === "Admin" && (
+          <React.Fragment>
+            <div
+              className="side_item"
+              onClick={(e) => this.state.parentClickHandler("HOME")}
+            >
+              <i className="material-icons">home</i>
+            </div>
+            <div className="side_description">
+              <span>בתי ספר</span>
+            </div>
+          </React.Fragment>
+        )}
         <div
           className="side_item"
           onClick={(e) => this.state.parentClickHandler("COURSES")}
@@ -27,9 +30,8 @@ export default class Home extends Component {
           <i className="material-icons">school</i>
         </div>
         <div className="side_description">
-          <span>Courses</span>
+          <span>קורסים</span>
         </div>
-
         <div
           className="side_item"
           onClick={(e) => this.state.parentClickHandler("EXAMS")}
@@ -37,9 +39,8 @@ export default class Home extends Component {
           <i className="material-icons">web</i>
         </div>
         <div className="side_description">
-          <span>Exams</span>
+          <span>מבחנים</span>
         </div>
-
         <div
           className="side_item"
           onClick={(e) => this.state.parentClickHandler("QUESTIONS")}
@@ -47,9 +48,8 @@ export default class Home extends Component {
           <i className="material-icons">question_answer</i>
         </div>
         <div className="side_description">
-          <span>Questions</span>
+          <span>שאלות</span>
         </div>
-
         <div
           className="side_item"
           onClick={(e) => this.state.parentClickHandler("FEEDBACK")}
@@ -57,9 +57,8 @@ export default class Home extends Component {
           <i className="material-icons">message</i>
         </div>
         <div className="side_description">
-          <span>Feedback</span>
+          <span>סטטיסטיקה</span>
         </div>
-
         <div
           className="side_item"
           onClick={(e) => this.state.parentClickHandler("ADMIN")}
@@ -67,7 +66,7 @@ export default class Home extends Component {
           <i className="material-icons">widgets</i>
         </div>
         <div className="side_description">
-          <span>Admin</span>
+          <span>אדמין</span>
         </div>
       </div>
     );

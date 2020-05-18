@@ -33,7 +33,10 @@ def createCourseOrAddSubject(courseJson):
         
     except:
         subjectsList = appendSubjectsToList(courseJson, None)
-        newCourse = Course(name=courseName, subjects=subjectsList)
+        school = ""
+        if "school" in courseJson.keys():
+            school = courseJson["school"]
+        newCourse = Course(name=courseName, subjects=subjectsList, school=school)
 
         newCourse.save()
         return (True, newCourse)
@@ -230,6 +233,7 @@ def changeCoursesTemplateInList(coursesList):
 def changeCourseTemplate(course):
     courseJson = dict()
     courseJson[course.name] = dict()
+    courseJson[course.name]["school"] = course.school
     courseJson[course.name]['subjects'] = [subject.name for subject in course.subjects]
 
     return courseJson

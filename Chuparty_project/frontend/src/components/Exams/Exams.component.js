@@ -225,12 +225,12 @@ export default class Exams extends Component {
   render() {
     let res =
       this.state.exams !== null ? (
-        <React.Fragment>
-          <div className="page_title"> Exams </div>
+        <div dir="RTL">
+          <div className="page_title"> מבחנים </div>
           {this.state.activeCourse !== "" && (
             <div className="active_model_title">
               <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
-                Course:
+                קורס:
               </span>
               <span className="active_model"> {this.state.activeCourse}</span>
             </div>
@@ -244,20 +244,20 @@ export default class Exams extends Component {
             </span>
             <Row>{this.state.sonComponents}</Row>
           </Container>
-        </React.Fragment>
+        </div>
       ) : this.state.activeCourse !== undefined ? (
-        <div className="col-centered models_loading">
-          <div className="loading_title"> Loading Exams... </div>
+        <div className="col-centered models_loading" dir="RTL">
+          <div className="loading_title"> טוען מבחנים... </div>
           <RotateLoader css={override} size={50} loading={this.state.loading} />
         </div>
       ) : (
-        <React.Fragment>
+        <React.Fragment dir="RTL">
           <div className="page_title"> Questions </div>
           <div className="active_model_title">
             <span
               style={{ fontStyle: "italic", fontSize: "x-large", color: "red" }}
             >
-              Error Loading Exam: No Course Chosen
+              בעיה בטעינת מבחנים: לא נבחר קורס
             </span>
           </div>
         </React.Fragment>

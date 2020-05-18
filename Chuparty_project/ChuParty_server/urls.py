@@ -8,6 +8,6 @@ urlpatterns = [
     #TODO: handle login_required
     path('', TemplateView.as_view(template_name='index.html')),
     path('api/', include('api.urls')),
+    path('admin/', admin.site.urls),
     re_path(r'^(?:.*)/?$', TemplateView.as_view(template_name="index.html")),# any path that is not '/'
-    path('admin/', admin.site.urls)
 ]

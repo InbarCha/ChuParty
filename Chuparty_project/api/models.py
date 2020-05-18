@@ -30,7 +30,7 @@ class Subject(models.Model):
 ###################################################
 class Course(models.Model):
     name = models.CharField(max_length=50)
-
+    school = models.CharField(max_length=30, default="Computer Science")
     # course subjects, for example: "Computer Networks" Course will have subjects: TCP, IP, DNS..
     subjects = models.ArrayField(
         model_container=Subject,
@@ -177,77 +177,57 @@ def checkIfPermissionValid(permission):
 
 
 ###################################################
-# Users - abstract
-###################################################
-class User(models.Model):
-    email = models.EmailField()
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    permissions = models.ListField(
-        models.CharField(max_length=20)
-    )
-
-    def as_json(self):
-        json_dict = dict(
-            first_name = self.first_name,
-            last_name = self.last_name,
-            email = self.email,
-            permissions = self.permissions
-        )
-
-        return json_dict
-
-    class Meta:
-        abstract = True
-
-###################################################
 # Student
 # To add new student:
-#       student = Student(first_name="David", last_name="Shaulov", email="david@gmail.com", permissions = [ "Create Exam", "Delete Exam" ])
+#       student = Student(username=inbar, school=ComputerScience)
 #       student.save()
 ###################################################
-class Student(User):
+class Student(models.Model):
+    username = models.CharField(max_length=30, default='inbar')
+    school = models.CharField(max_length=30, default="Computer Science")
     objects = models.DjongoManager() 
     
     # more fields unique to students
-    relevantCourses = models.ArrayField(
-        model_container=Course,
+    relevantCourses = models.ListField(
+        models.CharField(max_length=50)
     )
 
     def as_json(self):
-        json_dict = super().as_json()
-        json_dict['relevantCourses'] = list()
-
-        for course in list(self.relevantCourses):
-            json_dict['relevantCourses'].append(course.as_json())
+        json_dict = dict()
+        json_dict["username"] = self.username
+        json_dict["school"] = self.school
+        json_dict['relevantCourses'] = [course["name"] for course in self.relevantCourses]
 
         return json_dict
 
 
-class Lecturer(User):
+class Lecturer(models.Model):
+    username = models.CharField(max_length=30, default='inbar')
+    school = models.CharField(max_length=30, default="מדעי המחשב")
     objects = models.DjongoManager()
 
     # more fields unique to lecturers
-    coursesTeaching = models.ArrayField(
-        model_container=Course,
+    coursesTeaching = models.ListField(
+        models.CharField(max_length=50)
     )
 
     def as_json(self):
-        json_dict = super().as_json()
-        json_dict['coursesTeaching'] = list()
-        
-        for course in list(self.coursesTeaching):
-            json_dict['coursesTeaching'].append(course.as_json())
+        json_dict = dict()
+        json_dict["username"] = self.username
+        json_dict["school"] = self.school
+        json_dict['coursesTeaching'] = [course["name"] for course in self.coursesTeaching]
 
         return json_dict
 
-class Admin(User):
+class Admin(models.Model):
+    username = models.CharField(max_length=30, default='inbar')
     objects = models.DjongoManager()
 
     # more fields unique to admins
 
     def as_json(self):
-        json_dict = super().as_json()
+        json_dict = dict()
+        json_dict["username"] = self.username
 
         return json_dict
 
