@@ -81,7 +81,7 @@ export default class Home extends Component {
               className="material-icons account_icon_leave"
               onClick={this.logout}
             >
-              meeting_room
+              exit_to_app
             </span>
           </React.Fragment>
         )}

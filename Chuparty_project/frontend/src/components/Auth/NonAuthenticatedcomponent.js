@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { MDBBtn } from "mdbreact";
 
 export class NonAauthenticated extends Component {
   constructor(props) {
@@ -20,12 +21,9 @@ export class NonAauthenticated extends Component {
           <br />
           ולפתור מבחנים בצורה נוחה
           <br />
-          <span
-            className="material-icons login_icon_unauth"
-            onClick={this.toLogin}
-          >
-            input
-          </span>
+          <MDBBtn color="default" type="submit" onClick={this.toLogin}>
+            Login
+          </MDBBtn>
           <br />
           <img className="chuparty_banner" alt="not found"></img>
         </div>

@@ -35,6 +35,7 @@ export default class Courses extends Component {
     this.state = {
       all_courses: [],
       courses: null,
+      courses_copy: null,
       activeCourse: localStorage["activeCourse"],
       activeSchool: localStorage["activeSchool"],
       sonComponents: [],
@@ -58,8 +59,19 @@ export default class Courses extends Component {
               -1
           ),
         ];
+        let courses_copy = [
+          ...all_courses.filter(
+            (course) =>
+              localStorage["logged_courses"].indexOf(Object.keys(course)[0]) >
+              -1
+          ),
+        ];
         console.log(courses);
-        this.setState({ all_courses: data, courses: courses });
+        this.setState({
+          all_courses: data,
+          courses: courses,
+          courses_copy: courses_copy,
+        });
         this.SetSonComponents();
       })
       .catch((err) => console.error("error while fetching courses:", err));
@@ -73,6 +85,18 @@ export default class Courses extends Component {
       this.SetSonComponents();
     }
   }
+
+  deleteFromMyCourses = async (e, index) => {
+    let courseName = Object.keys(this.state.courses[index])[0];
+    let courses = this.state.courses;
+    await this.setState({
+      courses: [
+        ...courses.filter((course) => Object.keys(course)[0] !== courseName),
+      ],
+    });
+
+    this.SetSonComponents();
+  };
 
   chooseActiveCourse = (courseName) => {
     localStorage["activeCourse"] = courseName;
@@ -130,6 +154,7 @@ export default class Courses extends Component {
         sonComponents[index] = (
           <Course
             bounce={true}
+            deleteFromMyCourses={this.deleteFromMyCourses}
             key={index}
             index={index}
             chooseActiveCourse={this.chooseActiveCourse}
@@ -181,6 +206,7 @@ export default class Courses extends Component {
               bounce={false}
               course={elm}
               index={index}
+              deleteFromMyCourses={this.deleteFromMyCourses}
               key={index}
               chooseActiveCourse={this.chooseActiveCourse}
               changeCourseComponent={this.changeCourseComponent}
@@ -242,6 +268,24 @@ export default class Courses extends Component {
 
   saveChangesInMyCourses = (e) => {};
 
+  arraysEqual(_arr1, _arr2) {
+    if (
+      !Array.isArray(_arr1) ||
+      !Array.isArray(_arr2) ||
+      _arr1.length !== _arr2.length
+    )
+      return false;
+
+    var arr1 = _arr1.concat().sort();
+    var arr2 = _arr2.concat().sort();
+
+    for (var i = 0; i < arr1.length; i++) {
+      if (arr1[i] !== arr2[i]) return false;
+    }
+
+    return true;
+  }
+
   render() {
     let res =
       this.state.courses !== null ? (
@@ -278,13 +322,15 @@ export default class Courses extends Component {
                 add
               </span>
             )}
-            <span
-              className="material-icons save_icon"
-              style={{ cursor: "pointer" }}
-              onClick={(e) => this.saveChangesInMyCourses(e)}
-            >
-              save
-            </span>
+            {!this.arraysEqual(this.state.courses, this.state.courses_copy) && (
+              <span
+                className="material-icons save_icon"
+                style={{ cursor: "pointer" }}
+                onClick={(e) => this.saveChangesInMyCourses(e)}
+              >
+                save
+              </span>
+            )}
             <Row className="narrow_row">
               <Col className="text-center">
                 {this.state.all_courses.filter(

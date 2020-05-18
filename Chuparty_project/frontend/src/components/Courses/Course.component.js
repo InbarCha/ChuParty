@@ -8,9 +8,18 @@ const Bounce = styled.div`
 `;
 
 export class Course extends Component {
+  constructor(props) {
+    super(props);
+  }
+
   editCourse = (e) => {
     e.stopPropagation();
     this.props.changeCourseComponent(this.props.index, "EDIT");
+  };
+
+  deleteFromMyCourses = (e) => {
+    e.stopPropagation();
+    this.props.deleteFromMyCourses(e, this.props.index);
   };
 
   render() {
@@ -31,6 +40,12 @@ export class Course extends Component {
                 settings
               </span>
             )}
+            <span
+              className="material-icons delete_icon"
+              onClick={this.deleteFromMyCourses}
+            >
+              delete
+            </span>
             <img className="course_img" alt="" />
             <div className="course_name_text">{courseName}</div>
           </div>
