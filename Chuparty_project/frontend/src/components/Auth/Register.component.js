@@ -141,7 +141,7 @@ export class Register extends Component {
     if (email === "") {
       this.setState({ emailWarning: "'email' field is empty!" });
     }
-    if (school == "") {
+    if (school === "") {
       this.setState({ schoolWarning: "'school' wasn't chosen!" });
     }
 
@@ -204,6 +204,7 @@ export class Register extends Component {
             localStorage["logged_email"] = data["email"];
             localStorage["logged_type"] = data["type"];
             localStorage["activeSchool"] = data["school"];
+            localStorage["logged_courses"] = data["courses"];
 
             this.props.setLoggedIn(true);
             if (

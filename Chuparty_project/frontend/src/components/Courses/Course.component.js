@@ -22,12 +22,15 @@ export class Course extends Component {
       >
         <div className="model_container">
           <div className="model_name">
-            <span
-              className="material-icons settings_icon"
-              onClick={(e) => this.editCourse(e)}
-            >
-              settings
-            </span>
+            {(localStorage["logged_type"] === "Admin" ||
+              localStorage["logged_type"] === "Lecturer") && (
+              <span
+                className="material-icons settings_icon"
+                onClick={(e) => this.editCourse(e)}
+              >
+                settings
+              </span>
+            )}
             <img className="course_img" alt="" />
             <div className="course_name_text">{courseName}</div>
           </div>
