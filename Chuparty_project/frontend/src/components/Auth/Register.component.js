@@ -2,7 +2,16 @@ import React, { Component } from "react";
 import { css } from "@emotion/core";
 import RotateLoader from "react-spinners/ClipLoader";
 import { Row, Col } from "react-bootstrap";
-import { MDBContainer, MDBRow, MDBCol, MDBBtn } from "mdbreact";
+import {
+  MDBContainer,
+  MDBRow,
+  MDBCol,
+  MDBBtn,
+  MDBDropdown,
+  MDBDropdownToggle,
+  MDBDropdownMenu,
+  MDBDropdownItem,
+} from "mdbreact";
 import Checkbox from "@material-ui/core/Checkbox";
 
 const REGISTER_ROUTE =
@@ -10,14 +19,19 @@ const REGISTER_ROUTE =
     ? "http://localhost:8000/api/register"
     : "/api/register";
 
+const SCHOOLS_ROUTE =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/getSchools"
+    : "/api/getSchools";
+
 const override = css`
   display: block;
   margin: 0 auto;
 `;
 
 export class Register extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       username: "",
       password: "",
@@ -33,8 +47,30 @@ export class Register extends Component {
       firstNameWarning: "",
       lastNameWarning: "",
       emailWarning: "",
+      schoolWarning: "",
       registerWarning: "",
+      schools: [],
+      userSchool: "",
     };
+  }
+
+  componentDidMount() {
+    fetch(SCHOOLS_ROUTE)
+      .then((res) => {
+        console.log(res);
+        return res.json();
+      })
+      .then((data) => {
+        // this.setState({ schools: data });
+        data = data.map((e) => {
+          return {
+            name: Object.keys(e)[0],
+            courses: e[Object.keys(e)[0]].courses,
+          };
+        });
+        this.setState({ schools: data });
+      })
+      .catch((err) => console.error("error while fetching schools:", err));
   }
 
   usernameChanged = (e) => {
@@ -88,6 +124,7 @@ export class Register extends Component {
     let first_name = this.state.first_name;
     let last_name = this.state.last_name;
     let email = this.state.email;
+    let school = this.state.userSchool;
 
     if (username === "") {
       this.setState({ usernameWarning: "'Username' field is empty!" });
@@ -103,6 +140,9 @@ export class Register extends Component {
     }
     if (email === "") {
       this.setState({ emailWarning: "'email' field is empty!" });
+    }
+    if (school == "") {
+      this.setState({ schoolWarning: "'school' wasn't chosen!" });
     }
 
     let type = "";
@@ -122,7 +162,8 @@ export class Register extends Component {
       first_name !== "" &&
       last_name !== "" &&
       email !== "" &&
-      type !== ""
+      type !== "" &&
+      school !== ""
     ) {
       this.setState({ registerWarning: "" });
       let request_body = {
@@ -132,6 +173,7 @@ export class Register extends Component {
         last_name: last_name,
         email: email,
         type: type,
+        school: school,
       };
       this.setState({ isWaiting: true });
 
@@ -161,9 +203,17 @@ export class Register extends Component {
             localStorage["logged_last_name"] = data["last_name"];
             localStorage["logged_email"] = data["email"];
             localStorage["logged_type"] = data["type"];
+            localStorage["activeSchool"] = data["school"];
 
             this.props.setLoggedIn(true);
-            this.props.parentClickHandler("HOME");
+            if (
+              localStorage["activeSchool"] !== "" &&
+              localStorage["activeSchool"] !== undefined
+            ) {
+              this.props.parentClickHandler("COURSES");
+            } else {
+              this.props.parentClickHandler("HOME");
+            }
           } else {
             this.setState({ registerWarning: data["reason"] });
           }
@@ -198,6 +248,13 @@ export class Register extends Component {
         checkedLecturer: false,
       });
     }
+  };
+
+  changeUserSchool = (e, index) => {
+    this.setState({
+      userSchool: this.state.schools[index]["name"],
+      schoolWarning: "",
+    });
   };
 
   render() {
@@ -294,6 +351,32 @@ export class Register extends Component {
                     />
                     <label style={{ color: "red" }}>
                       {this.state.emailWarning}
+                    </label>
+                    <br />
+                    {this.state.userSchool && (
+                      <label className="user_school_label">
+                        {this.state.userSchool}
+                      </label>
+                    )}
+                    <MDBDropdown>
+                      <MDBDropdownToggle caret color="primary">
+                        Your School
+                      </MDBDropdownToggle>
+                      <MDBDropdownMenu basic>
+                        {this.state.schools.map((school, index) => {
+                          return (
+                            <MDBDropdownItem
+                              key={index}
+                              onClick={(e) => this.changeUserSchool(e, index)}
+                            >
+                              {school["name"]}
+                            </MDBDropdownItem>
+                          );
+                        })}
+                      </MDBDropdownMenu>
+                    </MDBDropdown>
+                    <label style={{ color: "red" }}>
+                      {this.state.schoolWarning}
                     </label>
                     <br />
                     <label className="grey-text" style={{ fontWeight: "bold" }}>

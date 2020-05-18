@@ -33,7 +33,7 @@ def createCourseOrAddSubject(courseJson):
         
     except:
         subjectsList = appendSubjectsToList(courseJson, None)
-        school = "",
+        school = ""
         if "school" in courseJson.keys():
             school = courseJson["school"]
         newCourse = Course(name=courseName, subjects=subjectsList, school=school)

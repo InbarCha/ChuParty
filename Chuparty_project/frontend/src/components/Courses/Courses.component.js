@@ -214,22 +214,27 @@ export default class Courses extends Component {
       this.state.courses !== null ? (
         <div dir="RTL">
           <div className="page_title"> קורסים </div>
-          {this.state.activeCourse !== "" && (
-            <React.Fragment>
-              <div className="active_model_title" dir="RTL">
-                <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
-                  בית ספר פעיל:{" "}
-                </span>
-                <span className="active_model">{this.state.activeSchool}</span>
-              </div>
-              <div className="active_model_title" dir="RTL">
-                <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
-                  קורס פעיל:{" "}
-                </span>
-                <span className="active_model">{this.state.activeCourse}</span>
-              </div>
-            </React.Fragment>
-          )}
+          {this.state.activeCourse !== "" &&
+            this.state.activeCourse !== undefined && (
+              <React.Fragment>
+                <div className="active_model_title" dir="RTL">
+                  <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
+                    בית ספר פעיל:{" "}
+                  </span>
+                  <span className="active_model">
+                    {this.state.activeSchool}
+                  </span>
+                </div>
+                <div className="active_model_title" dir="RTL">
+                  <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
+                    קורס פעיל:{" "}
+                  </span>
+                  <span className="active_model">
+                    {this.state.activeCourse}
+                  </span>
+                </div>
+              </React.Fragment>
+            )}
           <Container fluid className="model_items_container">
             <span
               className="material-icons add_course_icon"

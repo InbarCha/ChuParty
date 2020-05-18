@@ -2462,7 +2462,8 @@ POST request body:
 	"first_name": "david",
 	"last_name": "shaulov",
 	"email": "david@gmail.com".
-    "type": "Student"
+    "type": "Student",
+    "school": "Computer Science"
 }
 '''
 #####################################################
@@ -2494,6 +2495,7 @@ def register(request):
         password = body["password"]
         email = body['email']
         accountType = body['type']
+        school = body["school"]
 
         user = User(username=username, first_name=first_name, last_name=last_name, email=email)
         user.set_password(password)
@@ -2505,11 +2507,12 @@ def register(request):
                 "first_name": user.first_name,
                 "last_name" : user.last_name,
                 "email": user.email,
-                "type": accountType
+                "type": accountType,
+                "school": school
             }
         
         if accountType == "Student":
-            ret_tuple = createStudent({"username": username})
+            ret_tuple = createStudent({"username": username, "school": school})
             isNewStudentCreated = ret_tuple[0]
 
             if isNewStudentCreated is None:
@@ -2522,7 +2525,7 @@ def register(request):
                 ret_json["Status"] =  "Student Already Exists"
 
         elif accountType == "Lecturer":
-            ret_tuple = createLecturer({"username": username})
+            ret_tuple = createLecturer({"username": username, "school": school})
             isNewLecturerCreated = ret_tuple[0]
 
             if isNewLecturerCreated is None:

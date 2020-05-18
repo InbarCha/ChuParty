@@ -72,15 +72,14 @@ export class Login extends Component {
             localStorage["logged_email"] = data["email"];
             localStorage["logged_type"] = data["type"];
             localStorage["logged_courses"] = data["courses"];
-            localStorage["logged_school"] = data["school"];
+            localStorage["activeSchool"] = data["school"];
 
             this.props.setLoggedIn(true);
 
             if (
-              localStorage["logged_school"] !== "" &&
-              localStorage["logged_school"] !== undefined
+              localStorage["activeSchool"] !== "" &&
+              localStorage["activeSchool"] !== undefined
             ) {
-              localStorage["activeSchool"] = localStorage["logged_school"];
               this.props.parentClickHandler("COURSES");
             } else {
               this.props.parentClickHandler("HOME");

@@ -22,7 +22,7 @@ export default class Schools extends Component {
     this.state = {
       schools: null,
       activeSchool: null,
-      sonComponents: []
+      sonComponents: [],
     };
     this.setSonComponents = this.setSonComponents.bind(this);
     this.chooseActiveSchool = this.chooseActiveSchool.bind(this);
@@ -30,18 +30,28 @@ export default class Schools extends Component {
 
   componentDidMount() {
     fetch(SCHOOLS_ROUTE)
-      .then((res) => { console.log(res); return res.json() })
+      .then((res) => {
+        console.log(res);
+        return res.json();
+      })
       .then((data) => {
         // this.setState({ schools: data });
-        data = data.map(e => { return { name: Object.keys(e)[0], courses: e[Object.keys(e)[0]].courses } });
-        this.setSchools(data)
-      }).then(() => this.setSonComponents())
+        data = data.map((e) => {
+          return {
+            name: Object.keys(e)[0],
+            courses: e[Object.keys(e)[0]].courses,
+          };
+        });
+        this.setSchools(data);
+      })
+      .then(() => this.setSonComponents())
       .catch((err) => console.error("error while fetching schools:", err));
   }
 
   chooseActiveSchool(school) {
     localStorage["activeSchool"] = school;
-    this.setState({ activeSchool: school })
+    localStorage.removeItem("activeCourse");
+    this.setState({ activeSchool: school });
   }
 
   changedSchool = (school, index) => {
@@ -61,7 +71,7 @@ export default class Schools extends Component {
     let courses = school.courses;
 
     let school_copy = {};
-    school_copy.name = schoolName
+    school_copy.name = schoolName;
     school_copy.courses = [...courses];
 
     return school_copy;
@@ -161,11 +171,11 @@ export default class Schools extends Component {
   setSchools(schools) {
     return new Promise((resolve, reject) => {
       resolve(this.setState({ schools: schools }));
-    })
+    });
   }
 
   setSonComponents() {
-    console.log("schools:", this.state.schools)
+    console.log("schools:", this.state.schools);
     let sonComponents = [];
 
     this.state.schools.forEach((elm, index) => {
@@ -210,7 +220,7 @@ export default class Schools extends Component {
             onClick={this.addSchool} // TODO
           >
             add
-            </span>
+          </span>
           <Row>{this.state.sonComponents}</Row>
         </Container>
       </React.Fragment>
@@ -222,11 +232,11 @@ export default class Schools extends Component {
       this.state.schools !== null ? (
         this.getSchoolsArr()
       ) : (
-          <div className="col-centered models_loading">
-            <div className="loading_title"> Loading Schools... </div>
-            <RotateLoader css={override} size={50} />
-          </div>
-        );
+        <div className="col-centered models_loading">
+          <div className="loading_title"> Loading Schools... </div>
+          <RotateLoader css={override} size={50} />
+        </div>
+      );
     return res;
   }
 }

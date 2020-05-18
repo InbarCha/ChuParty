@@ -10,16 +10,19 @@ export default class Home extends Component {
   render() {
     return (
       <div className="sidebar">
-        <div
-          className="side_item"
-          onClick={(e) => this.state.parentClickHandler("HOME")}
-        >
-          <i className="material-icons">home</i>
-        </div>
-        <div className="side_description">
-          <span>עמוד הבית</span>
-        </div>
-
+        {localStorage["logged_type"] === "Admin" && (
+          <React.Fragment>
+            <div
+              className="side_item"
+              onClick={(e) => this.state.parentClickHandler("HOME")}
+            >
+              <i className="material-icons">home</i>
+            </div>
+            <div className="side_description">
+              <span>בתי ספר</span>
+            </div>
+          </React.Fragment>
+        )}
         <div
           className="side_item"
           onClick={(e) => this.state.parentClickHandler("COURSES")}
@@ -29,7 +32,6 @@ export default class Home extends Component {
         <div className="side_description">
           <span>קורסים</span>
         </div>
-
         <div
           className="side_item"
           onClick={(e) => this.state.parentClickHandler("EXAMS")}
@@ -39,7 +41,6 @@ export default class Home extends Component {
         <div className="side_description">
           <span>מבחנים</span>
         </div>
-
         <div
           className="side_item"
           onClick={(e) => this.state.parentClickHandler("QUESTIONS")}
@@ -49,7 +50,6 @@ export default class Home extends Component {
         <div className="side_description">
           <span>שאלות</span>
         </div>
-
         <div
           className="side_item"
           onClick={(e) => this.state.parentClickHandler("FEEDBACK")}
@@ -59,7 +59,6 @@ export default class Home extends Component {
         <div className="side_description">
           <span>סטטיסטיקה</span>
         </div>
-
         <div
           className="side_item"
           onClick={(e) => this.state.parentClickHandler("ADMIN")}
