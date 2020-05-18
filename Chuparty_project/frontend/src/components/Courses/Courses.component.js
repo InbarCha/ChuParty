@@ -39,7 +39,6 @@ export default class Courses extends Component {
       activeSchool: localStorage["activeSchool"],
       sonComponents: [],
       loading: true,
-      showDropdownCourses: false,
       searchStr: props.filterBy || "",
     };
   }
@@ -279,47 +278,43 @@ export default class Courses extends Component {
                 add
               </span>
             )}
+            <span
+              className="material-icons save_icon"
+              style={{ cursor: "pointer" }}
+              onClick={(e) => this.saveChangesInMyCourses(e)}
+            >
+              save
+            </span>
             <Row className="narrow_row">
               <Col className="text-center">
-                <MDBBtn color="info" onClick={this.showDropdown}>
-                  הוסף לקורסים שלך
-                </MDBBtn>
-                <span
-                  className="material-icons"
-                  style={{ cursor: "pointer" }}
-                  onClick={(e) => this.saveChangesInMyCourses(e)}
-                >
-                  save
-                </span>
-                {this.state.showDropdownCourses &&
-                  this.state.all_courses.filter(
-                    (course) =>
-                      this.state.courses
-                        .map((innerCourse) => Object.keys(innerCourse)[0])
-                        .indexOf(Object.keys(course)[0]) < 0
-                  ).length > 0 && (
-                    <MDBDropdown>
-                      <MDBDropdownToggle caret color="info">
-                        קורסים
-                      </MDBDropdownToggle>
-                      <MDBDropdownMenu basic>
-                        {this.state.all_courses
-                          .filter(
-                            (course) => this.state.courses.indexOf(course) < 0
-                          )
-                          .map((course, index) => {
-                            return (
-                              <MDBDropdownItem
-                                key={index}
-                                onClick={(e) => this.addToMyCourses(e, course)}
-                              >
-                                {Object.keys(course)[0]}
-                              </MDBDropdownItem>
-                            );
-                          })}
-                      </MDBDropdownMenu>
-                    </MDBDropdown>
-                  )}
+                {this.state.all_courses.filter(
+                  (course) =>
+                    this.state.courses
+                      .map((innerCourse) => Object.keys(innerCourse)[0])
+                      .indexOf(Object.keys(course)[0]) < 0
+                ).length > 0 && (
+                  <MDBDropdown>
+                    <MDBDropdownToggle caret color="info">
+                      {"הוסף לקורסים שלך "}
+                    </MDBDropdownToggle>
+                    <MDBDropdownMenu basic>
+                      {this.state.all_courses
+                        .filter(
+                          (course) => this.state.courses.indexOf(course) < 0
+                        )
+                        .map((course, index) => {
+                          return (
+                            <MDBDropdownItem
+                              key={index}
+                              onClick={(e) => this.addToMyCourses(e, course)}
+                            >
+                              {Object.keys(course)[0]}
+                            </MDBDropdownItem>
+                          );
+                        })}
+                    </MDBDropdownMenu>
+                  </MDBDropdown>
+                )}
               </Col>
             </Row>
             <Row>{this.state.sonComponents}</Row>
