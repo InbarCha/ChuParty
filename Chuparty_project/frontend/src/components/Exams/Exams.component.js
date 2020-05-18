@@ -225,7 +225,7 @@ export default class Exams extends Component {
   render() {
     let res =
       this.state.exams !== null ? (
-        <React.Fragment dir="RTL">
+        <div dir="RTL">
           <div className="page_title"> מבחנים </div>
           {this.state.activeCourse !== "" && (
             <div className="active_model_title">
@@ -244,7 +244,7 @@ export default class Exams extends Component {
             </span>
             <Row>{this.state.sonComponents}</Row>
           </Container>
-        </React.Fragment>
+        </div>
       ) : this.state.activeCourse !== undefined ? (
         <div className="col-centered models_loading" dir="RTL">
           <div className="loading_title"> טוען מבחנים... </div>

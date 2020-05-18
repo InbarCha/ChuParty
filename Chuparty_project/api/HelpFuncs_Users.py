@@ -36,8 +36,12 @@ def createStudent(requestBody):
                     return (None, ret_tuple[1])
                 course = ret_tuple[1]
                 coursesList.append(course.name)
+        
+        school = ""
+        if 'school' in requestBody.keys():
+            school = requestBody["school"]
 
-        newStudent = Student(username=username, relevantCourses=coursesList)
+        newStudent = Student(username=username, relevantCourses=coursesList, school=school)
         newStudent.save()
 
         return (True, newStudent)
@@ -78,8 +82,13 @@ def createLecturer(requestBody):
                     return (None, ret_tuple[1])
                 courseObj = ret_tuple[1]
                 coursesList.append(courseObj.name)
+        
+        
+        school = ""
+        if 'school' in requestBody.keys():
+            school = requestBody["school"]
 
-        newLecturer = Lecturer(username=username, coursesTeaching=coursesList)
+        newLecturer = Lecturer(username=username, coursesTeaching=coursesList, school=school)
         newLecturer.save()
 
         return (True, newLecturer)

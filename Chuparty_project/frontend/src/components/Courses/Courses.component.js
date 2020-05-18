@@ -12,6 +12,10 @@ const COURSES_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/getCourses"
     : "/api/getCourses";
+const COURSES_ROUTE_FROM_SCHOOL =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/getCoursesFromSchool?school="
+    : "/api/getCoursesFromSchool?school=";
 
 const override = css`
   display: block;
@@ -24,6 +28,7 @@ export default class Courses extends Component {
     this.state = {
       courses: null,
       activeCourse: localStorage["activeCourse"],
+      activeSchool: localStorage["activeSchool"],
       sonComponents: [],
       loading: true,
       searchStr: props.filterBy || "",
@@ -33,7 +38,7 @@ export default class Courses extends Component {
   componentDidMount() {
     // courses should look like the following:
     // [{"OOP": {subjects: ["Object-Oriented Principles"]}}, ...]
-    fetch(COURSES_ROUTE)
+    fetch(COURSES_ROUTE_FROM_SCHOOL + this.state.activeSchool)
       .then((res) => res.json())
       .then((data) => {
         this.setState({ courses: data });
@@ -207,10 +212,16 @@ export default class Courses extends Component {
   render() {
     let res =
       this.state.courses !== null ? (
-        <React.Fragment dir="RTL">
+        <div dir="RTL">
           <div className="page_title"> קורסים </div>
           {this.state.activeCourse !== "" && (
             <React.Fragment>
+              <div className="active_model_title" dir="RTL">
+                <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
+                  בית ספר פעיל:{" "}
+                </span>
+                <span className="active_model">{this.state.activeSchool}</span>
+              </div>
               <div className="active_model_title" dir="RTL">
                 <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
                   קורס פעיל:{" "}
@@ -228,7 +239,7 @@ export default class Courses extends Component {
             </span>
             <Row>{this.state.sonComponents}</Row>
           </Container>
-        </React.Fragment>
+        </div>
       ) : (
         <div className="col-centered models_loading" dir="RTL">
           <div className="loading_title"> טוען קורסים... </div>

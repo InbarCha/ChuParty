@@ -14,6 +14,7 @@ urlpatterns = [
     path('editCourse', views.editCourse),
     path('getCourses', views.getCourses), 
     path('getCourseByName', views.getCourseByName),
+    path('getCoursesFromSchool', views.getCoursesFromSchool),
     path('deleteCourse', views.deleteCourse),
 
     # school

@@ -30,7 +30,7 @@ class Subject(models.Model):
 ###################################################
 class Course(models.Model):
     name = models.CharField(max_length=50)
-
+    school = models.CharField(max_length=30, default="Computer Science")
     # course subjects, for example: "Computer Networks" Course will have subjects: TCP, IP, DNS..
     subjects = models.ArrayField(
         model_container=Subject,
@@ -179,11 +179,12 @@ def checkIfPermissionValid(permission):
 ###################################################
 # Student
 # To add new student:
-#       student = Student(first_name="David", last_name="Shaulov", email="david@gmail.com", permissions = [ "Create Exam", "Delete Exam" ])
+#       student = Student(username=inbar, school=ComputerScience)
 #       student.save()
 ###################################################
 class Student(models.Model):
     username = models.CharField(max_length=30, default='inbar')
+    school = models.CharField(max_length=30, default="Computer Science")
     objects = models.DjongoManager() 
     
     # more fields unique to students
@@ -194,13 +195,15 @@ class Student(models.Model):
     def as_json(self):
         json_dict = dict()
         json_dict["username"] = self.username
-        json_dict['relevantCourses'] = self.relevantCourses
+        json_dict["school"] = self.school
+        json_dict['relevantCourses'] = [course["name"] for course in self.relevantCourses]
 
         return json_dict
 
 
 class Lecturer(models.Model):
     username = models.CharField(max_length=30, default='inbar')
+    school = models.CharField(max_length=30, default="מדעי המחשב")
     objects = models.DjongoManager()
 
     # more fields unique to lecturers
@@ -211,7 +214,8 @@ class Lecturer(models.Model):
     def as_json(self):
         json_dict = dict()
         json_dict["username"] = self.username
-        json_dict['coursesTeaching'] = self.coursesTeaching
+        json_dict["school"] = self.school
+        json_dict['coursesTeaching'] = [course["name"] for course in self.coursesTeaching]
 
         return json_dict
 

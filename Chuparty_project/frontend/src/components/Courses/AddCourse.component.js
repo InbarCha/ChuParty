@@ -115,7 +115,10 @@ export class AddCourse extends Component {
     let course = this.state.course;
     let courseName = Object.keys(course)[0];
 
-    let request_body = { name: courseName };
+    let request_body = {
+      name: courseName,
+      school: localStorage["activeSchool"],
+    };
 
     if (this.state.addedSubjects.length > 0) {
       request_body["subjects"] = this.state.addedSubjects

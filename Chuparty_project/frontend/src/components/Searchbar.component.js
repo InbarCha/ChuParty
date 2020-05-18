@@ -32,6 +32,12 @@ export default class Home extends Component {
         .then((data) => {
           if (data["isLoggedOut"] === true) {
             localStorage.removeItem("loggedUsername");
+            localStorage.removeItem("logged_first_name");
+            localStorage.removeItem("logged_last_name");
+            localStorage.removeItem("logged_email");
+            localStorage.removeItem("logged_type");
+            localStorage.removeItem("logged_courses");
+            localStorage.removeItem("logged_school");
             this.props.setLoggedIn(false);
             this.props.parentClickHandler("NON_AUTHENTICATED");
           }

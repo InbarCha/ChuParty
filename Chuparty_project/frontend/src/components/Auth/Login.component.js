@@ -67,8 +67,24 @@ export class Login extends Component {
 
           if (data["isLoggedIn"] === true) {
             localStorage["loggedUsername"] = data["username"];
+            localStorage["logged_first_name"] = data["first_name"];
+            localStorage["logged_last_name"] = data["last_name"];
+            localStorage["logged_email"] = data["email"];
+            localStorage["logged_type"] = data["type"];
+            localStorage["logged_courses"] = data["courses"];
+            localStorage["logged_school"] = data["school"];
+
             this.props.setLoggedIn(true);
-            this.props.parentClickHandler("HOME");
+
+            if (
+              localStorage["logged_school"] !== "" &&
+              localStorage["logged_school"] !== undefined
+            ) {
+              localStorage["activeSchool"] = localStorage["logged_school"];
+              this.props.parentClickHandler("COURSES");
+            } else {
+              this.props.parentClickHandler("HOME");
+            }
           } else {
             this.setState({
               loginWarning: "'Username' or 'Password' are incorrect!",

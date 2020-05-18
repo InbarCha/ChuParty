@@ -147,7 +147,21 @@ export class Register extends Component {
           this.setState({ isWaiting: false });
 
           if (data["isRegistered"] === true) {
+            // server response:
+            // {
+            //   "isRegistered": True,
+            //   "username": user.username,
+            //   "first_name": user.first_name,
+            //   "last_name" : user.last_name,
+            //   "email": user.email,
+            //   "type": accountType
+            // }
             localStorage["loggedUsername"] = data["username"];
+            localStorage["logged_first_name"] = data["first_name"];
+            localStorage["logged_last_name"] = data["last_name"];
+            localStorage["logged_email"] = data["email"];
+            localStorage["logged_type"] = data["type"];
+
             this.props.setLoggedIn(true);
             this.props.parentClickHandler("HOME");
           } else {

@@ -34,7 +34,22 @@ export default class Home extends Component {
       localStorage["loggedUsername"] !== "" &&
       localStorage["loggedUsername"] !== undefined
     ) {
-      this.setState({ isLoggedIn: true, currentContentView: <Schools /> });
+      this.setState({ isLoggedIn: true });
+      if (
+        localStorage["activeSchool"] !== "" &&
+        localStorage["activeSchool"] !== undefined
+      ) {
+        this.setState({
+          currentContentView: (
+            <Courses
+              parentClickHandler={this.onSideBarClick}
+              filterBy={this.state.searchStr}
+            />
+          ),
+        });
+      } else {
+        this.setState({ currentContentView: <Schools /> });
+      }
     }
   }
 

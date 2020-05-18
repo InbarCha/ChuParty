@@ -224,6 +224,7 @@ method: POST
 POST body example:
 {
 	"name" : "Operating Systems",
+    "school": "Computer Science",
 	"subjects": [
 		{
 			"name": "processes"
@@ -454,6 +455,40 @@ def getCourses(request):
         coursesList = changeCoursesTemplateInList(courses)
 
         return JsonResponse(list(coursesList), safe=False)
+
+    else:  # request.method isn't GET
+        return JsonResponse(
+            {
+                        "Status": "getCourses() only accepts GET requests",
+                    },
+            status=500
+            )
+
+
+##################################################
+'''
+getCoursesFromSchool()
+method: GET
+Returns all the existing courses in the DB with the specified school
+'''
+##################################################
+@csrf_exempt
+def getCoursesFromSchool(request):
+    if request.method == "GET":
+        school = request.GET.get("school")
+
+        try:
+            courses = Course.objects.filter(school=school)
+            coursesList = changeCoursesTemplateInList(courses)
+
+            return JsonResponse(list(coursesList), safe=False)
+        
+        except Exception as e:
+            return JsonResponse({
+                "Error": str(e),
+                "Status": f"Can't get courses from school {school}"
+            })
+
 
     else:  # request.method isn't GET
         return JsonResponse(
@@ -1636,6 +1671,7 @@ method: POST
 POST body example:
 {
 	"username": "inbar",
+    "school": "Computer Science" (not a must when creating a student)
 	"relevantCourses":[
         {
         	"name": "Computer Networks"
@@ -1689,6 +1725,7 @@ def setStudent(request):
  POST body example:
 {
 	"username":"inbarcha",
+    "changeSchool": "Computer Science"
     "changeRelevantCourses": 
     [
         {
@@ -1705,6 +1742,7 @@ def setStudent(request):
 def editStudent(request):
     if request.method == "POST":
         changedCoursesFlg = False
+        changedSchoolFlg = False
 
         # decode request body
         body = parseRequestBody(request)
@@ -1736,6 +1774,14 @@ def editStudent(request):
                             return JsonResponse({"Status": ret_tuple[1]}, status=500)
                     
                     Student.objects.filter(username=username).update(relevantCourses=newRelevantCourses)
+            
+            if "changeSchool" in body.keys():
+                newSchool = body["changeSchool"]
+                oldSchool = studentObj.school
+
+                if newSchool != oldSchool:
+                    changedSchoolFlg = True
+                    Student.objects.filter(username=username).update(school=newSchool)
 
             ret_json = dict()
 
@@ -1743,6 +1789,11 @@ def editStudent(request):
                 ret_json['Changed Courses'] = "True"
             else:
                 ret_json['Changed Courses'] = "False"
+
+            if changedSchoolFlg == True:
+                ret_json['Changed School'] = "True"
+            else:
+                ret_json['Changed School'] = "False"
 
             return JsonResponse(ret_json)
 
@@ -1857,6 +1908,7 @@ method: POST
 POST body example:
 {
     "username": "eliavme"
+    "school": "Computer Science" (not a must when creating a lecturer)
 	"coursesTeaching": [{"name": "Computer Networks", {"name": iOS"}]
 }
 '''
@@ -1905,6 +1957,7 @@ def setLecturer(request):
  POST body example:
  {
     "username": "eliavme"
+    "changeSchool": "Computer Science"
 	"changeCoursesTeaching": [ "Computer Networks", ...]
 }
 '''
@@ -1913,6 +1966,7 @@ def setLecturer(request):
 def editLecturer(request):
     if request.method == "POST":
         changedCoursesFlg = False
+        changedSchoolFlg = False
 
         # decode request body
         body = parseRequestBody(request)
@@ -1944,12 +1998,25 @@ def editLecturer(request):
                     
                     Lecturer.objects.filter(username=username).update(coursesTeaching=newCoursesTeaching)
 
+            if "changeSchool" in body.keys():
+                newSchool = body["changeSchool"]
+                oldSchool = lecturerObj.school
+                
+                if newSchool != oldSchool:
+                    changedSchoolFlg = True
+                    Lecturer.objects.filter(username=username).update(school=newSchool)
+
             ret_json = dict()
 
             if changedCoursesFlg == True:
                 ret_json['Changed Courses'] = "True"
             else:
                 ret_json['Changed Courses'] = "False"
+            
+            if changedSchoolFlg == True:
+                ret_json['Changed School'] = "True"
+            else:
+                ret_json['Changed School'] = "False"
 
             return JsonResponse(ret_json)
 
@@ -2334,16 +2401,39 @@ def logIn(request):
             )
         username = body["username"]
         password = body["password"]
-        print(username)
-        print(password)
         user = authenticate(request, username=username, password=password)
+
         if user is not None:
             login(request, user)
+
+            # check if user is Student, lecturer or admin
+            if Student.objects.filter(username=username).count() > 0:
+                student = Student.objects.get(username=username)
+                courses = [course["name"] for course in student.relevantCourses]
+                school = student.school
+                userType = "Student"
+            elif Lecturer.objects.filter(username=username).count() > 0:
+                lecturer = Lecturer.objects.get(username=username)
+                courses = [course["name"] for course in lecturer.coursesTeaching]
+                school = lecturer.school
+                userType = "Lecturer"
+            elif Admin.objects.filter(username=username).count() > 0:
+                userType = "Admin"
+                school = "None"
+                courses = "None"
+            else: 
+                userType = "No User Type"
+
             return JsonResponse(
                 {
                     "isLoggedIn": True,
                     "username": user.username,
-                    "email": user.email
+                    "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "type": userType,
+                    "courses": courses,
+                    "school": school
                 }
             )
         else:
@@ -2412,6 +2502,8 @@ def register(request):
         ret_json = {
                 "isRegistered": True,
                 "username": user.username,
+                "first_name": user.first_name,
+                "last_name" : user.last_name,
                 "email": user.email,
                 "type": accountType
             }
