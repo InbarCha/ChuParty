@@ -23,10 +23,22 @@ const COURSES_ROUTE_FROM_SCHOOL =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/getCoursesFromSchool?school="
     : "/api/getCoursesFromSchool?school=";
+const EDIT_STUDENT_ROUTE =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/editStudent"
+    : "/api/editStudent";
+const EDIT_LECTURER_ROUTE =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/editLecturer"
+    : "/api/editLecturer";
 
 const override = css`
   display: block;
   margin: 0 auto;
+`;
+const override1 = css`
+  display: block;
+  float: left;
 `;
 
 export default class Courses extends Component {
@@ -40,6 +52,8 @@ export default class Courses extends Component {
       activeSchool: localStorage["activeSchool"],
       sonComponents: [],
       loading: true,
+      isSavingCourses: false,
+      checkV: false,
       searchStr: props.filterBy || "",
     };
   }
@@ -93,6 +107,7 @@ export default class Courses extends Component {
       courses: [
         ...courses.filter((course) => Object.keys(course)[0] !== courseName),
       ],
+      checkV: false,
     });
 
     this.SetSonComponents();
@@ -262,11 +277,59 @@ export default class Courses extends Component {
 
   async addToMyCourses(e, course) {
     let courses = this.state.courses;
-    await this.setState({ courses: [...courses, course] });
+    await this.setState({ courses: [...courses, course], checkV: false });
     this.SetSonComponents();
   }
 
-  saveChangesInMyCourses = (e) => {};
+  // {
+  //     "username":"inbarcha",
+  //     "changeSchool": "Computer Science"
+  //     "changeRelevantCourses": //if student - if lecturer, "changeCoursesTeaching"
+  //     [
+  //         {
+  //           "name": "Computer Networks"
+  //         },
+  //         {
+  //           "name":"OOP"
+  //         }
+  //     ]
+  // }
+  saveChangesInMyCourses = (e) => {
+    if (!this.state.isSavingCourses) {
+      let courses = this.state.courses;
+      let courses_objects = courses.map((course) => {
+        return { name: Object.keys(course)[0] };
+      });
+      let courses_names = courses.map((course) => {
+        return Object.keys(course)[0];
+      });
+
+      let request_body = { username: localStorage["loggedUsername"] };
+
+      if (localStorage["logged_type"] === "Student") {
+        request_body["changeRelevantCourses"] = courses_objects;
+        this.setState({ isSavingCourses: true });
+
+        fetch(EDIT_STUDENT_ROUTE, {
+          method: "POST",
+          body: JSON.stringify(request_body),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data["Changed Courses"] === "True") {
+              this.setState({ isSavingCourses: false, checkV: true });
+              localStorage["logged_courses"] = courses_names;
+            }
+          })
+          .catch((err) => {
+            this.setState({ isSavingCourses: false });
+            console.error("error while saving changes to my courses:", err);
+          });
+      } else if (localStorage["logged_type"] === "Lecturer") {
+        request_body["changeCoursesTeaching"] = courses_objects;
+      }
+    }
+  };
 
   arraysEqual(_arr1, _arr2) {
     if (
@@ -323,13 +386,23 @@ export default class Courses extends Component {
               </span>
             )}
             {!this.arraysEqual(this.state.courses, this.state.courses_copy) && (
-              <span
-                className="material-icons save_icon"
-                style={{ cursor: "pointer" }}
-                onClick={(e) => this.saveChangesInMyCourses(e)}
-              >
-                save
-              </span>
+              <React.Fragment>
+                <span
+                  className="material-icons save_icon"
+                  style={{ cursor: "pointer" }}
+                  onClick={(e) => this.saveChangesInMyCourses(e)}
+                >
+                  save
+                </span>
+                <RotateLoader
+                  css={override1}
+                  size={20}
+                  loading={this.state.isSavingCourses}
+                />
+                {this.state.checkV && (
+                  <span className="material-icons save_icon">check</span>
+                )}
+              </React.Fragment>
             )}
             <Row className="narrow_row">
               <Col className="text-center">
