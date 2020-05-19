@@ -61,6 +61,34 @@ def updateCourseNameInSchools(name, newName):
         School.objects.filter(name=school.name).delete()
         school.save()
 
+def updateCourseNameInStudent(name, newName):
+    # get all students from DB
+    studentsList = list(Student.objects.all())
+
+    # iterate over all students
+    # for every student, look as his courses and change its name if necessary
+    for student in studentsList:
+        for i in range(len(student.relevantCourses)):
+            if student.relevantCourses[i] == name:
+                student.relevantCourses[i] = newName
+
+        Student.objects.filter(username=student.username).delete()
+        student.save()
+
+def updateCourseNameInLecturer(name, newName):
+    # get all lecturers from DB
+    lecturersList = list(Lecturer.objects.all())
+
+    # iterate over all lecturers
+    # for every lecturer, look as his courses and change its name if necessary
+    for lecturer in lecturersList:
+        for i in range(len(lecturer.coursesTeaching)):
+            if lecturer.coursesTeaching[i] == name:
+                lecturer.coursesTeaching[i] = newName
+
+        Lecturer.objects.filter(username=lecturer.username).delete()
+        lecturer.save()
+
 #####################################
 # deleteSubjectFromCoursesInSchools(courseName, subjectObj)
 # help function

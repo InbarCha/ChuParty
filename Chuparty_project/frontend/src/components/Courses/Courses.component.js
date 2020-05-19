@@ -284,22 +284,11 @@ export default class Courses extends Component {
   // {
   //     "username":"inbarcha",
   //     "changeSchool": "Computer Science"
-  //     "changeRelevantCourses": //if student - if lecturer, "changeCoursesTeaching"
-  //     [
-  //         {
-  //           "name": "Computer Networks"
-  //         },
-  //         {
-  //           "name":"OOP"
-  //         }
-  //     ]
+  //     "changeRelevantCourses": [ "Computer Networks", ...]
   // }
   saveChangesInMyCourses = (e) => {
     if (!this.state.isSavingCourses) {
       let courses = this.state.courses;
-      let courses_objects = courses.map((course) => {
-        return { name: Object.keys(course)[0] };
-      });
       let courses_names = courses.map((course) => {
         return Object.keys(course)[0];
       });
@@ -307,7 +296,7 @@ export default class Courses extends Component {
       let request_body = { username: localStorage["loggedUsername"] };
 
       if (localStorage["logged_type"] === "Student") {
-        request_body["changeRelevantCourses"] = courses_objects;
+        request_body["changeRelevantCourses"] = courses_names;
         this.setState({ isSavingCourses: true });
 
         fetch(EDIT_STUDENT_ROUTE, {
@@ -326,7 +315,24 @@ export default class Courses extends Component {
             console.error("error while saving changes to my courses:", err);
           });
       } else if (localStorage["logged_type"] === "Lecturer") {
-        request_body["changeCoursesTeaching"] = courses_objects;
+        request_body["changeCoursesTeaching"] = courses_names;
+        this.setState({ isSavingCourses: true });
+
+        fetch(EDIT_LECTURER_ROUTE, {
+          method: "POST",
+          body: JSON.stringify(request_body),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data["Changed Courses"] === "True") {
+              this.setState({ isSavingCourses: false, checkV: true });
+              localStorage["logged_courses"] = courses_names;
+            }
+          })
+          .catch((err) => {
+            this.setState({ isSavingCourses: false });
+            console.error("error while saving changes to my courses:", err);
+          });
       }
     }
   };

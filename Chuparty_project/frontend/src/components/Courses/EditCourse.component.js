@@ -130,6 +130,15 @@ export class EditCourse extends Component {
         console.log(data);
         this.setState({ loading: false });
         this.props.changedCourse(data["Edited Course"], this.props.index);
+        if (data["Changed Name"] === "True") {
+          let logged_courses = localStorage["logged_courses"].split(",");
+          logged_courses = logged_courses.map((course) =>
+            course === courseNameOrig ? courseNameNew : course
+          );
+
+          localStorage["logged_courses"] = logged_courses;
+        }
+
         this.props.changeCourseComponent(this.props.index, "COURSE");
       })
       .catch((err) => {

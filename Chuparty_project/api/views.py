@@ -401,6 +401,8 @@ def editCourse(request):
                 updateCourseNameInSchools(name, newName)
                 updateCourseNameInQuestions(name, newName)
                 updateCourseNameInExams(name, newName)
+                updateCourseNameInStudent(name, newName)
+                updateCourseNameInLecturer(name, newName)
 
             # create response
             ret_json = dict()
@@ -1726,15 +1728,7 @@ def setStudent(request):
 {
 	"username":"inbarcha",
     "changeSchool": "Computer Science"
-    "changeRelevantCourses": 
-    [
-        {
-        	"name": "Computer Networks"
-        },
-        {
-        	"name":"OOP"
-        }
-    ]
+    "changeRelevantCourses": [ "Computer Networks", ...]
 }
 '''
 ######################################################
@@ -1768,7 +1762,7 @@ def editStudent(request):
                     # iterate over courses given in the request body
                     # for each course, if it doesn't exist in the db, create it
                     for doc in newRelevantCourses:
-                        ret_tuple = createCourseOrAddSubject(doc)
+                        ret_tuple = createCourseOrAddSubject({"name":doc})
                         isCourseReturned = ret_tuple[0]
                         if isCourseReturned is None:
                             return JsonResponse({"Status": ret_tuple[1]}, status=500)
@@ -1991,7 +1985,7 @@ def editLecturer(request):
                     # iterate over courses given in the request body
                     # for each course, if it doesn't exist in the db, create it
                     for doc in newCoursesTeaching:
-                        ret_tuple = createCourseOrAddSubject(doc)
+                        ret_tuple = createCourseOrAddSubject({"name": doc})
                         isCourseReturned = ret_tuple[0]
                         if isCourseReturned is None:
                             return JsonResponse({"Status": ret_tuple[1]}, status=500)
@@ -2409,12 +2403,12 @@ def logIn(request):
             # check if user is Student, lecturer or admin
             if Student.objects.filter(username=username).count() > 0:
                 student = Student.objects.get(username=username)
-                courses = [course["name"] for course in student.relevantCourses]
+                courses = [course for course in student.relevantCourses]
                 school = student.school
                 userType = "Student"
             elif Lecturer.objects.filter(username=username).count() > 0:
                 lecturer = Lecturer.objects.get(username=username)
-                courses = [course["name"] for course in lecturer.coursesTeaching]
+                courses = [course for course in lecturer.coursesTeaching]
                 school = lecturer.school
                 userType = "Lecturer"
             elif Admin.objects.filter(username=username).count() > 0:
