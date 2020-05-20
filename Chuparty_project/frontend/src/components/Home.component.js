@@ -12,6 +12,7 @@ import Login from "./Auth/Login.component";
 import Register from "./Auth/Register.component";
 import Profile from "./Auth/Profile.component";
 import NonAuthenticated from "./Auth/NonAuthenticatedcomponent";
+import EditProfile from "./Auth/EditProfile.component";
 
 export default class Home extends Component {
   _isMounted = false;
@@ -116,7 +117,18 @@ export default class Home extends Component {
         });
         break;
       case "PROFILE":
-        this.setState({ currentContentView: <Profile /> });
+        this.setState({
+          currentContentView: (
+            <Profile parentClickHandler={this.onSideBarClick} />
+          ),
+        });
+        break;
+      case "EDIT_PROFILE":
+        this.setState({
+          currentContentView: (
+            <EditProfile parentClickHandler={this.onSideBarClick} />
+          ),
+        });
         break;
       default:
         console.log("no clickMsg handler for:", clickMsg);

@@ -343,7 +343,7 @@ export class Register extends Component {
                       htmlFor="defaultFormLoginEmailEx"
                       className="grey-text"
                     >
-                      Email
+                      Your Email
                     </label>
                     <input
                       type="text"

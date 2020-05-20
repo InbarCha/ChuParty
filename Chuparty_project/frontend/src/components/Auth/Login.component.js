@@ -53,7 +53,10 @@ export class Login extends Component {
     }
 
     if (username !== "" && password !== "") {
-      let request_body = { username: username, password: password };
+      let request_body = {
+        username: username,
+        password: password,
+      };
       this.setState({ isWaiting: true });
 
       fetch(LOGIN_ROUTE, {

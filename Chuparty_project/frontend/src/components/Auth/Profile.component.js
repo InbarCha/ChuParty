@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { MDBContainer, MDBRow, MDBCol, MDBBadge } from "mdbreact";
+import { MDBContainer, MDBRow, MDBCol, MDBBadge, MDBBtn } from "mdbreact";
 import { Row, Col } from "react-bootstrap";
 
 export class Profile extends Component {
@@ -14,6 +14,10 @@ export class Profile extends Component {
       type: localStorage["logged_type"],
     };
   }
+
+  edit = () => {
+    this.props.parentClickHandler("EDIT_PROFILE");
+  };
 
   render() {
     return (
@@ -74,6 +78,9 @@ export class Profile extends Component {
                       {this.state.email}
                     </label>
                     <br />
+                    <MDBBtn color="primary" type="submit" onClick={this.edit}>
+                      Edit
+                    </MDBBtn>
                     <img className="login_img" alt="not found" />
                   </form>
                 </MDBCol>
