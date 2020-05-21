@@ -288,6 +288,7 @@ export class Register extends Component {
                       type="text"
                       className="form-control"
                       onChange={this.usernameChanged}
+                      disabled={this.state.isWaiting}
                     />
                     <label style={{ color: "red" }}>
                       {this.state.usernameWarning}
@@ -304,6 +305,7 @@ export class Register extends Component {
                       id="defaultFormLoginPasswordEx"
                       className="form-control"
                       onChange={this.passwordChanged}
+                      disabled={this.state.isWaiting}
                     />
                     <label style={{ color: "red" }}>
                       {this.state.passwordWarning}
@@ -319,6 +321,7 @@ export class Register extends Component {
                       type="text"
                       className="form-control"
                       onChange={this.firstNameChanged}
+                      disabled={this.state.isWaiting}
                     />
                     <label style={{ color: "red" }}>
                       {this.state.firstNameWarning}
@@ -334,6 +337,7 @@ export class Register extends Component {
                       type="text"
                       className="form-control"
                       onChange={this.lastNameChanged}
+                      disabled={this.state.isWaiting}
                     />
                     <label style={{ color: "red" }}>
                       {this.state.lastNameWarning}
@@ -349,6 +353,7 @@ export class Register extends Component {
                       type="text"
                       className="form-control"
                       onChange={this.emailChanged}
+                      disabled={this.state.isWaiting}
                     />
                     <label style={{ color: "red" }}>
                       {this.state.emailWarning}

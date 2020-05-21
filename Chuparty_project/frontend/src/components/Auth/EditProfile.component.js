@@ -1,18 +1,14 @@
 import React, { Component } from "react";
 import { Row, Col } from "react-bootstrap";
-import {
-  MDBContainer,
-  MDBRow,
-  MDBCol,
-  MDBBtn,
-  MDBDropdown,
-  MDBDropdownToggle,
-  MDBDropdownMenu,
-  MDBDropdownItem,
-} from "mdbreact";
+import { MDBContainer, MDBRow, MDBCol, MDBBtn } from "mdbreact";
 import Checkbox from "@material-ui/core/Checkbox";
 import { css } from "@emotion/core";
 import RotateLoader from "react-spinners/ClipLoader";
+
+const EDIT_USER_ROUTE =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/editUser"
+    : "/api/editUser";
 
 const override = css`
   display: block;
@@ -123,6 +119,15 @@ export class EditProfile extends Component {
       email !== ""
     ) {
       this.setState({ registerWarning: "" });
+
+      // {
+      //   "username": "david",
+      //   "change_username": "davidsh",
+      //   "change_password": "12345678",
+      //   "change_first_name": "david",
+      //   "change_last_name": "shaulov",
+      //   "change_email": "david@gmail.com".
+      // }
       let request_body = {
         username: original_username,
         change_username: username,
@@ -136,6 +141,31 @@ export class EditProfile extends Component {
       console.log(request_body);
 
       //fetch
+      fetch(EDIT_USER_ROUTE, {
+        method: "POST",
+        body: JSON.stringify(request_body),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+          this.setState({ isWaiting: false });
+
+          if (data["Changed Username"] === "True") {
+            localStorage["loggedUsername"] = username;
+          }
+          if (data["Changed First Name"] === "True") {
+            localStorage["logged_first_name"] = first_name;
+          }
+          if (data["Changed Last Name"] === "True") {
+            localStorage["logged_last_name"] = last_name;
+          }
+          if (data["Changed First Name"] === "True") {
+            localStorage["logged_email"] = email;
+          }
+        })
+        .catch((err) => {
+          console.error("error while registering:", err);
+        });
     }
   };
 
@@ -164,6 +194,7 @@ export class EditProfile extends Component {
                     type="text"
                     className="form-control"
                     defaultValue={this.state.username}
+                    disabled={this.state.isWaiting}
                     onChange={this.usernameChanged}
                   />
                   <label style={{ color: "red" }}>
@@ -180,6 +211,7 @@ export class EditProfile extends Component {
                     type="password"
                     id="defaultFormLoginPasswordEx"
                     className="form-control"
+                    disabled={this.state.isWaiting}
                     onChange={this.passwordChanged}
                   />
                   <label style={{ color: "red" }}>
@@ -195,6 +227,7 @@ export class EditProfile extends Component {
                   <input
                     type="text"
                     className="form-control"
+                    disabled={this.state.isWaiting}
                     defaultValue={this.state.first_name}
                     onChange={this.firstNameChanged}
                   />
@@ -211,6 +244,7 @@ export class EditProfile extends Component {
                   <input
                     type="text"
                     className="form-control"
+                    disabled={this.state.isWaiting}
                     defaultValue={this.state.last_name}
                     onChange={this.lastNameChanged}
                   />
@@ -227,6 +261,7 @@ export class EditProfile extends Component {
                   <input
                     type="text"
                     className="form-control"
+                    disabled={this.state.isWaiting}
                     defaultValue={this.state.email}
                     onChange={this.emailChanged}
                   />

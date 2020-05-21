@@ -2577,3 +2577,125 @@ def logOut(request):
                 },
                 status=500
             )
+
+######################################################
+'''
+editUser()
+POST Body request:
+{
+	"username": "david",
+    "change_username": "davidsh",
+	"change_password": "12345678",
+	"change_first_name": "david",
+	"change_last_name": "shaulov",
+	"change_email": "david@gmail.com".
+}
+'''
+#####################################################
+@csrf_exempt
+def editUser(request):
+    if request.method == "POST":
+        changedUserNameFlg = False
+        changedPasswordFlg = False
+        changedFirstNameFlg = False
+        changedLastNameFlg = False
+        changedEmailFlg = False
+
+        # decode request body
+        body = parseRequestBody(request)
+
+        if 'username' not in body.keys():
+            return JsonResponse({"Status": "Can't Edit User: 'username' field in not in request body"}, status=500)
+        username = body['username']
+
+        try:
+            userObj = User.objects.get(username=username)
+
+            if 'change_first_name' in body.keys():
+                newFirstName = body['change_first_name']
+                if newFirstName != userObj.last_name:
+                    userObj.first_name = newFirstName
+                    changedFirstNameFlg = True
+            
+            if 'change_last_name' in body.keys():
+                newLastName = body['change_last_name']
+                
+                if newLastName != userObj.last_name:
+                    userObj.last_name = newLastName
+                    changedLastNameFlg = True
+            
+            if 'change_email' in body.keys():
+                newEmail = body['change_email']
+                if newEmail != userObj.email:
+                    userObj.email = newEmail
+                    changedEmailFlg = True
+
+            if 'change_password' in body.keys():
+                newPassword = body['change_password']
+                userObj.set_password(newPassword)
+                changedPasswordFlg = True
+            
+            if 'change_username' in body.keys():
+                newUsername = body['change_username']
+                if newUsername != userObj.username:
+                    userObj.username = newUsername
+                    changedUserNameFlg = True
+
+                # change the username in the matching Student / Lecturer / Admin object
+                if Student.objects.filter(username=username).count() > 0:
+                    Student.objects.filter(username=username).update(username=newUsername)
+                elif Lecturer.objects.filter(username=username).count() > 0:
+                    Lecturer.objects.filter(username=username).update(username=newUsername)
+                elif Admin.objects.filter(username=username).count() > 0:
+                    Admin.objects.filter(username=username).update(username=newUsername)
+            
+            if changedUserNameFlg == True or changedPasswordFlg == True or changedFirstNameFlg == True or changedLastNameFlg == True or changedEmailFlg == True:
+                User.objects.filter(username=username).delete()
+                userObj.save()
+
+            # create response
+            ret_json = dict()
+
+            if changedFirstNameFlg == True:
+                ret_json['Changed First Name'] = "True"
+            else:
+                ret_json['Changed First Name'] = "False"
+            
+            if changedLastNameFlg == True:
+                ret_json['Changed Last Name'] = "True"
+            else:
+                ret_json['Changed Last Name'] = "False"
+
+            if changedEmailFlg == True:
+                ret_json['Changed Email'] = "True"
+            else:
+                ret_json['Changed Email'] = "False"
+
+            if changedUserNameFlg == True:
+                ret_json['Changed Username'] = "True"
+            else:
+                ret_json['Changed Username'] = "False"
+
+            if changedPasswordFlg == True:
+                ret_json['Changed Password'] = "True"
+            else:
+                ret_json['Changed Password'] = "False"
+
+            return JsonResponse(ret_json)
+
+        except Exception as e:
+            return JsonResponse(
+                {
+                        "Exception": str(e),
+                        "Status": "Can't Edit User"
+                    },
+                status=500
+            )
+
+    else:
+        return JsonResponse(
+            {
+                    "Status": "editUser() only accepts POST requests",
+                },
+            status=500
+        )

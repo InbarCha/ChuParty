@@ -134,6 +134,7 @@ export class Login extends Component {
                       id="defaultFormLoginEmailEx"
                       className="form-control"
                       onChange={this.usernameChanged}
+                      disabled={this.state.isWaiting}
                     />
                     <label style={{ color: "red" }}>
                       {this.state.usernameWarning}
@@ -150,6 +151,7 @@ export class Login extends Component {
                       id="defaultFormLoginPasswordEx"
                       className="form-control"
                       onChange={this.passwordChanged}
+                      disabled={this.state.isWaiting}
                     />
                     <label style={{ color: "red" }}>
                       {this.state.passwordWarning}
