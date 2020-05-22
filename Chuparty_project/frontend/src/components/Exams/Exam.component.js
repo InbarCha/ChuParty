@@ -30,12 +30,15 @@ export class Exam extends Component {
       <div className={"model col-centered"} onClick={this.chooseExam} dir="RTL">
         <div className="model_container">
           <div className="model_name">
-            <span
-              className="material-icons settings_icon"
-              onClick={(e) => this.editExam(e)}
-            >
-              settings
-            </span>
+            {(localStorage["logged_type"] === "Admin" ||
+              localStorage["logged_type"] === "Lecturer") && (
+              <span
+                className="material-icons settings_icon"
+                onClick={(e) => this.editExam(e)}
+              >
+                settings
+              </span>
+            )}
             <img className="exam_img" alt="" />
             <div className="model_name_text">
               {examName} <br /> {examDate}

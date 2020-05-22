@@ -40,6 +40,7 @@ urlpatterns = [
     path('getExamsFromCourse', views.getExamsFromCourse),
     path('getExamByID', views.getExamByID),
     path('deleteExam', views.deleteExam),
+    path('generateExam', views.generateExam),
 
     # student
     path('setStudent', views.setStudent),
@@ -68,7 +69,5 @@ urlpatterns = [
     path('logOut', views.logOut),
     path('register', views.register),
     path('editUser', views.editUser),
-
-    path('get_csrf', views.get_csrf)
 
 ]

@@ -342,7 +342,6 @@ hr {
 .course_img {
   width: 50%;
   height: 50%;
-  margin-left: 8%;
   content: url("./assets/course.png");
 }
 .user_school_label {

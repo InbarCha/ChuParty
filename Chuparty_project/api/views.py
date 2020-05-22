@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
 import json
 from django.http import JsonResponse
+from random import shuffle
 from datetime import datetime
 from urllib.parse import unquote
 from api.HelpFuncs_Subjects import *
@@ -1342,6 +1343,90 @@ def setExam(request):
 
 ##################################################
 '''
+generateExam()
+method: POST
+
+Picks the number of questions (as specified in the request body) from this course at random,
+and generates an exam out of it.
+
+POST body:
+{
+    "numberOfQuestions": 10
+    "course": "Computer Networks"
+}
+'''
+##################################################
+@csrf_exempt
+def generateExam(request):
+    if request.method == "POST":
+        # decode request body
+        body = parseRequestBody(request)
+
+        # name
+        if 'numberOfQuestions' not in body.keys() or 'course' not in body.keys():
+            return JsonResponse({"Status": "Can't Generate Exam - 'numberOfQuestions' / 'course' not specified"}, status=500)
+        numberOfQuestions = body['numberOfQuestions']
+        course = body['course']
+        if Course.objects.filter(name=course).count() > 0:
+            courseObj = Course.objects.get(name=course)
+        else:
+            return JsonResponse({
+                "Status": f"Course {course} Doesn't Exist"
+            })
+
+        # pick the number of questions as specified, from the specified course
+        questionsList = list(Question.objects.filter(course=courseObj))
+        shuffle(questionsList)
+        questionsListSlice = questionsList[:numberOfQuestions]
+
+        # exam name and date
+        now = datetime.now()
+        hourFormatted = "{:02d}".format(now.hour)
+        minutedFormatted = "{:02d}".format(now.minute)
+        secondFormatted = "{:02d}".format(now.second)
+        name = "מבחן מג'ונרט בקורס " + course  + " בשעה " + hourFormatted + ":" + minutedFormatted + ":" + secondFormatted
+        dateObj = datetime.strptime(str(now.year) + "-" + str(now.month) + "-" + str(now.day), "%Y-%m-%d").date()
+        examID = name + "_" + str(dateObj)
+
+        # exam writers
+        writers = ["ג'ונרט אוטומטית"]
+
+        # exam subjects
+        subjectsObjList = []
+        for questionObj in questionsListSlice:
+            questionSubject = questionObj.subject
+            if questionSubject.name not in [subject.name for subject in subjectsObjList]:
+                subjectsObjList.append(questionSubject)
+
+        newExam = Exam(
+                examID=examID,
+                name=name,
+                date=dateObj,
+                writers=writers,
+                course=courseObj,
+                questions=questionsListSlice,
+                subjects=subjectsObjList
+            )
+        newExam.save()
+
+        return JsonResponse(
+            {
+                "Generated Exam": changeExamTemplate(newExam),
+                "Status": "Generated an Exam"
+            }
+        )
+
+    else:  # request.method isn't POST
+        return JsonResponse(
+            {
+                        "Status": "generateExam() only accepts POST requests",
+                    },
+            status=500
+            )
+
+
+##################################################
+'''
 editExam()
 method: POST
 {
@@ -2366,10 +2451,6 @@ def isLoggedIn(request):
             status=500
         )
 
-
-def get_csrf(request):
-    csrf_token = get_token(request)
-    return JsonResponse({'csrf_token':csrf_token})
 
 ######################################################
 '''

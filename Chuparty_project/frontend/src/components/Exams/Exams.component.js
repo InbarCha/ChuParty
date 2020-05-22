@@ -1,10 +1,18 @@
 import React, { Component } from "react";
-import { Container, Row } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import { css } from "@emotion/core";
 import RotateLoader from "react-spinners/ClipLoader";
+import scrollToComponent from "react-scroll-to-component";
 import Exam from "./Exam.component";
 import AddExam from "./AddExam.component";
 import EditExam from "./EditExam.component";
+import {
+  MDBBtn,
+  MDBDropdown,
+  MDBDropdownToggle,
+  MDBDropdownMenu,
+  MDBDropdownItem,
+} from "mdbreact";
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
   console.log("DEV enabled");
@@ -12,6 +20,10 @@ const EXAMS_FROM_COURSE_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/getExamsFromCourse?courseName="
     : "/api/getExamsFromCourse?courseName=";
+const GENERATE_EXAM_ROUTE =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/generateExam"
+    : "/api/generateExam";
 
 const override = css`
   display: block;
@@ -25,6 +37,8 @@ export default class Exams extends Component {
       exams: null,
       activeCourse: localStorage["activeCourse"],
       sonComponents: [],
+      generateExamNumOfQuestions: 10,
+      loading: false,
     };
   }
 
@@ -222,6 +236,40 @@ export default class Exams extends Component {
     this.changeExamComponent(-1, "ADD_EXAM");
   };
 
+  generateExam = () => {
+    let request_body = {
+      course: this.state.activeCourse,
+      numberOfQuestions: this.state.generateExamNumOfQuestions,
+    };
+    this.setState({ loading: true });
+    fetch(GENERATE_EXAM_ROUTE, {
+      method: "post",
+      body: JSON.stringify(request_body),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        this.setState({ loading: false });
+
+        if (data["Status"] === "Generated an Exam") {
+          let generatedExam = data["Generated Exam"];
+          let exams = this.state.exams;
+          this.setState({ exams: [...exams, generatedExam] });
+          this.SetSonComponents();
+        } else {
+          window.alert("Can't generate an exam");
+        }
+      })
+      .catch((err) => {
+        console.error("error while editing exam:", err);
+        this.setState({ loading: false });
+      });
+  };
+
+  changeNumOfQuestions = (e, numberOfQuestions) => {
+    this.setState({ generateExamNumOfQuestions: numberOfQuestions });
+  };
+
   render() {
     let res =
       this.state.exams !== null ? (
@@ -236,6 +284,35 @@ export default class Exams extends Component {
             </div>
           )}
           <Container fluid className="model_items_container">
+            <Row className="narrow_row">
+              <Col className="text-center">
+                <MDBDropdown>
+                  <MDBDropdownToggle caret color="info">
+                    {"בחר מספר שאלות במבחן "}
+                  </MDBDropdownToggle>
+                  <MDBDropdownMenu basic>
+                    <MDBDropdownItem
+                      onClick={(e) => this.changeNumOfQuestions(e, 10)}
+                    >
+                      10
+                    </MDBDropdownItem>
+                    <MDBDropdownItem
+                      onClick={(e) => this.changeNumOfQuestions(e, 12)}
+                    >
+                      12
+                    </MDBDropdownItem>
+                  </MDBDropdownMenu>
+                </MDBDropdown>
+                <MDBBtn color="info" type="submit" onClick={this.generateExam}>
+                  ג'נרט מבחן
+                </MDBBtn>
+                <RotateLoader
+                  css={override}
+                  size={30}
+                  loading={this.state.loading}
+                />
+              </Col>
+            </Row>
             <span
               className="material-icons add_course_icon"
               onClick={this.addExam}
