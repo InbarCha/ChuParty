@@ -44,7 +44,7 @@ export class Course extends Component {
               className="material-icons delete_icon"
               onClick={this.deleteFromMyCourses}
             >
-              delete
+              remove_circle_outline
             </span>
             <img className="course_img" alt="" />
             <div className="course_name_text">{courseName}</div>

@@ -162,6 +162,8 @@ export class EditProfile extends Component {
           if (data["Changed First Name"] === "True") {
             localStorage["logged_email"] = email;
           }
+
+          this.props.parentClickHandler("PROFILE");
         })
         .catch((err) => {
           console.error("error while registering:", err);
