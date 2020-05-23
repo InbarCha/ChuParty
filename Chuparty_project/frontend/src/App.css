@@ -306,6 +306,9 @@ hr {
 .users_rotate_loader {
   margin-top: 10px;
 }
+.admin_table {
+  box-shadow: 0 0 3px 3px darkgray;
+}
 .question_answers {
   padding: 15px 15px 15px 15px;
   margin-bottom: 15px;

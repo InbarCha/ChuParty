@@ -146,8 +146,8 @@ export default class Admin extends Component {
             </Row>
             <Row>
               <Col className="text-center">
-                <MDBTable>
-                  <MDBTableHead color="primary-color" textWhite>
+                <MDBTable className="admin_table">
+                  <MDBTableHead color="info-color" textWhite>
                     <tr>
                       <th>UserID</th>
                       <th>First Name</th>
