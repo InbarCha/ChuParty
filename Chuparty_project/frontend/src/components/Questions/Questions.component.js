@@ -453,6 +453,10 @@ export class Questions extends Component {
           this.setState({ loading: false });
           this.setEdit(false);
         });
+    } else {
+      if (this.state.questions_added.length > 0) {
+        this.saveAllAddedQuestionsToDb();
+      }
     }
   };
 

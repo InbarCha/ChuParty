@@ -159,22 +159,14 @@ class Exam(models.Model):
         return json_dict
 
 
-##################################################
-class PermissionEnum(Enum):
-    createExam = "Create Exam"
-    deleteExam = "Delete Exam"
+class ExamGradesObj(models.Model):
+    examID = models.CharField(max_length=50)
+    examGrade = models.IntegerField()
 
-    @classmethod
-    def choices(cls):
-        return [var.value for var in cls]
+    objects = models.DjongoManager() 
 
-
-def checkIfPermissionValid(permission):
-    if permission not in PermissionEnum.choices():
-        raise ValidationError(f"Permission parameter can only be one of \
-                                     the following enum values: {PermissionEnum.choices()}")
-
-
+    class Meta:
+        managed = False
 
 ###################################################
 # Student
@@ -184,12 +176,15 @@ def checkIfPermissionValid(permission):
 ###################################################
 class Student(models.Model):
     username = models.CharField(max_length=30, default='inbar')
-    school = models.CharField(max_length=30, default="Computer Science")
     objects = models.DjongoManager() 
     
     # more fields unique to students
     relevantCourses = models.ListField(
         models.CharField(max_length=50)
+    )
+    school = models.CharField(max_length=30, default="Computer Science")
+    examsGradesList = models.ArrayField(
+        model_container=ExamGradesObj
     )
 
     def as_json(self):

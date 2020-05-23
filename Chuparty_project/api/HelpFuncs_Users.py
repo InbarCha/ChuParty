@@ -36,12 +36,24 @@ def createStudent(requestBody):
                     return (None, ret_tuple[1])
                 course = ret_tuple[1]
                 coursesList.append(course.name)
+
+        examsGradesListFinal = []
+        if 'examsGradesList' in requestBody.keys():
+            examsGradesList = requestBody["examsGradesList"]
+
+            for examsGradeJson in examsGradesList:
+                examID = examsGradeJson["examID"]
+                examGrade = examsGradeJson["examGrade"]
+
+                examGradeObj = ExamGradesObj(examID=examID, examGrade=int(examGrade))
+                print(ExamGradesObj)
+                examsGradesListFinal.append(examGradeObj)
         
         school = ""
         if 'school' in requestBody.keys():
             school = requestBody["school"]
 
-        newStudent = Student(username=username, relevantCourses=coursesList, school=school)
+        newStudent = Student(username=username, relevantCourses=coursesList, school=school, examsGradesList=examsGradesListFinal)
         newStudent.save()
 
         return (True, newStudent)

@@ -250,6 +250,8 @@ def setCourse(request):
             return JsonResponse({"Status": ret_tuple[1]}, status=500)
 
         elif isNewCourseCreated == False:
+            user = request.user
+
             return JsonResponse(
                 {
                     "Status": "Course Already Exists",
@@ -1758,7 +1760,7 @@ method: POST
 POST body example:
 {
 	"username": "inbar",
-    "school": "Computer Science" (not a must when creating a student)
+    "school": "Computer Science",
 	"relevantCourses":[
         {
         	"name": "Computer Networks"
@@ -1766,7 +1768,13 @@ POST body example:
         {
         	"name":"OOP"
         }
-	]
+	],
+    "examsGradesList": [
+        {
+            "examID": "מבחן ברשתות תקשורת מועד א' 2020-20-01",
+            "examGrade": 100
+        }
+    ]
 }
 '''
 #####################################################
@@ -1813,7 +1821,18 @@ def setStudent(request):
 {
 	"username":"inbarcha",
     "changeSchool": "Computer Science"
-    "changeRelevantCourses": [ "Computer Networks", ...]
+    "changeRelevantCourses": [ "Computer Networks", ...],
+    "changeExamsGradesList": 
+    [ 
+         {
+            "examID": "מבחן ברשתות תקשורת מועד א' 2020-20-01",
+            "examGrade": 100
+        },
+         {
+            "examID": "מבחן בתכנות מונחה עצמים מועד א' 2020-20-01",
+            "examGrade": 90
+        }
+    ]
 }
 '''
 ######################################################
@@ -1822,6 +1841,7 @@ def editStudent(request):
     if request.method == "POST":
         changedCoursesFlg = False
         changedSchoolFlg = False
+        changedExamsGradesListFlg = False
 
         # decode request body
         body = parseRequestBody(request)
@@ -1854,6 +1874,26 @@ def editStudent(request):
                     
                     Student.objects.filter(username=username).update(relevantCourses=newRelevantCourses)
             
+            if 'changeExamsGradesList' in body.keys():
+                newExamsGradesList = body["changeExamsGradesList"]
+                oldExamsGradesList = studentObj.examsGradesList
+
+                newExamsGradesListFiltered = [examGrade for examGrade in newExamsGradesList if examGrade not in oldExamsGradesList]
+                oldExamsGradesListFiltered = [examGrade for examGrade in oldExamsGradesList if examGrade not in newExamsGradesList]
+
+                if newExamsGradesListFiltered or oldExamsGradesListFiltered:
+                    changedExamsGradesListFlg = True
+
+                    examsGradesListFinal = []
+                    for examsGradeJson in newExamsGradesList:
+                        examID = examsGradeJson["examID"]
+                        examGrade = examsGradeJson["examGrade"]
+
+                        examGradeObj = ExamGradesObj(examID=examID, examGrade=int(examGrade))
+                        examsGradesListFinal.append(examGradeObj)
+
+                    Student.objects.filter(username=username).update(examsGradesList=examsGradesListFinal)
+            
             if "changeSchool" in body.keys():
                 newSchool = body["changeSchool"]
                 oldSchool = studentObj.school
@@ -1873,6 +1913,11 @@ def editStudent(request):
                 ret_json['Changed School'] = "True"
             else:
                 ret_json['Changed School'] = "False"
+            
+            if changedExamsGradesListFlg == True:
+                ret_json['Changed Exams Grades List'] = "True"
+            else:
+                ret_json['Changed Exams Grades List'] = "False"
 
             return JsonResponse(ret_json)
 
