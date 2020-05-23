@@ -668,6 +668,7 @@ def editSchool(request):
 
         # decode request body
         body = parseRequestBody(request)
+        print(body)
 
         if 'name' not in body.keys():
             return JsonResponse({"Status": "Can't Edit School: 'name' field in not in request body"}, status=500)
@@ -690,8 +691,8 @@ def editSchool(request):
                         return JsonResponse({"Status": ret_tuple[1]}, status=500)
 
                     courseObj = ret_tuple[1]
-                    if courseObj.name not in [course.name for course in newCoursesList]:
-                        newCoursesList.append(courseObj)
+                    if courseObj.name not in newCoursesList:
+                        newCoursesList.append(courseObj.name)
                         addedToCoursesFlg = True
 
             # delete course from school courses
@@ -708,23 +709,27 @@ def editSchool(request):
 
                     courseObj = ret_tuple[1]
 
-                    if courseObj.name in [course.name for course in newCoursesList]:
+                    if courseObj.name in newCoursesList:
                         newCoursesList = list(
-                            filter(lambda course: course.name != courseObj.name, newCoursesList))
+                            filter(lambda course: course != courseObj.name, newCoursesList))
                         deletedFromCoursesFlg = True
 
             # update school's courses list
             if deletedFromCoursesFlg == True or addedToCoursesFlg == True:
                 School.objects.filter(name=name).update(courses=newCoursesList)
+                schoolObj.courses = newCoursesList
 
             # change school name
             if 'ChangeName' in body.keys():
                 newName = body['ChangeName']
                 School.objects.filter(name=name).update(name=newName)
+                schoolObj.name = newName
                 changedNameFlg = True
 
             # create response
             ret_json = dict()
+            print(schoolObj)
+            ret_json["Edited School"] = schoolObj.as_json()
 
             if changedNameFlg == True:
                 ret_json['Changed Name'] = "True"
@@ -2822,6 +2827,104 @@ def editUser(request):
         return JsonResponse(
             {
                     "Status": "editUser() only accepts POST requests",
+                },
+            status=500
+        )
+
+######################################################
+'''
+getAllUsers()
+GET
+'''
+#####################################################
+def getAllUsers(request):
+    if request.method == "GET":
+        users = User.objects.all()
+
+        completeUsersList = []
+        for user in users:
+            username = user.username
+            first_name = user.first_name
+            last_name = user.last_name
+            email = user.email
+
+            # check if user is Student, lecturer or admin
+            if Student.objects.filter(username=username).count() > 0:
+                student = Student.objects.get(username=username)
+                permissions = "Student"
+                school = student.school
+            elif Lecturer.objects.filter(username=username).count() > 0:
+                lecturer = Lecturer.objects.get(username=username)
+                permissions = "Lecturer"
+                school = lecturer.school
+            elif Admin.objects.filter(username=username).count() > 0:
+                permissions = "Admin"
+                school = "None"
+            
+            userFinal = dict(
+                username = username, 
+                first_name = first_name,
+                last_name = last_name,
+                email = email,
+                school = school,
+                permissions = permissions
+            )
+
+            completeUsersList.append(userFinal)
+
+        return JsonResponse(completeUsersList, safe=False)
+
+    else:  # request.method isn't GET
+        return JsonResponse(
+            {
+                        "Status": "getAllUsers() only accepts GET requests",
+                    },
+            status=500
+            )
+
+######################################################
+'''
+deleteUser()
+GET
+'''
+#####################################################
+def deleteUser(request):
+    if request.method == "GET":
+        username = request.GET.get("username")
+
+        try:
+            User.objects.get(username=username)
+            User.objects.filter(username=username).delete()
+
+            ret_json = dict()
+            ret_json["Status"] = f"Deleted User {username}"
+
+            # check if user is Student, lecturer or admin
+            if Student.objects.filter(username=username).count() > 0:
+                Student.objects.filter(username=username).delete()
+                ret_json["UserType"] = "Student"
+            elif Lecturer.objects.filter(username=username).count() > 0:
+                Lecturer.objects.filter(username=username).delete()
+                ret_json["UserType"] = "Lecturer"
+            elif Admin.objects.filter(username=username).count() > 0:
+                Admin.objects.filter(username=username).delete()
+                ret_json["UserType"] = "Admin"
+            
+            return JsonResponse({"Status": f"Deleted User '{username}'"})
+
+        except Exception as e:
+            return JsonResponse(
+                {
+                        "Exception": str(e),
+                        "Status": f"Can't delete user {username}",
+                    },
+                status=500
+            )
+
+    else:
+        return JsonResponse(
+            {
+                    "Status": "deleteStudent() only accepts GET requests",
                 },
             status=500
         )

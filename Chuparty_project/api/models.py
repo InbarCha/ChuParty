@@ -65,7 +65,7 @@ class School(models.Model):
         )
 
         for course in list(self.courses):
-            json_dict['courses'].append(course.as_json())
+            json_dict['courses'].append(course)
         return json_dict
 
 

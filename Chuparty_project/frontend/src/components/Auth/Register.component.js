@@ -141,7 +141,7 @@ export class Register extends Component {
     if (email === "") {
       this.setState({ emailWarning: "'email' field is empty!" });
     }
-    if (school === "") {
+    if (!this.state.checkedAdmin && school === "") {
       this.setState({ schoolWarning: "'school' wasn't chosen!" });
     }
 
@@ -163,7 +163,7 @@ export class Register extends Component {
       last_name !== "" &&
       email !== "" &&
       type !== "" &&
-      school !== ""
+      ((!this.state.checkedAdmin && school !== "") || this.state.checkedAdmin)
     ) {
       this.setState({ registerWarning: "" });
       let request_body = {
@@ -359,32 +359,6 @@ export class Register extends Component {
                       {this.state.emailWarning}
                     </label>
                     <br />
-                    {this.state.userSchool && (
-                      <label className="user_school_label">
-                        {this.state.userSchool}
-                      </label>
-                    )}
-                    <MDBDropdown>
-                      <MDBDropdownToggle caret color="primary">
-                        Your School
-                      </MDBDropdownToggle>
-                      <MDBDropdownMenu basic>
-                        {this.state.schools.map((school, index) => {
-                          return (
-                            <MDBDropdownItem
-                              key={index}
-                              onClick={(e) => this.changeUserSchool(e, index)}
-                            >
-                              {school["name"]}
-                            </MDBDropdownItem>
-                          );
-                        })}
-                      </MDBDropdownMenu>
-                    </MDBDropdown>
-                    <label style={{ color: "red" }}>
-                      {this.state.schoolWarning}
-                    </label>
-                    <br />
                     <label className="grey-text" style={{ fontWeight: "bold" }}>
                       Please Choose Type:
                     </label>
@@ -409,6 +383,34 @@ export class Register extends Component {
                       inputProps={{ "aria-label": "primary checkbox" }}
                     />
                     <label className="grey-text">Admin</label>
+                    <br /> <br />
+                    {this.state.userSchool && (
+                      <label className="user_school_label">
+                        {this.state.userSchool}
+                      </label>
+                    )}
+                    {!this.state.checkedAdmin && (
+                      <MDBDropdown>
+                        <MDBDropdownToggle caret color="primary">
+                          Your School
+                        </MDBDropdownToggle>
+                        <MDBDropdownMenu basic>
+                          {this.state.schools.map((school, index) => {
+                            return (
+                              <MDBDropdownItem
+                                key={index}
+                                onClick={(e) => this.changeUserSchool(e, index)}
+                              >
+                                {school["name"]}
+                              </MDBDropdownItem>
+                            );
+                          })}
+                        </MDBDropdownMenu>
+                      </MDBDropdown>
+                    )}
+                    <label style={{ color: "red" }}>
+                      {this.state.schoolWarning}
+                    </label>
                     <div className="text-center mt-4">
                       <MDBBtn
                         color="indigo"

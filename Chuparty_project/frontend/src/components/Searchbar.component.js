@@ -40,6 +40,12 @@ export default class Home extends Component {
             localStorage.removeItem("activeSchool");
             localStorage.removeItem("activeCourse");
             localStorage.removeItem("activeExamID");
+            localStorage.removeItem("email_to_edit_as_admin");
+            localStorage.removeItem("editUserAsAdmin");
+            localStorage.removeItem("username_to_edit_as_admin");
+            localStorage.removeItem("first_name_to_edit_as_admin");
+            localStorage.removeItem("last_name_to_edit_as_admin");
+            localStorage.removeItem("asAdmin_originalUsername");
             this.props.setLoggedIn(false);
             this.props.parentClickHandler("NON_AUTHENTICATED");
           }

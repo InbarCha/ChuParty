@@ -16,6 +16,12 @@ export class Profile extends Component {
   }
 
   edit = () => {
+    localStorage.removeItem("email_to_edit_as_admin");
+    localStorage.removeItem("editUserAsAdmin");
+    localStorage.removeItem("username_to_edit_as_admin");
+    localStorage.removeItem("first_name_to_edit_as_admin");
+    localStorage.removeItem("last_name_to_edit_as_admin");
+    localStorage.removeItem("asAdmin_originalUsername");
     this.props.parentClickHandler("EDIT_PROFILE");
   };
 

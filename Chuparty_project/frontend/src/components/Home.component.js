@@ -87,7 +87,14 @@ export default class Home extends Component {
         this.setState({ currentContentView: <Feedback /> });
         break;
       case "ADMIN":
-        this.setState({ currentContentView: <Admin /> });
+        this.setState({
+          currentContentView: (
+            <Admin
+              parentClickHandler={this.onSideBarClick}
+              setLoggedIn={this.setLoggedIn}
+            />
+          ),
+        });
         break;
       case "NON_AUTHENTICATED":
         this.setState({
@@ -124,11 +131,26 @@ export default class Home extends Component {
         });
         break;
       case "EDIT_PROFILE":
-        this.setState({
-          currentContentView: (
-            <EditProfile parentClickHandler={this.onSideBarClick} />
-          ),
-        });
+        if (localStorage["editUserAsAdmin"] === "true") {
+          this.setState({
+            currentContentView: (
+              <EditProfile
+                parentClickHandler={this.onSideBarClick}
+                asAdmin={true}
+                username={localStorage["username_to_edit_as_admin"]}
+                first_name={localStorage["first_name_to_edit_as_admin"]}
+                last_name={localStorage["last_name_to_edit_as_admin"]}
+                email={localStorage["email_to_edit_as_admin"]}
+              />
+            ),
+          });
+        } else {
+          this.setState({
+            currentContentView: (
+              <EditProfile parentClickHandler={this.onSideBarClick} />
+            ),
+          });
+        }
         break;
       default:
         console.log("no clickMsg handler for:", clickMsg);

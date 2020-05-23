@@ -170,11 +170,11 @@ export class EditSchool extends Component {
       //remove an existing course subject
       if (array_name === "courses") {
         let school = this.state.school;
-        let courseName = school.name
+        let courseName = school.name;
         let courses = school.courses;
 
         this.setState({
-            deletedCourses: [...this.state.deletedCourses, courses[index]],
+          deletedCourses: [...this.state.deletedCourses, courses[index]],
         });
 
         courses.splice(index, 1);
@@ -213,6 +213,7 @@ export class EditSchool extends Component {
                 <img className="edit_img" alt="" />
                 <input
                   type="text"
+                  dir="RTL"
                   defaultValue={schoolName}
                   name={schoolName + "_edit"}
                   className="modelTitle_edit_input"
@@ -236,27 +237,21 @@ export class EditSchool extends Component {
                 <br />
                 {this.state.school.courses.length >= 1 && (
                   <React.Fragment>
-                    {this.state.school.courses.map(
-                      (elm, j_index) => {
-                        return (
-                          <div className="detail_container" key={j_index}>
-                            {elm}
-                            <span
-                              className="material-icons remove_icon"
-                              onClick={(e) =>
-                                this.removeCourse(
-                                  e,
-                                  j_index,
-                                  "courses"
-                                )
-                              }
-                            >
-                              remove_circle_outline
-                            </span>
-                          </div>
-                        );
-                      }
-                    )}
+                    {this.state.school.courses.map((elm, j_index) => {
+                      return (
+                        <div className="detail_container" key={j_index}>
+                          {elm}
+                          <span
+                            className="material-icons remove_icon"
+                            onClick={(e) =>
+                              this.removeCourse(e, j_index, "courses")
+                            }
+                          >
+                            remove_circle_outline
+                          </span>
+                        </div>
+                      );
+                    })}
                   </React.Fragment>
                 )}
                 {this.state.addedCourses.map((elm, j_index) => {
@@ -265,6 +260,7 @@ export class EditSchool extends Component {
                       <input
                         type="text"
                         value={elm}
+                        dir="RTL"
                         name={elm + "_edit"}
                         className="subject_edit_input"
                         disabled={this.state.loading}

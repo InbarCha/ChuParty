@@ -303,6 +303,9 @@ hr {
   margin: 0 !important;
   padding-top: 20px;
 }
+.users_rotate_loader {
+  margin-top: 10px;
+}
 .question_answers {
   padding: 15px 15px 15px 15px;
   margin-bottom: 15px;

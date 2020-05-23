@@ -40,6 +40,18 @@ export class EditProfile extends Component {
     };
   }
 
+  componentDidMount() {
+    console.log(this.props.asAdmin);
+    if (this.props.asAdmin) {
+      this.setState({
+        username: this.props.username,
+        first_name: this.props.first_name,
+        last_name: this.props.last_name,
+        email: this.props.email,
+      });
+    }
+  }
+
   usernameChanged = (e) => {
     let newVal = e.target.value;
     this.setState({
@@ -85,10 +97,25 @@ export class EditProfile extends Component {
     this.props.parentClickHandler("PROFILE");
   };
 
+  toAdminConsole = () => {
+    localStorage.removeItem("email_to_edit_as_admin");
+    localStorage.removeItem("editUserAsAdmin");
+    localStorage.removeItem("username_to_edit_as_admin");
+    localStorage.removeItem("first_name_to_edit_as_admin");
+    localStorage.removeItem("last_name_to_edit_as_admin");
+    localStorage.removeItem("asAdmin_originalUsername");
+    this.props.parentClickHandler("ADMIN");
+  };
+
   saveEdit = (e) => {
     e.preventDefault();
 
-    let original_username = localStorage["loggedUsername"];
+    let original_username = "";
+    if (!this.props.asAdmin) {
+      original_username = localStorage["loggedUsername"];
+    } else {
+      original_username = localStorage["asAdmin_originalUsername"];
+    }
     let username = this.state.username;
     let password = this.state.password;
     let first_name = this.state.first_name;
@@ -150,20 +177,24 @@ export class EditProfile extends Component {
           console.log(data);
           this.setState({ isWaiting: false });
 
-          if (data["Changed Username"] === "True") {
+          if (data["Changed Username"] === "True" && !this.props.asAdmin) {
             localStorage["loggedUsername"] = username;
           }
-          if (data["Changed First Name"] === "True") {
+          if (data["Changed First Name"] === "True" && !this.props.asAdmin) {
             localStorage["logged_first_name"] = first_name;
           }
-          if (data["Changed Last Name"] === "True") {
+          if (data["Changed Last Name"] === "True" && !this.props.asAdmin) {
             localStorage["logged_last_name"] = last_name;
           }
-          if (data["Changed First Name"] === "True") {
+          if (data["Changed First Name"] === "True" && !this.props.asAdmin) {
             localStorage["logged_email"] = email;
           }
 
-          this.props.parentClickHandler("PROFILE");
+          if (!this.props.asAdmin) {
+            this.props.parentClickHandler("PROFILE");
+          } else {
+            this.toAdminConsole();
+          }
         })
         .catch((err) => {
           console.error("error while registering:", err);
@@ -185,7 +216,12 @@ export class EditProfile extends Component {
             <MDBRow>
               <MDBCol className="col col-cen">
                 <form className="login_form">
-                  <p className="h4 text-center mb-4">Edit Profile</p>
+                  {!this.props.asAdmin && (
+                    <p className="h4 text-center mb-4">Edit Profile</p>
+                  )}
+                  {this.props.asAdmin && (
+                    <p className="h4 text-center mb-4">Edit User as Admin</p>
+                  )}
                   <label
                     htmlFor="defaultFormLoginEmailEx"
                     className="grey-text"
@@ -195,7 +231,7 @@ export class EditProfile extends Component {
                   <input
                     type="text"
                     className="form-control"
-                    defaultValue={this.state.username}
+                    value={this.state.username}
                     disabled={this.state.isWaiting}
                     onChange={this.usernameChanged}
                   />
@@ -230,7 +266,7 @@ export class EditProfile extends Component {
                     type="text"
                     className="form-control"
                     disabled={this.state.isWaiting}
-                    defaultValue={this.state.first_name}
+                    value={this.state.first_name}
                     onChange={this.firstNameChanged}
                   />
                   <label style={{ color: "red" }}>
@@ -247,7 +283,7 @@ export class EditProfile extends Component {
                     type="text"
                     className="form-control"
                     disabled={this.state.isWaiting}
-                    defaultValue={this.state.last_name}
+                    value={this.state.last_name}
                     onChange={this.lastNameChanged}
                   />
                   <label style={{ color: "red" }}>
@@ -264,7 +300,7 @@ export class EditProfile extends Component {
                     type="text"
                     className="form-control"
                     disabled={this.state.isWaiting}
-                    defaultValue={this.state.email}
+                    value={this.state.email}
                     onChange={this.emailChanged}
                   />
                   <label style={{ color: "red" }}>
@@ -284,13 +320,24 @@ export class EditProfile extends Component {
                     >
                       Save Edit
                     </MDBBtn>
-                    <MDBBtn
-                      color="indigo"
-                      type="submit"
-                      onClick={this.toProfile}
-                    >
-                      Back to Profile
-                    </MDBBtn>
+                    {!this.props.asAdmin && (
+                      <MDBBtn
+                        color="indigo"
+                        type="submit"
+                        onClick={this.toProfile}
+                      >
+                        Back to Profile
+                      </MDBBtn>
+                    )}
+                    {this.props.asAdmin && (
+                      <MDBBtn
+                        color="indigo"
+                        type="submit"
+                        onClick={this.toAdminConsole}
+                      >
+                        Back to Admin Console
+                      </MDBBtn>
+                    )}
                   </div>
                   <label style={{ color: "red" }}>
                     {this.state.registerWarning}

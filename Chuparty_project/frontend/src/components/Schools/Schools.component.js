@@ -105,17 +105,6 @@ export default class Schools extends Component {
     this.SetSonComponents();
   };
 
-  createDeepCopySchool = (school) => {
-    let schoolName = school.name;
-    let courses = school.courses;
-
-    let school_copy = {};
-    school_copy.name = schoolName;
-    school_copy.courses = [...courses];
-
-    return school_copy;
-  };
-
   changeSchoolComponent = (index, component) => {
     let sonComponents = this.state.sonComponents;
     let school_orig = "";
