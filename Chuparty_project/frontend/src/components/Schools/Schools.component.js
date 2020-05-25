@@ -52,6 +52,7 @@ export default class Schools extends Component {
     localStorage["activeSchool"] = school;
     localStorage.removeItem("activeCourse");
     this.setState({ activeSchool: school });
+    this.props.parentClickHandler("COURSES");
   }
 
   changedSchool = (school, index) => {
@@ -102,7 +103,7 @@ export default class Schools extends Component {
       sonComponents: sonComponents,
     });
 
-    this.SetSonComponents();
+    this.setSonComponents();
   };
 
   changeSchoolComponent = (index, component) => {
@@ -168,17 +169,19 @@ export default class Schools extends Component {
     let sonComponents = [];
 
     this.state.schools.forEach((elm, index) => {
-      let newSchool = (
-        <School
-          bounce={false}
-          school={elm}
-          index={index}
-          key={index}
-          chooseActiveSchool={this.chooseActiveSchool}
-          changeSchoolComponent={this.changeSchoolComponent}
-        />
-      );
-
+      let newSchool = "";
+      if (elm !== "" && elm !== null && elm !== undefined) {
+        newSchool = (
+          <School
+            bounce={false}
+            school={elm}
+            index={index}
+            key={index}
+            chooseActiveSchool={this.chooseActiveSchool}
+            changeSchoolComponent={this.changeSchoolComponent}
+          />
+        );
+      }
       sonComponents.push(newSchool);
     });
 

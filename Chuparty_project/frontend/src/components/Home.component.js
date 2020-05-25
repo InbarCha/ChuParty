@@ -49,7 +49,11 @@ export default class Home extends Component {
           ),
         });
       } else {
-        this.setState({ currentContentView: <Schools /> });
+        this.setState({
+          currentContentView: (
+            <Schools parentClickHandler={this.onSideBarClick} />
+          ),
+        });
       }
     }
   }
@@ -58,7 +62,11 @@ export default class Home extends Component {
     console.log(clickMsg);
     switch (clickMsg) {
       case "HOME":
-        this.setState({ currentContentView: <Schools /> });
+        this.setState({
+          currentContentView: (
+            <Schools parentClickHandler={this.onSideBarClick} />
+          ),
+        });
         break;
       case "COURSES":
         this.setState({

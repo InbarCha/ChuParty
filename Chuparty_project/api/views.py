@@ -578,6 +578,8 @@ def setSchool(request):
                 # iterate over courses given in the request body
                 # for each course, if it doesn't exist in the db, create it
                 for doc in courses:
+                    if 'school' not in doc.keys():
+                        doc["school"] = schoolName
                     ret_tuple = createCourseOrAddSubject(doc)
                     isCourseReturned = ret_tuple[0]
 
@@ -587,10 +589,11 @@ def setSchool(request):
                     course = ret_tuple[1]
                     coursesList.append(course.name)
 
-            newShool = School(name=schoolName, courses=coursesList)
-            newShool.save()
+            newSchool = School(name=schoolName, courses=coursesList)
+            newSchool.save()
             return JsonResponse(
                 {
+                    "New School": newSchool.as_json(),
                     "Status": "Added School",
                 }
             )

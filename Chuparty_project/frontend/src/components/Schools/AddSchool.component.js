@@ -59,7 +59,7 @@ export class AddSchool extends Component {
       let newVal = e.target.value;
 
       let school = { ...this.state.school };
-    //   let oldSchoolName = school.name;
+      //   let oldSchoolName = school.name;
 
       let newSchool = {};
       newSchool.name = newVal;
@@ -192,6 +192,7 @@ export class AddSchool extends Component {
                     type="text"
                     placeholder="School Name"
                     name="course_namw"
+                    dir="RTL"
                     className="modelTitle_edit_input"
                     disabled={this.state.loading}
                     onChange={(e) => this.schoolNameChanged(e)}
@@ -213,6 +214,7 @@ export class AddSchool extends Component {
                         type="text"
                         value={elm}
                         name={elm + "_edit"}
+                        dir="RTL"
                         className="subject_edit_input"
                         disabled={this.state.loading}
                         onChange={(e) => this.courseChanged(e, j_index)}

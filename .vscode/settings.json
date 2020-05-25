@@ -1,4 +1,4 @@
 {
-    "git.ignoreLimitWarning": true,
-    "python.autoComplete.extraPaths": ["./Chuparty_project"],
+  "git.ignoreLimitWarning": true,
+  "python.autoComplete.extraPaths": ["./Chuparty_project"]
 }
