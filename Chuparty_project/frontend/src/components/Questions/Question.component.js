@@ -52,12 +52,15 @@ export class Question extends Component {
   render() {
     return (
       <div className="question_container" dir="RTL">
-        <span
-          className="material-icons settings_icon_question"
-          onClick={(e) => this.editQuestion(e)}
-        >
-          settings
-        </span>
+        {(localStorage["logged_type"] === "Admin" ||
+          localStorage["logged_type"] === "Lecturer") && (
+          <span
+            className="material-icons settings_icon_question"
+            onClick={(e) => this.editQuestion(e)}
+          >
+            settings
+          </span>
+        )}
         <div className="question_body"> {this.state.body}</div>
         <div> {this.getAnswers()} </div>
       </div>

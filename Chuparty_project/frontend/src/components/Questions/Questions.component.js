@@ -599,64 +599,70 @@ export class Questions extends Component {
             </React.Fragment>
           )}
           <Container fluid>
-            <div
-              className="material-icons add_question_icon"
-              onClick={this.addQuestion}
-            >
-              add
-            </div>
+            {(localStorage["logged_type"] === "Admin" ||
+              localStorage["logged_type"] === "Lecturer") && (
+              <div
+                className="material-icons add_question_icon"
+                onClick={this.addQuestion}
+              >
+                add
+              </div>
+            )}
             <br />
             {(this.state.questions.length > 0 ||
               this.state.questions_added.length > 0) && (
               <React.Fragment>
                 <Row className="narrow_row">
                   <Col md={{ span: 6, offset: 3 }} sm={{ span: 8, offset: 2 }}>
-                    <div className="btn_center_wrapper">
-                      <button
-                        className="btn btn-dark questions_settings_icon"
-                        onClick={(e) => this.editAllQuestions(e)}
-                        hidden={
-                          this.state.sonComponents.filter(
-                            (sonComponent) =>
-                              sonComponent.type === EditQuestion ||
-                              sonComponent.type === AddQuestion
-                          ).length === this.state.sonComponents.length
-                        }
-                      >
-                        ערוך הכל
-                      </button>
-                      <button
-                        className="btn btn-dark questions_settings_icon"
-                        onClick={(e) => this.saveAllQuestions(e)}
-                        hidden={
-                          !(
+                    {(localStorage["logged_type"] === "Admin" ||
+                      localStorage["logged_type"] === "Lecturer") && (
+                      <div className="btn_center_wrapper">
+                        <button
+                          className="btn btn-dark questions_settings_icon"
+                          onClick={(e) => this.editAllQuestions(e)}
+                          hidden={
                             this.state.sonComponents.filter(
                               (sonComponent) =>
                                 sonComponent.type === EditQuestion ||
                                 sonComponent.type === AddQuestion
                             ).length === this.state.sonComponents.length
-                          )
-                        }
-                      >
-                        שמור הכל
-                      </button>
-                      <button
-                        className="btn btn-dark questions_settings_icon"
-                        onClick={(e) => this.cancelEditAllQuestions(e)}
-                        hidden={
-                          !(
-                            this.state.sonComponents.filter(
-                              (sonComponent) =>
-                                sonComponent.type === EditQuestion ||
-                                sonComponent.type === AddQuestion
-                            ).length === this.state.sonComponents.length
-                          )
-                        }
-                        style={{ marginLeft: "5px" }}
-                      >
-                        בטל עריכה
-                      </button>
-                    </div>
+                          }
+                        >
+                          ערוך הכל
+                        </button>
+                        <button
+                          className="btn btn-dark questions_settings_icon"
+                          onClick={(e) => this.saveAllQuestions(e)}
+                          hidden={
+                            !(
+                              this.state.sonComponents.filter(
+                                (sonComponent) =>
+                                  sonComponent.type === EditQuestion ||
+                                  sonComponent.type === AddQuestion
+                              ).length === this.state.sonComponents.length
+                            )
+                          }
+                        >
+                          שמור הכל
+                        </button>
+                        <button
+                          className="btn btn-dark questions_settings_icon"
+                          onClick={(e) => this.cancelEditAllQuestions(e)}
+                          hidden={
+                            !(
+                              this.state.sonComponents.filter(
+                                (sonComponent) =>
+                                  sonComponent.type === EditQuestion ||
+                                  sonComponent.type === AddQuestion
+                              ).length === this.state.sonComponents.length
+                            )
+                          }
+                          style={{ marginLeft: "5px" }}
+                        >
+                          בטל עריכה
+                        </button>
+                      </div>
+                    )}
                   </Col>
                 </Row>
                 <Row className="row_top_margin_narrow">

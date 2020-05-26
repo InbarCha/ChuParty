@@ -313,12 +313,15 @@ export default class Exams extends Component {
                 />
               </Col>
             </Row>
-            <span
-              className="material-icons add_course_icon"
-              onClick={this.addExam}
-            >
-              add
-            </span>
+            {(localStorage["logged_type"] === "Admin" ||
+              localStorage["logged_type"] === "Lecturer") && (
+              <span
+                className="material-icons add_course_icon"
+                onClick={this.addExam}
+              >
+                add
+              </span>
+            )}
             <Row>{this.state.sonComponents}</Row>
           </Container>
         </div>

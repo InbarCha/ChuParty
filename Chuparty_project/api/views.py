@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
 import json
 from django.http import JsonResponse
+import operator
 from random import shuffle
 from datetime import datetime
 from urllib.parse import unquote
@@ -1682,7 +1683,8 @@ def getExamsFromCourse(request):
             courseObj = Course.objects.get(name=courseName)
 
             exams = Exam.objects.filter(course=courseObj)
-            examsList = changeExamsTemplateInList(exams)
+            examsOrdered = sorted(exams, key=operator.attrgetter('date'), reverse = True)
+            examsList = changeExamsTemplateInList(examsOrdered)
 
             return JsonResponse(list(examsList), safe=False)
         
