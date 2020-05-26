@@ -311,7 +311,7 @@ export class EditQuestion extends Component {
         </span>
         <br />
         <div className="col-centered">
-          <input
+          <textarea
             type="text"
             defaultValue={this.state.body}
             name={this.state.body + "_edit"}

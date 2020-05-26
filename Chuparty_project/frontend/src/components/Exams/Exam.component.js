@@ -9,8 +9,14 @@ const Bounce = styled.div`
 
 export class Exam extends Component {
   chooseExam = () => {
-    localStorage["activeExamID"] = Object.keys(this.props.exam)[0];
-    this.props.parentClickHandler("QUESTIONS");
+    let activeExamID = Object.keys(this.props.exam)[0];
+    localStorage["activeExamID"] = activeExamID;
+
+    if (localStorage["logged_type"] === "Lecturer") {
+      this.props.parentClickHandler("LECTURER_QUESTIONS_PAGE");
+    } else {
+      this.props.parentClickHandler("QUESTIONS");
+    }
   };
 
   editExam = (e) => {

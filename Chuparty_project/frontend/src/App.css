@@ -22,6 +22,7 @@
   font-size: xxx-large;
   font-weight: bold;
   color: rgb(59, 128, 173);
+  margin-top: 20px;
   font-family: "Courier New", Courier, monospace !important;
 }
 .page_title_unauth {
@@ -309,6 +310,13 @@ hr {
 .admin_table {
   box-shadow: 0 0 3px 3px darkgray;
 }
+.question_lecturer_icon {
+  text-align: center;
+  font-size: 300px !important;
+  margin-top: 50px;
+  color: rgb(59, 128, 173);
+  cursor: pointer;
+}
 .question_answers {
   padding: 15px 15px 15px 15px;
   margin-bottom: 15px;
@@ -484,7 +492,7 @@ nav {
   margin-top: 15px;
   border-radius: 7px;
   width: 100%;
-  height: 40px;
+  height: auto;
   background-color: rgb(216, 214, 214);
 }
 .loading_title {

@@ -43,7 +43,13 @@ export default class Home extends Component {
         </div>
         <div
           className="side_item"
-          onClick={(e) => this.state.parentClickHandler("QUESTIONS")}
+          onClick={(e) => {
+            if (localStorage["logged_type"] === "Lecturer") {
+              this.state.parentClickHandler("LECTURER_QUESTIONS_PAGE");
+            } else {
+              this.state.parentClickHandler("QUESTIONS");
+            }
+          }}
         >
           <i className="material-icons">question_answer</i>
         </div>

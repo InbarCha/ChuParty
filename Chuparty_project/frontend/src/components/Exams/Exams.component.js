@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { css } from "@emotion/core";
 import RotateLoader from "react-spinners/ClipLoader";
-import scrollToComponent from "react-scroll-to-component";
 import Exam from "./Exam.component";
 import AddExam from "./AddExam.component";
 import EditExam from "./EditExam.component";
