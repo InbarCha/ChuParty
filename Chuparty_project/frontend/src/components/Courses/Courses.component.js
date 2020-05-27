@@ -95,15 +95,19 @@ export default class Courses extends Component {
     console.log("new props filter:", this.props.filterBy);
     if (this.props.filterBy !== this.state.searchStr) {
       console.log(`searching for ${this.props.filterBy}`);
-      this.setState({ searchStr: this.props.filterBy.toLowerCase() })
+      this.setState({ searchStr: this.props.filterBy.toLowerCase() });
     }
-    if(prevState.searchStr != this.state.searchStr)
-      this.SetSonComponents();
+    if (prevState.searchStr != this.state.searchStr) this.SetSonComponents();
   }
 
   deleteFromMyCourses = async (e, index) => {
     let courseName = Object.keys(this.state.courses[index])[0];
     let courses = this.state.courses;
+    let local_courses = localStorage["logged_courses"].split(",");
+    localStorage["logged_courses"] = [
+      ...local_courses.filter((elm, index) => elm !== courseName),
+    ];
+    console.log(local_courses);
     await this.setState({
       courses: [
         ...courses.filter((course) => Object.keys(course)[0] !== courseName),
@@ -289,10 +293,21 @@ export default class Courses extends Component {
   // }
   saveChangesInMyCourses = (e) => {
     if (!this.state.isSavingCourses) {
+      let logged_courses = localStorage["logged_courses"].split(",");
       let courses = this.state.courses;
+      let courses_copy = courses.map((elm, index) =>
+        this.createDeepCopyCourse(elm)
+      );
+      this.setState({ courses_copy: courses_copy });
       let courses_names = courses.map((course) => {
         return Object.keys(course)[0];
       });
+      courses_names = [
+        ...courses_names,
+        ...logged_courses.filter(
+          (elm, index) => courses_names.indexOf(elm) < 0
+        ),
+      ];
 
       let request_body = { username: localStorage["loggedUsername"] };
 
@@ -307,7 +322,10 @@ export default class Courses extends Component {
           .then((res) => res.json())
           .then((data) => {
             if (data["Changed Courses"] === "True") {
-              this.setState({ isSavingCourses: false, checkV: true });
+              this.setState({
+                isSavingCourses: false,
+                checkV: true,
+              });
               localStorage["logged_courses"] = courses_names;
             }
           })

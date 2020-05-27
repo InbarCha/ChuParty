@@ -10,7 +10,8 @@ export default class Home extends Component {
   render() {
     return (
       <div className="sidebar">
-        {localStorage["logged_type"] === "Admin" && (
+        {(localStorage["logged_type"] === "Admin" ||
+          localStorage["logged_type"] === "Lecturer") && (
           <React.Fragment>
             <div
               className="side_item"

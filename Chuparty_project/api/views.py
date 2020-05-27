@@ -2042,7 +2042,7 @@ method: POST
 POST body example:
 {
     "username": "eliavme"
-    "school": "Computer Science" (not a must when creating a lecturer)
+    "schools":["מדעי המחשב", "משפטים"]
 	"coursesTeaching": [{"name": "Computer Networks", {"name": iOS"}]
 }
 '''
@@ -2091,7 +2091,7 @@ def setLecturer(request):
  POST body example:
  {
     "username": "eliavme"
-    "changeSchool": "Computer Science"
+    "changeSchools": ["Computer Science", "law"]
 	"changeCoursesTeaching": [ "Computer Networks", ...]
 }
 '''
@@ -2100,7 +2100,7 @@ def setLecturer(request):
 def editLecturer(request):
     if request.method == "POST":
         changedCoursesFlg = False
-        changedSchoolFlg = False
+        changedSchoolsFlg = False
 
         # decode request body
         body = parseRequestBody(request)
@@ -2132,13 +2132,16 @@ def editLecturer(request):
                     
                     Lecturer.objects.filter(username=username).update(coursesTeaching=newCoursesTeaching)
 
-            if "changeSchool" in body.keys():
-                newSchool = body["changeSchool"]
-                oldSchool = lecturerObj.school
+            if "changeSchools" in body.keys():
+                newSchools = body["changeSchools"]
+                oldSchools = lecturerObj.school
+
+                newSchoolsFiltered = [school for school in newSchools if school not in oldSchools]
+                oldSchoolsFiltered = [school for school in oldSchools if school not in newSchools]
                 
-                if newSchool != oldSchool:
-                    changedSchoolFlg = True
-                    Lecturer.objects.filter(username=username).update(school=newSchool)
+                if newSchoolsFiltered or oldSchoolsFiltered:
+                    changedSchoolsFlg = True
+                    Lecturer.objects.filter(username=username).update(schools=newSchools)
 
             ret_json = dict()
 
@@ -2147,10 +2150,10 @@ def editLecturer(request):
             else:
                 ret_json['Changed Courses'] = "False"
             
-            if changedSchoolFlg == True:
-                ret_json['Changed School'] = "True"
+            if changedSchoolsFlg == True:
+                ret_json['Changed Schools'] = "True"
             else:
-                ret_json['Changed School'] = "False"
+                ret_json['Changed Schools'] = "False"
 
             return JsonResponse(ret_json)
 
@@ -2539,13 +2542,13 @@ def logIn(request):
             # check if user is Student, lecturer or admin
             if Student.objects.filter(username=username).count() > 0:
                 student = Student.objects.get(username=username)
-                courses = [course for course in student.relevantCourses]
+                courses = student.relevantCourses
                 school = student.school
                 userType = "Student"
             elif Lecturer.objects.filter(username=username).count() > 0:
                 lecturer = Lecturer.objects.get(username=username)
-                courses = [course for course in lecturer.coursesTeaching]
-                school = lecturer.school
+                courses = lecturer.coursesTeaching
+                schools = lecturer.schools
                 userType = "Lecturer"
             elif Admin.objects.filter(username=username).count() > 0:
                 userType = "Admin"
@@ -2554,7 +2557,8 @@ def logIn(request):
             else: 
                 userType = "No User Type"
 
-            return JsonResponse(
+            if userType == "Lecturer": 
+                return JsonResponse(
                 {
                     "isLoggedIn": True,
                     "username": user.username,
@@ -2563,9 +2567,23 @@ def logIn(request):
                     "last_name": user.last_name,
                     "type": userType,
                     "courses": courses,
-                    "school": school
+                    "schools": schools
                 }
             )
+            else:
+                return JsonResponse(
+                    {
+                        "isLoggedIn": True,
+                        "username": user.username,
+                        "email": user.email,
+                        "first_name": user.first_name,
+                        "last_name": user.last_name,
+                        "type": userType,
+                        "courses": courses,
+                        "school": school
+                    }
+                )
+
         else:
             return JsonResponse(
                 {
@@ -2857,15 +2875,15 @@ def getAllUsers(request):
             if Student.objects.filter(username=username).count() > 0:
                 student = Student.objects.get(username=username)
                 permissions = "Student"
-                school = student.school
+                school =student.school
             elif Lecturer.objects.filter(username=username).count() > 0:
                 lecturer = Lecturer.objects.get(username=username)
                 permissions = "Lecturer"
-                school = lecturer.school
+                school = lecturer.schools
             elif Admin.objects.filter(username=username).count() > 0:
                 permissions = "Admin"
                 school = "None"
-            
+
             userFinal = dict(
                 username = username, 
                 first_name = first_name,

@@ -96,11 +96,11 @@ def createLecturer(requestBody):
                 coursesList.append(courseObj.name)
         
         
-        school = ""
-        if 'school' in requestBody.keys():
-            school = requestBody["school"]
+        schools = list()
+        if 'schools' in requestBody.keys():
+            schools = requestBody["schools"]
 
-        newLecturer = Lecturer(username=username, coursesTeaching=coursesList, school=school)
+        newLecturer = Lecturer(username=username, coursesTeaching=coursesList, schools=schools)
         newLecturer.save()
 
         return (True, newLecturer)

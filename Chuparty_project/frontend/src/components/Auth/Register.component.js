@@ -203,7 +203,8 @@ export class Register extends Component {
             localStorage["logged_last_name"] = data["last_name"];
             localStorage["logged_email"] = data["email"];
             localStorage["logged_type"] = data["type"];
-            localStorage["activeSchool"] = data["school"];
+            localStorage["logged_schools"] = data["schools"];
+            localStorage["activeSchool"] = data["schools"][0];
             localStorage["logged_courses"] = data["courses"];
 
             this.props.setLoggedIn(true);

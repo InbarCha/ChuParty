@@ -102,6 +102,7 @@ export default class Admin extends Component {
                   localStorage.removeItem("first_name_to_edit_as_admin");
                   localStorage.removeItem("last_name_to_edit_as_admin");
                   localStorage.removeItem("asAdmin_originalUsername");
+                  localStorage.removeItem("logged_schools");
                   this.props.setLoggedIn(false);
                   this.props.parentClickHandler("NON_AUTHENTICATED");
                 }
@@ -167,7 +168,11 @@ export default class Admin extends Component {
                           <td>{user["first_name"]}</td>
                           <td>{user["last_name"]}</td>
                           <td>{user["email"]}</td>
-                          <td>{user["school"]}</td>
+                          <td>
+                            {!Array.isArray(user["school"]) && user["school"]}
+                            {Array.isArray(user["school"]) &&
+                              user["school"].map((elm) => <div>{elm}</div>)}
+                          </td>
                           <td>{user["permissions"]}</td>
                           <td>
                             <span

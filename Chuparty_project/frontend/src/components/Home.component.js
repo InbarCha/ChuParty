@@ -40,7 +40,8 @@ export default class Home extends Component {
       this.setState({ isLoggedIn: true });
       if (
         localStorage["activeSchool"] !== "" &&
-        localStorage["activeSchool"] !== undefined
+        localStorage["activeSchool"] !== undefined &&
+        localStorage["logged_type"] !== "Lecturer"
       ) {
         this.setState({
           currentContentView: (

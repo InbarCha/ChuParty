@@ -198,7 +198,10 @@ class Student(models.Model):
 
 class Lecturer(models.Model):
     username = models.CharField(max_length=30, default='inbar')
-    school = models.CharField(max_length=30, default="מדעי המחשב")
+    schools = models.ListField(
+        models.CharField(max_length=50),
+        default=["מדעי המחשב", "משפטים"]
+    )
     objects = models.DjongoManager()
 
     # more fields unique to lecturers
@@ -209,8 +212,8 @@ class Lecturer(models.Model):
     def as_json(self):
         json_dict = dict()
         json_dict["username"] = self.username
-        json_dict["school"] = self.school
-        json_dict['coursesTeaching'] = [course["name"] for course in self.coursesTeaching]
+        json_dict["schools"] = self.schools
+        json_dict['coursesTeaching'] = self.coursesTeaching
 
         return json_dict
 

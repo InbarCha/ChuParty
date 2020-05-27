@@ -37,6 +37,7 @@ export default class Home extends Component {
             localStorage.removeItem("logged_email");
             localStorage.removeItem("logged_type");
             localStorage.removeItem("logged_courses");
+            localStorage.removeItem("logged_schools");
             localStorage.removeItem("activeSchool");
             localStorage.removeItem("activeCourse");
             localStorage.removeItem("activeExamID");

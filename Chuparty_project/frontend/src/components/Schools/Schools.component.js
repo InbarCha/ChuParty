@@ -42,7 +42,18 @@ export default class Schools extends Component {
             courses: e[Object.keys(e)[0]].courses,
           };
         });
-        this.setSchools(data);
+        let all_schools = data;
+        let schools = [
+          ...all_schools.filter(
+            (school) =>
+              localStorage["logged_schools"].indexOf(school["name"]) > -1
+          ),
+        ];
+        if (localStorage["logged_type"] !== "Admin") {
+          this.setSchools(schools);
+        } else {
+          this.setSchools(all_schools);
+        }
       })
       .then(() => this.setSonComponents())
       .catch((err) => console.error("error while fetching schools:", err));
@@ -207,12 +218,14 @@ export default class Schools extends Component {
           </React.Fragment>
         )}
         <Container fluid className="model_items_container">
-          <span
-            className="material-icons add_course_icon"
-            onClick={this.addSchool} // TODO
-          >
-            add
-          </span>
+          {localStorage["logged_type"] === "Admin" && (
+            <span
+              className="material-icons add_course_icon"
+              onClick={this.addSchool} // TODO
+            >
+              add
+            </span>
+          )}
           <Row>{this.state.sonComponents}</Row>
         </Container>
       </React.Fragment>
