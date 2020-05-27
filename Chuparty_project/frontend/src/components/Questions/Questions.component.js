@@ -674,12 +674,10 @@ export class Questions extends Component {
                           loading={this.state.loading}
                         />
                       </div>
-                      <div>{this.state.sonComponents}</div>
-                    </div>
-                  </Col>
-                </Row>
-              </React.Fragment>
-            )}
+                    </Col>
+                  </Row>
+                </React.Fragment>
+              )}
           </Container>
         </React.Fragment>
       ) : this.state.activeExamsID !== undefined ? (
@@ -688,17 +686,17 @@ export class Questions extends Component {
           <RotateLoader css={override} size={50} loading={this.state.loading} />
         </div>
       ) : (
-        <React.Fragment dir="RTL">
-          <div className="page_title"> שאלות </div>
-          <div className="active_model_title">
-            <span
-              style={{ fontStyle: "italic", fontSize: "x-large", color: "red" }}
-            >
-              בעיה בטעינת שאלות: לא נבחר אף מבחן
+            <React.Fragment dir="RTL">
+              <div className="page_title"> שאלות </div>
+              <div className="active_model_title">
+                <span
+                  style={{ fontStyle: "italic", fontSize: "x-large", color: "red" }}
+                >
+                  בעיה בטעינת שאלות: לא נבחר אף מבחן
             </span>
-          </div>
-        </React.Fragment>
-      );
+              </div>
+            </React.Fragment>
+          );
     return res;
   }
 }
