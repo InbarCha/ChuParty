@@ -1,5 +1,10 @@
 import React, { Component } from "react";
 
+const RESULTS_ROUTE =
+    !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+        ? "http://localhost:8000/api/submitResults"
+        : "/api/submitResults";
+
 export default class TestResult extends Component {
     constructor(props) {
         super(props)
@@ -10,9 +15,23 @@ export default class TestResult extends Component {
     }
 
     componentDidMount() {
-        this.setCorrectAnswers()
+        this.setCorrectAnswers();
+        this.sendResults();
     }
 
+    sendResults() {
+        fetch(RESULTS_ROUTE,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.props.items)
+            })
+            .then(res => res.json())
+            .then(data => { console.log(data); })
+            .catch(err => { console.error("error while submitting results", err); })
+    }
 
     setCorrectAnswers() {
         console.log("setting correct answers");
