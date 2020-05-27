@@ -19,6 +19,11 @@ export class Exam extends Component {
     }
   };
 
+  takeExam = (event) => {
+    localStorage["activeExamID"] = Object.keys(this.props.exam)[0];
+    this.props.parentClickHandler("TEST");
+  }
+
   editExam = (e) => {
     e.stopPropagation();
     this.props.changeExamComponent(this.props.index, "EDIT");
@@ -33,7 +38,7 @@ export class Exam extends Component {
     let subjects = this.props.exam[examID]["subjects"];
 
     let newExam = (
-      <div className={"model col-centered"} onClick={this.chooseExam} dir="RTL">
+      <div className={"model col-centered"} dir="RTL">
         <div className="model_container">
           <div className="model_name">
             {(localStorage["logged_type"] === "Admin" ||
@@ -70,6 +75,9 @@ export class Exam extends Component {
             <div className="detail_container">
               <span className="exam_detail">מספר השאלות במבחן:</span>
               {" " + questions.length}
+            </div>
+            <div className="TakeExam" onClick={this.takeExam}>
+              <span className="btn btn-light">התחל מבחן!</span>
             </div>
           </div>
         </div>
