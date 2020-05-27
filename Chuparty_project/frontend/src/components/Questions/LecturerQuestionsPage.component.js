@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { MDBBadge, MDBBtn } from "mdbreact";
-import FileInput from "../Utils/FileInput.component";
 
 export class LecturerQuestionsPage extends Component {
   constructor(props) {
@@ -10,7 +9,7 @@ export class LecturerQuestionsPage extends Component {
       activeExamsName: localStorage["activeExamName"],
       activeExamsID: localStorage["activeExamID"],
       loading: false,
-      fileSelector: <FileInput id="fileInput" />,
+      fileSelector: <input id="fileInput" />,
       fileChosen: null,
     };
   }

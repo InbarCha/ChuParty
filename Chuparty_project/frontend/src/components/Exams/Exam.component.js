@@ -14,15 +14,13 @@ export class Exam extends Component {
 
     if (localStorage["logged_type"] === "Lecturer") {
       this.props.parentClickHandler("LECTURER_QUESTIONS_PAGE");
-    } else {
-      this.props.parentClickHandler("QUESTIONS");
     }
   };
 
   takeExam = (event) => {
     localStorage["activeExamID"] = Object.keys(this.props.exam)[0];
     this.props.parentClickHandler("TEST");
-  }
+  };
 
   editExam = (e) => {
     e.stopPropagation();
@@ -38,7 +36,7 @@ export class Exam extends Component {
     let subjects = this.props.exam[examID]["subjects"];
 
     let newExam = (
-      <div className={"model col-centered"} dir="RTL">
+      <div className={"model col-centered"} dir="RTL" onClick={this.chooseExam}>
         <div className="model_container">
           <div className="model_name">
             {(localStorage["logged_type"] === "Admin" ||
@@ -76,9 +74,11 @@ export class Exam extends Component {
               <span className="exam_detail">מספר השאלות במבחן:</span>
               {" " + questions.length}
             </div>
-            <div className="TakeExam" onClick={this.takeExam}>
-              <span className="btn btn-light">התחל מבחן!</span>
-            </div>
+            {localStorage["logged_type"] === "Student" && (
+              <div className="TakeExam" onClick={this.takeExam}>
+                <span className="btn btn-light">התחל מבחן!</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
