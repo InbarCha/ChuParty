@@ -585,7 +585,6 @@ div[class^="sc-fznyAO"]{
 }
 .carousel_option, .carousel_option label {
     cursor: pointer;
-    /* width: 50%; */
     margin-bottom: 3px;
     color: #000;
     transition: color 200ms ease-in;
@@ -611,7 +610,6 @@ div[class^="rec rec-swipable-"] {
     width: -moz-fit-content;
     width: fit-content;
     padding: 1%;
-    /* float: right; */
     margin-left: 42%;
     transition: background-color ease-in 200ms;
 }
