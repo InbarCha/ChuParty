@@ -28,10 +28,10 @@ export default class QuestionsCarousel extends Component {
             return {
                 question: Object.keys(e)[0],
                 answers: e[Object.keys(e)[0]].answers,
-                correctAnswer: e[Object.keys(e)[0]].correctAnswer - 1, //indexing from 0 and not from 1
+                correctAnswer: e[Object.keys(e)[0]].correctAnswer - 1, // indexing from 0 and not from 1
                 selectedAnswers: [],
-                difficulty: e.difficulty,
-                subject: e.subject
+                difficulty: e[Object.keys(e)[0]].difficulty,
+                subject: e[Object.keys(e)[0]].subject
             }
         })
         this.setState({ items: items });
