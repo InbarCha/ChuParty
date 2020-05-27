@@ -2933,3 +2933,24 @@ def deleteUser(request):
                 },
             status=500
         )
+######################################################
+'''
+submitResults()
+POST Body request:
+{
+	TODO: send user name/ID in request body
+    "items":[
+        answers: (5) ["132.13.168.0/22", "132.13.160.0/21", "132.13.168.0/21", "132.13.175.0/26", "0.0.0.0/0"]
+        correctAnswer: 3
+        difficulty: 2
+        question: "לנתב בעל טבלת הניתוב המצוינת הגיעה הודעה עם כתובת היעד: 132.133.175.90 ציין לאיזה רגל בנתב תועבר ההודעה?"
+        selectedAnswers: [4]
+        subject: "שכבת הרשת"
+    ]
+}
+'''
+#####################################################
+@csrf_exempt
+def submitResults(request):
+    print("bar was here and added an API that actually got trigerred SMILE")
+    return JsonResponse({ "Status": "results submitted" }, status=200)

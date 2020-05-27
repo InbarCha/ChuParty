@@ -70,6 +70,8 @@ urlpatterns = [
     path('register', views.register),
     path('editUser', views.editUser),
     path('getAllUsers', views.getAllUsers),
-    path('deleteUser', views.deleteUser)
+    path('deleteUser', views.deleteUser),
 
+    # test
+    path('submitResults', views.submitResults)
 ]
