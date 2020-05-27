@@ -1,0 +1,84 @@
+import React, { Component } from "react";
+
+export default class TestResult extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            numQuestions: props.items.length,
+            correct: 0
+        }
+    }
+
+    componentDidMount() {
+        this.setCorrectAnswers()
+    }
+
+
+    setCorrectAnswers() {
+        console.log("setting correct answers");
+        let items = this.props.items;
+        let _correct = items.map(elm => {
+            if (elm.selectedAnswers.length === 1) {
+                return elm.correctAnswer == elm.selectedAnswers[0] ? 1 : 0
+            } else if (elm.correctAnswer instanceof Array) {
+                if (elm.correctAnswer.length === elm.selectedAnswers.length) {
+                    for (let i = 0; i < elm.correctAnswer.length; i++) {
+                        if (elm.selectedAnswers.indexOf(elm.correctAnswer[i]) === -1)
+                            return 0;
+                    } return 1;
+                } else return 0;
+            } else return 0;
+        }).reduce((prev, current) => {
+            return prev + current;
+        })
+        this.setState({ correct: _correct })
+    }
+
+
+    render() {
+        let res = this.state.correct ?
+            <div id="testResults">
+                <div id="testResultsHead">
+                    <h1 className="resultsTitle">תוצאות המבחן</h1>
+                    <span className="correct">
+                        צדקת ב: &nbsp;
+                </span>
+                    {this.state.correct}
+                    <br />
+                    <span className="total">
+                        מתוך: &nbsp;
+                </span>
+                    {this.state.numQuestions}
+                    <br />
+                    <span className="grade">
+                        ציון: &nbsp;
+                </span>
+                    {Math.round(this.state.correct / this.state.numQuestions * 100)}
+                </div>
+                <hr />
+                <br />
+                {this.props.items.map((elm, i) => {
+                    return (
+                        <div className="questionResult">
+                            <h3>שאלה&nbsp;
+                                {i + 1}:
+                            </h3>
+                            <p>{elm.question}</p>
+                            {elm.answers.map((answer, j) => {
+                                let cls = "answer";
+                                if (elm.correctAnswer === j)
+                                    cls += " correctAnswer";
+                                if (elm.selectedAnswers.indexOf(j) != -1)
+                                    cls += " selectedAnswer";
+                                return <p className={cls}>{answer}</p>
+                            })}
+                            <hr id="separator" />
+                        </div>
+                    )
+                })}
+            </div>
+            :
+            <h1>loading</h1>
+        return res;
+    }
+}
