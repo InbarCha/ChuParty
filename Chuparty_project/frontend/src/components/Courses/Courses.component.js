@@ -91,13 +91,14 @@ export default class Courses extends Component {
       .catch((err) => console.error("error while fetching courses:", err));
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     console.log("new props filter:", this.props.filterBy);
     if (this.props.filterBy !== this.state.searchStr) {
       console.log(`searching for ${this.props.filterBy}`);
-      this.setState({ searchStr: this.props.filterBy.toLowerCase() });
-      this.SetSonComponents();
+      this.setState({ searchStr: this.props.filterBy.toLowerCase() })
     }
+    if(prevState.searchStr != this.state.searchStr)
+      this.SetSonComponents();
   }
 
   deleteFromMyCourses = async (e, index) => {
@@ -199,7 +200,7 @@ export default class Courses extends Component {
   SetSonComponents() {
     if (this.state.courses !== null) {
       let courses = this.state.courses;
-      console.log(courses);
+      console.log(this.state.searchStr);
       let sonComponents = [];
       if (this.state.searchStr !== "")
         courses = courses.filter(
