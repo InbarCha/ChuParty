@@ -6,6 +6,7 @@ import Schools from "./Schools/Schools.component";
 import Courses from "./Courses/Courses.component";
 import Exams from "./Exams/Exams.component";
 import Feedback from "./Feedback.component";
+import Test from "./Test.component";
 import Admin from "./Admin.component";
 import Questions from "./Questions/Questions.component";
 import Login from "./Auth/Login.component";
@@ -98,6 +99,9 @@ export default class Home extends Component {
         break;
       case "QUESTIONS_EDIT":
         this.setState({ currentContentView: <Questions edit={true} /> });
+        break;
+      case "TEST":
+        this.setState({ currentContentView: <Test /> });
         break;
       case "FEEDBACK":
         this.setState({ currentContentView: <Feedback /> });
