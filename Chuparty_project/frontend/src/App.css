@@ -559,10 +559,10 @@ div[class^="sc-fznyAO"]{
     width: 100%;
     direction: rtl;
     text-align: right;
-    font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+    /* font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif; */
 }
 .carousel_question {
-    text-align: center;
+    /* text-align: center; */
     font-size: 18px;
     font-weight: 600;
 }
