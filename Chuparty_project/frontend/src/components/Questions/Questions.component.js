@@ -673,6 +673,7 @@ export class Questions extends Component {
                           css={override}
                           loading={this.state.loading}
                         />
+                        </div>
                       </div>
                     </Col>
                   </Row>
