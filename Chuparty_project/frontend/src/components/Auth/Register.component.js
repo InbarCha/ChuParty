@@ -13,6 +13,7 @@ import {
   MDBDropdownItem,
 } from "mdbreact";
 import Checkbox from "@material-ui/core/Checkbox";
+import Select from "react-select";
 
 const REGISTER_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
@@ -51,6 +52,8 @@ export class Register extends Component {
       registerWarning: "",
       schools: [],
       userSchool: "",
+      selectSchoolsOptions: [],
+      selectedSchoolForLecturer: null,
     };
   }
 
@@ -68,7 +71,12 @@ export class Register extends Component {
             courses: e[Object.keys(e)[0]].courses,
           };
         });
-        this.setState({ schools: data });
+        this.setState({
+          schools: data,
+          selectSchoolsOptions: data.map((elm) => {
+            return { value: elm["name"], label: elm["name"] };
+          }),
+        });
       })
       .catch((err) => console.error("error while fetching schools:", err));
   }
@@ -124,7 +132,18 @@ export class Register extends Component {
     let first_name = this.state.first_name;
     let last_name = this.state.last_name;
     let email = this.state.email;
-    let school = this.state.userSchool;
+    let school = "";
+    let schools = "";
+
+    if (this.state.checkedAdmin) {
+      school = this.state.userSchool;
+    } else if (
+      this.state.checkedLecturer &&
+      this.state.selectedSchoolForLecturer !== null
+    ) {
+      schools = this.state.selectedSchoolForLecturer.map((elm) => elm["value"]);
+      console.log(schools);
+    }
 
     if (username === "") {
       this.setState({ usernameWarning: "'Username' field is empty!" });
@@ -141,8 +160,11 @@ export class Register extends Component {
     if (email === "") {
       this.setState({ emailWarning: "'email' field is empty!" });
     }
-    if (!this.state.checkedAdmin && school === "") {
+    if (this.state.checkedStudent & (school === "")) {
       this.setState({ schoolWarning: "'school' wasn't chosen!" });
+    }
+    if (this.state.checkedLecturer && schools === "") {
+      this.setState({ schoolWarning: "'schools' weren't chosen!" });
     }
 
     let type = "";
@@ -163,7 +185,9 @@ export class Register extends Component {
       last_name !== "" &&
       email !== "" &&
       type !== "" &&
-      ((!this.state.checkedAdmin && school !== "") || this.state.checkedAdmin)
+      ((this.state.checkedStudent && school !== "") ||
+        this.state.checkedAdmin ||
+        (this.state.checkedLecturer && schools !== ""))
     ) {
       this.setState({ registerWarning: "" });
       let request_body = {
@@ -174,6 +198,7 @@ export class Register extends Component {
         email: email,
         type: type,
         school: school,
+        schools: schools,
       };
       this.setState({ isWaiting: true });
 
@@ -210,7 +235,8 @@ export class Register extends Component {
             this.props.setLoggedIn(true);
             if (
               localStorage["activeSchool"] !== "" &&
-              localStorage["activeSchool"] !== undefined
+              localStorage["activeSchool"] !== undefined &&
+              localStorage["logged_type"] === "Student"
             ) {
               this.props.parentClickHandler("COURSES");
             } else {
@@ -257,6 +283,10 @@ export class Register extends Component {
       userSchool: this.state.schools[index]["name"],
       schoolWarning: "",
     });
+  };
+
+  changedLecturerSchool = (selectedOption) => {
+    this.setState({ selectedSchoolForLecturer: selectedOption });
   };
 
   render() {
@@ -390,7 +420,7 @@ export class Register extends Component {
                         {this.state.userSchool}
                       </label>
                     )}
-                    {!this.state.checkedAdmin && (
+                    {!this.state.checkedLecturer && !this.state.checkedAdmin && (
                       <MDBDropdown>
                         <MDBDropdownToggle caret color="primary">
                           Your School
@@ -408,6 +438,17 @@ export class Register extends Component {
                           })}
                         </MDBDropdownMenu>
                       </MDBDropdown>
+                    )}
+                    {this.state.checkedLecturer && (
+                      <div style={{ padding: "40px" }}>
+                        <Select
+                          placeholder="Select Your Schools"
+                          value={this.state.selectedSchoolForLecturer}
+                          onChange={this.changedLecturerSchool}
+                          options={this.state.selectSchoolsOptions}
+                          isMulti={true}
+                        />
+                      </div>
                     )}
                     <label style={{ color: "red" }}>
                       {this.state.schoolWarning}

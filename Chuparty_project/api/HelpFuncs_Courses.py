@@ -37,8 +37,13 @@ def createCourseOrAddSubject(courseJson):
         if "school" in courseJson.keys():
             school = courseJson["school"]
         newCourse = Course(name=courseName, subjects=subjectsList, school=school)
-
         newCourse.save()
+
+        schoolObj = School.objects.get(name=school)
+        coursesList = schoolObj.courses
+        coursesList.append(courseName)
+        School.objects.filter(name=school).update(courses=coursesList)
+
         return (True, newCourse)
 
 

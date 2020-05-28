@@ -85,7 +85,7 @@ export class Login extends Component {
             if (
               localStorage["activeSchool"] !== "" &&
               localStorage["activeSchool"] !== undefined &&
-              localStorage["logged_type"] !== "Lecturer"
+              localStorage["logged_type"] === "Student"
             ) {
               this.props.parentClickHandler("COURSES");
             } else {

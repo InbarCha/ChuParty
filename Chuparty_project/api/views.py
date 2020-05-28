@@ -287,6 +287,27 @@ def deleteCourse(request):
 
         try:
             Course.objects.filter(name=courseName).delete()
+            schools = list(School.objects.all())
+            for school in schools:
+                coursesList = school.courses
+                coursesList = [course for course in coursesList if course != courseName]
+                School.objects.filter(name=school.name).update(courses=coursesList)
+            
+            # delete course from user courses, it it exists there
+            username = request.user.username
+
+            # check if user is Student, lecturer or admin
+            if Student.objects.filter(username=username).count() > 0:
+                student = Student.objects.get(username=username)
+                courses = student.relevantCourses
+                courses = [course for course in courses if course.name != courseName]
+                Student.objects.filter(username=username).update(relevantCourses=courses)
+            elif Lecturer.objects.filter(username=username).count() > 0:
+                lecturer = Lecturer.objects.get(username=username)
+                courses = lecturer.coursesTeaching
+                scourses = [course for course in courses if course.name != courseName]
+                Lecturer.objects.filter(username=username).update(coursesTeaching=courses)
+
             return JsonResponse({"Status": f"Deleted Course '{courseName}'"})
 
         except Exception as e:
@@ -2543,7 +2564,7 @@ def logIn(request):
             if Student.objects.filter(username=username).count() > 0:
                 student = Student.objects.get(username=username)
                 courses = student.relevantCourses
-                school = student.school
+                schools = [student.school]
                 userType = "Student"
             elif Lecturer.objects.filter(username=username).count() > 0:
                 lecturer = Lecturer.objects.get(username=username)
@@ -2557,8 +2578,7 @@ def logIn(request):
             else: 
                 userType = "No User Type"
 
-            if userType == "Lecturer": 
-                return JsonResponse(
+            return JsonResponse(
                 {
                     "isLoggedIn": True,
                     "username": user.username,
@@ -2567,22 +2587,9 @@ def logIn(request):
                     "last_name": user.last_name,
                     "type": userType,
                     "courses": courses,
-                    "schools": schools
+                    "schools": schools,
                 }
             )
-            else:
-                return JsonResponse(
-                    {
-                        "isLoggedIn": True,
-                        "username": user.username,
-                        "email": user.email,
-                        "first_name": user.first_name,
-                        "last_name": user.last_name,
-                        "type": userType,
-                        "courses": courses,
-                        "school": school
-                    }
-                )
 
         else:
             return JsonResponse(
@@ -2611,7 +2618,8 @@ POST request body:
 	"last_name": "shaulov",
 	"email": "david@gmail.com".
     "type": "Student",
-    "school": "Computer Science"
+    "school": "Computer Science" //if user is student
+    "schools": ["Computer Science", "Law"] //if user is lecturer
 }
 '''
 #####################################################
@@ -2644,6 +2652,7 @@ def register(request):
         email = body['email']
         accountType = body['type']
         school = body["school"]
+        schools = body["schools"]
 
         user = User(username=username, first_name=first_name, last_name=last_name, email=email)
         user.set_password(password)
@@ -2656,11 +2665,11 @@ def register(request):
                 "last_name" : user.last_name,
                 "email": user.email,
                 "type": accountType,
-                "school": school,
                 "courses": []
             }
         
         if accountType == "Student":
+            ret_json["schools"] = school
             ret_tuple = createStudent({"username": username, "school": school})
             isNewStudentCreated = ret_tuple[0]
 
@@ -2674,7 +2683,8 @@ def register(request):
                 ret_json["Status"] =  "Student Already Exists"
 
         elif accountType == "Lecturer":
-            ret_tuple = createLecturer({"username": username, "school": school})
+            ret_json["schools"] = schools
+            ret_tuple = createLecturer({"username": username, "schools": schools})
             isNewLecturerCreated = ret_tuple[0]
 
             if isNewLecturerCreated is None:

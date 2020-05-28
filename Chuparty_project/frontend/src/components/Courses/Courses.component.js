@@ -103,11 +103,11 @@ export default class Courses extends Component {
   deleteFromMyCourses = async (e, index) => {
     let courseName = Object.keys(this.state.courses[index])[0];
     let courses = this.state.courses;
-    let local_courses = localStorage["logged_courses"].split(",");
-    localStorage["logged_courses"] = [
-      ...local_courses.filter((elm, index) => elm !== courseName),
-    ];
-    console.log(local_courses);
+    // let local_courses = localStorage["logged_courses"].split(",");
+    // localStorage["logged_courses"] = [
+    //   ...local_courses.filter((elm, index) => elm !== courseName),
+    // ];
+    // console.log(local_courses);
     await this.setState({
       courses: [
         ...courses.filter((course) => Object.keys(course)[0] !== courseName),
@@ -295,19 +295,37 @@ export default class Courses extends Component {
     if (!this.state.isSavingCourses) {
       let logged_courses = localStorage["logged_courses"].split(",");
       let courses = this.state.courses;
-      let courses_copy = courses.map((elm, index) =>
+      let courses_copy_final = courses.map((elm, index) =>
         this.createDeepCopyCourse(elm)
       );
-      this.setState({ courses_copy: courses_copy });
+      let courses_copy = this.state.courses_copy.map((elm, index) =>
+        this.createDeepCopyCourse(elm)
+      );
       let courses_names = courses.map((course) => {
         return Object.keys(course)[0];
       });
-      courses_names = [
-        ...courses_names,
-        ...logged_courses.filter(
-          (elm, index) => courses_names.indexOf(elm) < 0
-        ),
-      ];
+      let courses_names_copy = courses_copy.map((course) => {
+        return Object.keys(course)[0];
+      });
+
+      //fiter out from logged courses every course which exists in courses_copy but not in courses
+      logged_courses = logged_courses.filter(
+        (elm) =>
+          !(
+            courses_names_copy.indexOf(elm) > 0 &&
+            courses_names.indexOf(elm) < 0
+          )
+      );
+
+      if (logged_courses.length > 0) {
+        courses_names = [
+          ...courses_names,
+          ...logged_courses.filter(
+            (elm, index) => courses_names.indexOf(elm) < 0 && elm != ""
+          ),
+        ];
+        console.log(courses_names);
+      }
 
       let request_body = { username: localStorage["loggedUsername"] };
 
@@ -321,10 +339,12 @@ export default class Courses extends Component {
         })
           .then((res) => res.json())
           .then((data) => {
+            console.log(data);
             if (data["Changed Courses"] === "True") {
               this.setState({
                 isSavingCourses: false,
                 checkV: true,
+                courses_copy: courses_copy_final,
               });
               localStorage["logged_courses"] = courses_names;
             }
@@ -343,8 +363,13 @@ export default class Courses extends Component {
         })
           .then((res) => res.json())
           .then((data) => {
+            console.log(data);
             if (data["Changed Courses"] === "True") {
-              this.setState({ isSavingCourses: false, checkV: true });
+              this.setState({
+                isSavingCourses: false,
+                checkV: true,
+                courses_copy: courses_copy_final,
+              });
               localStorage["logged_courses"] = courses_names;
             }
           })
@@ -410,7 +435,10 @@ export default class Courses extends Component {
                 add
               </span>
             )}
-            {!this.arraysEqual(this.state.courses, this.state.courses_copy) && (
+            {!this.arraysEqual(
+              this.state.courses.map((elm) => Object.keys(elm)[0]),
+              this.state.courses_copy.map((elm) => Object.keys(elm)[0])
+            ) && (
               <React.Fragment>
                 <span
                   className="material-icons save_icon"
@@ -424,10 +452,10 @@ export default class Courses extends Component {
                   size={20}
                   loading={this.state.isSavingCourses}
                 />
-                {this.state.checkV && (
-                  <span className="material-icons save_icon">check</span>
-                )}
               </React.Fragment>
+            )}
+            {this.state.checkV && (
+              <span className="material-icons save_icon">check</span>
             )}
             <Row className="narrow_row">
               <Col className="text-center">

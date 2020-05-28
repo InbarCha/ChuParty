@@ -57,6 +57,10 @@ export class EditCourse extends Component {
             console.log(data);
             this.props.deleteFromSonComponents(this.props.index);
             this.setState({ loading: false });
+            let local_courses = localStorage["logged_courses"].split(",");
+            localStorage["logged_courses"] = [
+              ...local_courses.filter((elm, index) => elm !== courseName),
+            ];
           })
           .catch((err) => {
             console.error("error while fetching courses:", err);

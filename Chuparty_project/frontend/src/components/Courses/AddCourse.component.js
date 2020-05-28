@@ -138,6 +138,12 @@ export class AddCourse extends Component {
       .then((data) => {
         console.log(data);
         if (data["Status"] === "Added Course") {
+          let local_courses = localStorage["logged_courses"].split(",");
+          localStorage["logged_courses"] = [
+            ...local_courses,
+            Object.keys(data["New Course"])[0],
+          ];
+
           //propagate changes to the course itself
           this.props.addCourseToSonComponents(data["New Course"]);
         } else if (data["Status"] === "Course Already Exists") {
