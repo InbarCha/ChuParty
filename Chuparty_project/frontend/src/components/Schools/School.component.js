@@ -30,7 +30,7 @@ export class School extends Component {
                 settings
               </span>
             )}
-            <img className="course_img" alt="" />
+            <img className="school_img" alt="" />
             <div className="course_name_text">{SchoolName}</div>
           </div>
           {SchoolName.length >= 1 && (

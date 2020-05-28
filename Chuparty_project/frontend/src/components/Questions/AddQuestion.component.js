@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { css } from "@emotion/core";
 import RotateLoader from "react-spinners/ClipLoader";
 import scrollToComponent from "react-scroll-to-component";
+import Select from "react-select";
 
 const SET_QUESTION_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
@@ -31,10 +32,21 @@ export class AddQuestion extends Component {
       ],
       subject: "",
       loading: false,
+      selectSubjectsOptions: [],
+      selectedSubject: null,
+      subjectInput: "",
     };
   }
 
   componentDidMount() {
+    let courseSubjects = localStorage["activeCourseSubjects"].split(",");
+
+    this.setState({
+      selectSubjectsOptions: courseSubjects.map((elm) => {
+        return { value: elm, label: elm };
+      }),
+    });
+
     //scroll down to new component
     scrollToComponent(this, {
       offset: 0,
@@ -159,19 +171,44 @@ export class AddQuestion extends Component {
     }
   };
 
-  subjectChanged = (e) => {
-    e.stopPropagation();
-
+  subjectChanged = (selectedOption) => {
     if (!this.state.loading) {
-      let newVal = e.target.value;
-
       let question = this.state.question;
-      let body = Object.keys(question)[0];
+      let body = this.state.body;
 
-      question[body]["subject"] = newVal;
+      if (selectedOption !== null) {
+        let subject = selectedOption["value"];
+        question[body]["subject"] = subject;
+        this.setState({
+          subject: subject,
+          question: question,
+        });
+      } else {
+        question[body]["subject"] = null;
+        this.setState({ subject: null, question: question, subjectInput: "" });
+      }
 
-      this.setState({ question: question, subject: newVal });
+      this.setState({
+        selectedSubject: selectedOption,
+      });
       this.props.questionAddedChanged(this.props.index, question);
+    }
+  };
+
+  subjectInputChanged = (newInput) => {
+    this.setState({ subjectInput: newInput });
+  };
+
+  menuClosed = () => {
+    if (this.state.subject === null || this.state.subject === "") {
+      this.setState({
+        selectedSubject: {
+          label: this.state.subjectInput,
+          value: this.state.subjectInput,
+        },
+        subjectInput: this.state.subjectInput,
+        subject: this.state.subjectInput,
+      });
     }
   };
 
@@ -187,9 +224,20 @@ export class AddQuestion extends Component {
       answers = [...answers.filter((answer) => answer !== "")];
       question[body]["answers"] = answers;
 
+      if (
+        question[body]["subject"] === "" ||
+        question[body]["subject"] === null
+      ) {
+        question[body]["subject"] = this.state.subjectInput;
+      }
+      this.setState({
+        question: question,
+        subject: this.state.subjectInput,
+        answers: answers,
+      });
+
       if (question[body]["subject"] !== "" && body !== "Question Body") {
         this.setState({ loading: true });
-        this.setState({ question: question, answers: answers });
 
         //save changes to db and propagate changes to questions component
         this.saveChangesToDb();
@@ -356,14 +404,16 @@ export class AddQuestion extends Component {
         />
         <br /> <br />
         <span className="question_detail_edit_title">נושא:</span>
-        <input
-          type="text"
-          defaultValue={this.state.subject || ""}
-          name={"question_subject_edit"}
-          className="question_subject_edit_input"
-          dir="RTL"
-          disabled={this.state.loading}
-          onChange={(e) => this.subjectChanged(e)}
+        <Select
+          placeholder="בחר נושא"
+          value={this.state.selectedSubject}
+          onChange={this.subjectChanged}
+          options={this.state.selectSubjectsOptions}
+          isDisabled={this.state.loading || this.state.loading_parent}
+          isClearable={true}
+          isRtl={true}
+          onInputChange={this.subjectInputChanged}
+          onMenuClose={this.menuClosed}
         />
         <br />
         <div className="col-centered model_loading">

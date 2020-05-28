@@ -11,6 +11,10 @@ export class LecturerQuestionsPage extends Component {
       loading: false,
       fileSelector: <input id="fileInput" />,
       fileChosen: null,
+      examName: localStorage["activeExamName"],
+      examDate: localStorage["activeExamDate"],
+      activeExamsID: localStorage["activeExamID"],
+      activeCourse: localStorage["activeCourse"],
     };
   }
 
@@ -30,7 +34,28 @@ export class LecturerQuestionsPage extends Component {
       this.state.activeExamsID !== undefined &&
       this.state.activeExamsID !== null ? (
         <Container fluid className="model_items_container">
-          <div className="page_title"> עריכת/יצירת מבחן - למרצה </div>
+          <div className="page_title" dir="RTL">
+            {" "}
+            עריכת/יצירת מבחן - למרצה{" "}
+          </div>
+          {this.state.activeExamsID !== "" && (
+            <React.Fragment>
+              <div className="active_model_title" dir="RTL">
+                <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
+                  קורס:
+                </span>
+                <span className="active_model"> {this.state.activeCourse}</span>
+              </div>
+              <div className="active_model_title">
+                <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
+                  מבחן:
+                </span>
+                <span className="active_model">
+                  {" " + this.state.examName + " " + this.state.examDate}
+                </span>
+              </div>
+            </React.Fragment>
+          )}
           <Row>
             <Col md={6} sm={12} xs={12} style={{ textAlign: "center" }}>
               <span

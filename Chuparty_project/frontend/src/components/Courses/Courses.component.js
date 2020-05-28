@@ -64,29 +64,38 @@ export default class Courses extends Component {
     fetch(COURSES_ROUTE_FROM_SCHOOL + this.state.activeSchool)
       .then((res) => res.json())
       .then((data) => {
-        console.log(localStorage["logged_courses"]);
-        let all_courses = data;
-        let courses = [
-          ...all_courses.filter(
-            (course) =>
-              localStorage["logged_courses"].indexOf(Object.keys(course)[0]) >
-              -1
-          ),
-        ];
-        let courses_copy = [
-          ...all_courses.filter(
-            (course) =>
-              localStorage["logged_courses"].indexOf(Object.keys(course)[0]) >
-              -1
-          ),
-        ];
-        console.log(courses);
-        this.setState({
-          all_courses: data,
-          courses: courses,
-          courses_copy: courses_copy,
-        });
-        this.SetSonComponents();
+        if (localStorage["logged_type"] === "Admin") {
+          let courses = data;
+          this.setState({
+            courses: courses,
+          });
+          this.SetSonComponents();
+        } else {
+          console.log(data);
+          console.log(localStorage["logged_courses"]);
+          let all_courses = data;
+          let courses = [
+            ...all_courses.filter(
+              (course) =>
+                localStorage["logged_courses"].indexOf(Object.keys(course)[0]) >
+                -1
+            ),
+          ];
+          let courses_copy = [
+            ...all_courses.filter(
+              (course) =>
+                localStorage["logged_courses"].indexOf(Object.keys(course)[0]) >
+                -1
+            ),
+          ];
+          console.log(courses);
+          this.setState({
+            all_courses: data,
+            courses: courses,
+            courses_copy: courses_copy,
+          });
+          this.SetSonComponents();
+        }
       })
       .catch((err) => console.error("error while fetching courses:", err));
   }
@@ -97,7 +106,7 @@ export default class Courses extends Component {
       console.log(`searching for ${this.props.filterBy}`);
       this.setState({ searchStr: this.props.filterBy.toLowerCase() });
     }
-    if (prevState.searchStr != this.state.searchStr) this.SetSonComponents();
+    if (prevState.searchStr !== this.state.searchStr) this.SetSonComponents();
   }
 
   deleteFromMyCourses = async (e, index) => {
@@ -118,8 +127,9 @@ export default class Courses extends Component {
     this.SetSonComponents();
   };
 
-  chooseActiveCourse = (courseName) => {
+  chooseActiveCourse = (courseName, courseSubjects) => {
     localStorage["activeCourse"] = courseName;
+    localStorage["activeCourseSubjects"] = courseSubjects;
     this.setState({ activeCourse: courseName });
     this.props.parentClickHandler("EXAMS");
   };
@@ -321,7 +331,7 @@ export default class Courses extends Component {
         courses_names = [
           ...courses_names,
           ...logged_courses.filter(
-            (elm, index) => courses_names.indexOf(elm) < 0 && elm != ""
+            (elm, index) => courses_names.indexOf(elm) < 0 && elm !== ""
           ),
         ];
         console.log(courses_names);
@@ -435,58 +445,60 @@ export default class Courses extends Component {
                 add
               </span>
             )}
-            {!this.arraysEqual(
-              this.state.courses.map((elm) => Object.keys(elm)[0]),
-              this.state.courses_copy.map((elm) => Object.keys(elm)[0])
-            ) && (
-              <React.Fragment>
-                <span
-                  className="material-icons save_icon"
-                  style={{ cursor: "pointer" }}
-                  onClick={(e) => this.saveChangesInMyCourses(e)}
-                >
-                  save
-                </span>
-                <RotateLoader
-                  css={override1}
-                  size={20}
-                  loading={this.state.isSavingCourses}
-                />
-              </React.Fragment>
-            )}
+            {localStorage["logged_type"] !== "Admin" &&
+              !this.arraysEqual(
+                this.state.courses.map((elm) => Object.keys(elm)[0]),
+                this.state.courses_copy.map((elm) => Object.keys(elm)[0])
+              ) && (
+                <React.Fragment>
+                  <span
+                    className="material-icons save_icon"
+                    style={{ cursor: "pointer" }}
+                    onClick={(e) => this.saveChangesInMyCourses(e)}
+                  >
+                    save
+                  </span>
+                  <RotateLoader
+                    css={override1}
+                    size={20}
+                    loading={this.state.isSavingCourses}
+                  />
+                </React.Fragment>
+              )}
             {this.state.checkV && (
               <span className="material-icons save_icon">check</span>
             )}
             <Row className="narrow_row">
               <Col className="text-center">
-                {this.state.all_courses.filter(
-                  (course) =>
-                    this.state.courses
-                      .map((innerCourse) => Object.keys(innerCourse)[0])
-                      .indexOf(Object.keys(course)[0]) < 0
-                ).length > 0 && (
-                  <MDBDropdown>
-                    <MDBDropdownToggle caret color="info">
-                      {"הוסף לקורסים שלך "}
-                    </MDBDropdownToggle>
-                    <MDBDropdownMenu basic>
-                      {this.state.all_courses
-                        .filter(
-                          (course) => this.state.courses.indexOf(course) < 0
-                        )
-                        .map((course, index) => {
-                          return (
-                            <MDBDropdownItem
-                              key={index}
-                              onClick={(e) => this.addToMyCourses(e, course)}
-                            >
-                              {Object.keys(course)[0]}
-                            </MDBDropdownItem>
-                          );
-                        })}
-                    </MDBDropdownMenu>
-                  </MDBDropdown>
-                )}
+                {localStorage["logged_type"] !== "Admin" &&
+                  this.state.all_courses.filter(
+                    (course) =>
+                      this.state.courses
+                        .map((innerCourse) => Object.keys(innerCourse)[0])
+                        .indexOf(Object.keys(course)[0]) < 0
+                  ).length > 0 && (
+                    <MDBDropdown>
+                      <MDBDropdownToggle caret color="info">
+                        {"הוסף לקורסים שלך "}
+                      </MDBDropdownToggle>
+                      <MDBDropdownMenu basic>
+                        {this.state.all_courses
+                          .filter(
+                            (course) => this.state.courses.indexOf(course) < 0
+                          )
+                          .map((course, index) => {
+                            return (
+                              <MDBDropdownItem
+                                key={index}
+                                onClick={(e) => this.addToMyCourses(e, course)}
+                              >
+                                {Object.keys(course)[0]}
+                              </MDBDropdownItem>
+                            );
+                          })}
+                      </MDBDropdownMenu>
+                    </MDBDropdown>
+                  )}
               </Col>
             </Row>
             <Row>{this.state.sonComponents}</Row>

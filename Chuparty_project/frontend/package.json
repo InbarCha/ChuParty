@@ -21,6 +21,7 @@
     "react-elastic-carousel": "^0.6.1",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
+    "react-scroll-to-bottom": "^2.0.0",
     "react-scroll-to-component": "^1.0.2",
     "react-select": "^3.1.0",
     "react-slick": "^0.26.1",

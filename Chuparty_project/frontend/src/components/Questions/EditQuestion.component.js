@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { css } from "@emotion/core";
 import RotateLoader from "react-spinners/ClipLoader";
+import Select from "react-select";
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
   console.log("DEV enabled");
@@ -31,6 +32,9 @@ export class EditQuestion extends Component {
       subject: null,
       loading: false,
       loading_parent: this.props.loading,
+      selectSubjectsOptions: [],
+      selectedSubject: null,
+      subjectInput: "",
     };
   }
 
@@ -42,6 +46,7 @@ export class EditQuestion extends Component {
     let difficulty = question[body]["difficulty"];
     let course = question[body]["course"];
     let subject = question[body]["subject"];
+    let courseSubjects = localStorage["activeCourseSubjects"].split(",");
 
     this.setState({
       body: body,
@@ -50,6 +55,10 @@ export class EditQuestion extends Component {
       difficulty: difficulty,
       course: course,
       subject: subject,
+      selectedSubject: { label: subject, value: subject },
+      selectSubjectsOptions: courseSubjects.map((elm) => {
+        return { value: elm, label: elm };
+      }),
     });
 
     this.setState({ loading: false });
@@ -113,6 +122,18 @@ export class EditQuestion extends Component {
       .then((data) => {
         console.log(data);
         this.setState({ loading: false });
+
+        let activeCourseSubjects = localStorage["activeCourseSubjects"].split(
+          ","
+        );
+        if (activeCourseSubjects.indexOf(this.state.subject) < 0) {
+          activeCourseSubjects = [
+            ...activeCourseSubjects.filter((elm) => elm !== ""),
+            this.state.subject,
+          ];
+          localStorage["activeCourseSubjects"] = activeCourseSubjects;
+        }
+
         this.props.changedQuestion(data["Edited Question"], this.props.index);
         this.props.changeQuestionComponent(this.props.index, "QUESTION");
       })
@@ -134,9 +155,23 @@ export class EditQuestion extends Component {
       answers = [...answers.filter((answer) => answer !== "")];
       question[body]["answers"] = answers;
 
-      if (question[body]["subject"] !== "") {
+      if (
+        question[body]["subject"] === "" ||
+        question[body]["subject"] === null
+      ) {
+        question[body]["subject"] = this.state.subjectInput;
+      }
+      this.setState({
+        question: question,
+        subject: this.state.subjectInput,
+        answers: answers,
+      });
+
+      if (
+        question[body]["subject"] !== "" &&
+        question[body]["subject"] !== null
+      ) {
         this.setState({ loading: true });
-        this.setState({ question: question, answers: answers });
 
         //save changes to db and propagate changes to questions component
         this.saveChangesToDb();
@@ -277,19 +312,41 @@ export class EditQuestion extends Component {
     }
   };
 
-  subjectChanged = (e) => {
-    e.stopPropagation();
+  subjectChanged = (selectedOption) => {
+    let question = this.state.question;
+    let body = this.state.body;
 
-    if (!this.state.loading) {
-      let newVal = e.target.value;
+    if (selectedOption !== null) {
+      let subject = selectedOption["value"];
+      question[body]["subject"] = subject;
+      this.setState({
+        subject: subject,
+        question: question,
+      });
+    } else {
+      question[body]["subject"] = null;
+      this.setState({ subject: null, question: question, subjectInput: "" });
+    }
 
-      let question = this.state.question;
-      let body = Object.keys(question)[0];
+    this.setState({
+      selectedSubject: selectedOption,
+    });
+  };
 
-      question[body]["subject"] = newVal;
+  subjectInputChanged = (newInput) => {
+    this.setState({ subjectInput: newInput });
+  };
 
-      this.setState({ question: question, subject: newVal });
-      this.props.questionCopyChanged(this.props.index, question);
+  menuClosed = () => {
+    if (this.state.subject === null || this.state.subject === "") {
+      this.setState({
+        selectedSubject: {
+          label: this.state.subjectInput,
+          value: this.state.subjectInput,
+        },
+        subjectInput: this.state.subjectInput,
+        subject: this.state.subjectInput,
+      });
     }
   };
 
@@ -373,15 +430,17 @@ export class EditQuestion extends Component {
           onChange={(e) => this.correctAnswerChanged(e)}
         />
         <br /> <br />
-        <span className="question_detail_edit_title">נושא: </span>
-        <input
-          type="text"
-          defaultValue={this.state.subject || ""}
-          name={"question_subject_edit"}
-          dir="RTL"
-          className="question_subject_edit_input"
-          disabled={this.state.loading || this.state.loading_parent}
-          onChange={(e) => this.subjectChanged(e)}
+        <span className="correctAnswer_edit_title">נושא: </span>
+        <Select
+          placeholder="בחר נושא"
+          value={this.state.selectedSubject}
+          onChange={this.subjectChanged}
+          options={this.state.selectSubjectsOptions}
+          isDisabled={this.state.loading || this.state.loading_parent}
+          isClearable={true}
+          isRtl={true}
+          onInputChange={this.subjectInputChanged}
+          onMenuClose={this.menuClosed}
         />
         <br />
         <div

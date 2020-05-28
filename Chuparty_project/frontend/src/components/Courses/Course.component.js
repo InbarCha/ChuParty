@@ -24,10 +24,15 @@ export class Course extends Component {
 
   render() {
     let courseName = Object.keys(this.props.course)[0];
+    let courseSubjects = this.props.course[courseName]["subjects"];
     let newCourse = (
       <div
         className={"model col-centered"}
-        onClick={this.props.chooseActiveCourse.bind(this, courseName)}
+        onClick={this.props.chooseActiveCourse.bind(
+          this,
+          courseName,
+          courseSubjects
+        )}
       >
         <div className="model_container">
           <div className="model_name">

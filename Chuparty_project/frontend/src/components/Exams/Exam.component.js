@@ -11,7 +11,8 @@ export class Exam extends Component {
   chooseExam = () => {
     let activeExamID = Object.keys(this.props.exam)[0];
     localStorage["activeExamID"] = activeExamID;
-
+    localStorage["activeExamName"] = this.props.exam[activeExamID]["name"];
+    localStorage["activeExamDate"] = this.props.exam[activeExamID]["date"];
     if (localStorage["logged_type"] === "Lecturer") {
       this.props.parentClickHandler("LECTURER_QUESTIONS_PAGE");
     }

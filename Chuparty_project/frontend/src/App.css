@@ -361,6 +361,12 @@ hr {
   height: 50%;
   content: url("./assets/course.png");
 }
+.school_img {
+  width: 50%;
+  height: 50%;
+  margin-bottom: 20px;
+  content: url("./assets/school.png");
+}
 .user_school_label {
   font-family: "Courier New", Courier, monospace;
   color: blue;

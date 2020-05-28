@@ -193,6 +193,12 @@ def editQuestion_helpFunc(requestBody):
         if subjectObj.name != questionObj.subject.name:
             questionObj.subject = subjectObj
             changedSubjectFlg = True
+            courseObj = questionObj.course
+
+            if subjectObj.name not in [subject.name for subject in courseObj.subjects]:
+                subjectsObjsListCurr = courseObj.subjects
+                subjectsObjsListCurr.append(subjectObj)
+                Course.objects.filter(name=courseObj.name).update(subjects = subjectsObjsListCurr) 
 
     # change the question's answers list
     if 'ChangeAnswers' in requestBody.keys():

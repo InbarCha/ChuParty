@@ -1557,6 +1557,8 @@ def editExam(request):
 
                         # if the new question's subject is not in the exam subjects, add it
                         if questionObj.subject.name not in [subject.name for subject in examObj.subjects]:
+                            print(questionObj.subject.name)
+                            print([subject.name for subject in examObj.subjects])
                             examObj.subjects.append(questionObj.subject)
 
             # delete a question
@@ -2573,7 +2575,7 @@ def logIn(request):
                 userType = "Lecturer"
             elif Admin.objects.filter(username=username).count() > 0:
                 userType = "Admin"
-                school = "None"
+                schools = "None"
                 courses = "None"
             else: 
                 userType = "No User Type"
@@ -2669,7 +2671,7 @@ def register(request):
             }
         
         if accountType == "Student":
-            ret_json["schools"] = school
+            ret_json["schools"] = [school]
             ret_tuple = createStudent({"username": username, "school": school})
             isNewStudentCreated = ret_tuple[0]
 

@@ -135,7 +135,7 @@ export class Register extends Component {
     let school = "";
     let schools = "";
 
-    if (this.state.checkedAdmin) {
+    if (this.state.checkedStudent) {
       school = this.state.userSchool;
     } else if (
       this.state.checkedLecturer &&
@@ -229,7 +229,9 @@ export class Register extends Component {
             localStorage["logged_email"] = data["email"];
             localStorage["logged_type"] = data["type"];
             localStorage["logged_schools"] = data["schools"];
-            localStorage["activeSchool"] = data["schools"][0];
+            if (data["schools"] !== undefined) {
+              localStorage["activeSchool"] = data["schools"][0];
+            }
             localStorage["logged_courses"] = data["courses"];
 
             this.props.setLoggedIn(true);

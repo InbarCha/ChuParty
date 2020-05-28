@@ -103,6 +103,9 @@ export default class Admin extends Component {
                   localStorage.removeItem("last_name_to_edit_as_admin");
                   localStorage.removeItem("asAdmin_originalUsername");
                   localStorage.removeItem("logged_schools");
+                  localStorage.removeItem("activeCourseSubjects");
+                  localStorage.removeItem("activeExamName");
+                  localStorage.removeItem("activeExamDate");
                   this.props.setLoggedIn(false);
                   this.props.parentClickHandler("NON_AUTHENTICATED");
                 }
