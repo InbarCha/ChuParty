@@ -168,6 +168,27 @@ class ExamGradesObj(models.Model):
     class Meta:
         managed = False
 
+class QuestionsAnsweredPerSubject(models.Model):
+    subjectName = models.CharField(max_length = 30)
+    answeredCorrect = models.ArrayField(
+        model_container=Question
+    )
+    answeredWrong = models.ArrayField(
+        model_container=Question
+    )
+    class Meta:
+        managed = False
+
+class QuestionsAnsweredPerCourse(models.Model):
+    courseName = models.CharField(max_length=30)
+    questionsAnsweredPerSubject = models.ArrayField(
+        model_container=QuestionsAnsweredPerSubject
+    )
+
+    class Meta:
+        managed = False
+
+
 ###################################################
 # Student
 # To add new student:
@@ -185,6 +206,10 @@ class Student(models.Model):
     school = models.CharField(max_length=30, default="Computer Science")
     examsGradesList = models.ArrayField(
         model_container=ExamGradesObj
+    )
+    questionsAnsweredPerCourse = models.ArrayField(
+        model_container=QuestionsAnsweredPerCourse,
+        default=[]
     )
 
     def as_json(self):

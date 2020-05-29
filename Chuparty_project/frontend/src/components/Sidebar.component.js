@@ -42,21 +42,25 @@ export default class Home extends Component {
         <div className="side_description">
           <span>מבחנים</span>
         </div>
-        <div
-          className="side_item"
-          onClick={(e) => {
-            if (localStorage["logged_type"] === "Lecturer") {
-              this.state.parentClickHandler("LECTURER_QUESTIONS_PAGE");
-            } else {
-              this.state.parentClickHandler("QUESTIONS");
-            }
-          }}
-        >
-          <i className="material-icons">question_answer</i>
-        </div>
-        <div className="side_description">
-          <span>שאלות</span>
-        </div>
+        {localStorage["logged_type"] !== "Student" && (
+          <React.Fragment>
+            <div
+              className="side_item"
+              onClick={(e) => {
+                if (localStorage["logged_type"] === "Lecturer") {
+                  this.state.parentClickHandler("LECTURER_QUESTIONS_PAGE");
+                } else {
+                  this.state.parentClickHandler("QUESTIONS");
+                }
+              }}
+            >
+              <i className="material-icons">question_answer</i>
+            </div>
+            <div className="side_description">
+              <span>שאלות</span>
+            </div>
+          </React.Fragment>
+        )}
         <div
           className="side_item"
           onClick={(e) => this.state.parentClickHandler("FEEDBACK")}

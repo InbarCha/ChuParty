@@ -2968,19 +2968,148 @@ def deleteUser(request):
 submitResults()
 POST Body request:
 {
-	TODO: send user name/ID in request body
+	"username": inbarcha
     "items":[
-        answers: (5) ["132.13.168.0/22", "132.13.160.0/21", "132.13.168.0/21", "132.13.175.0/26", "0.0.0.0/0"]
-        correctAnswer: 3
-        difficulty: 2
-        question: "לנתב בעל טבלת הניתוב המצוינת הגיעה הודעה עם כתובת היעד: 132.133.175.90 ציין לאיזה רגל בנתב תועבר ההודעה?"
-        selectedAnswers: [4]
-        subject: "שכבת הרשת"
+        {
+            answers: (5) ["132.13.168.0/22", "132.13.160.0/21", "132.13.168.0/21", "132.13.175.0/26", "0.0.0.0/0"]
+            correctAnswer: 3
+            difficulty: 2
+            question: "לנתב בעל טבלת הניתוב המצוינת הגיעה הודעה עם כתובת היעד: 132.133.175.90 ציין לאיזה רגל בנתב תועבר ההודעה?"
+            selectedAnswers: [4]
+            subject: "שכבת הרשת"
+        }
     ]
 }
 '''
 #####################################################
 @csrf_exempt
 def submitResults(request):
-    print("bar was here and added an API that actually got trigerred SMILE")
-    return JsonResponse({ "Status": "results submitted" }, status=200)
+    if request.method == "POST":
+        # decode request body
+        body = parseRequestBody(request)
+
+        if 'items' not in body.keys() or 'username' not in body.keys():
+            return JsonResponse({"Status": "Can't Submit Results: 'items' or 'username' fields in not in request body"}, status=500)
+        items = body['items']
+        examID = body["examID"]
+        examGrade = body["grade"]
+        username = body['username']
+
+        try:
+            studentObj = Student.objects.get(username=username)
+        except Exception as e:
+               return JsonResponse(
+                {
+                        "Exception": str(e),
+                        "Status": f"Can't Submit Resuls: username {username} isn't a student",
+                    },
+                status=500
+            ) 
+        
+        # handle saving of examID and examGrade
+
+
+        for item in items:
+            answers = item["answers"]
+            correctAnswer = item["correctAnswer"]
+            difficulty = item["difficulty"]
+            questionBody = item["question"]
+            selectedAnswer = item["selectedAnswers"][0]
+            subject = item["subject"]
+
+            answeredCorretFlg = (correctAnswer == selectedAnswer)
+
+            # get the questionObj from DB
+            try:
+                questionObj = Question.objects.get(body=questionBody)
+                courseObj = questionObj.course
+                questionsAnsweredPerCourse = studentObj.questionsAnsweredPerCourse
+
+                foundCourseFlg = False
+                for i in range(len(questionsAnsweredPerCourse)):
+                    currQuestionsAnsweredPerCourse = questionsAnsweredPerCourse[i]
+
+                    if currQuestionsAnsweredPerCourse.courseName == courseObj.name:
+                        foundCourseFlg = True
+
+                        questionsAnsweredPerSubject = currQuestionsAnsweredPerCourse.questionsAnsweredPerSubject
+                        foundSubjectFlg = False;
+                        for j in range(len(questionsAnsweredPerSubject)):
+                            currQuestionsAnsweredPerSubject = questionsAnsweredPerSubject[j]
+
+                            if currQuestionsAnsweredPerSubject.subjectName == subject:
+                                foundSubjectFlg = True
+
+                                answeredCorrectList = currQuestionsAnsweredPerSubject.answeredCorrect
+                                answeredWrongList = currQuestionsAnsweredPerSubject.answeredWrong
+
+                                if questionObj.body in [question.body for question in answeredCorrectList]:
+                                    if answeredCorretFlg == False:
+                                        answeredCorrectList = [question for question in answeredCorrectList if question.body != questionObj.body]
+                                if questionObj.body in [question.body for question in answeredWrongList]:
+                                    if answeredCorretFlg == True:
+                                        answeredWrongList = [question for question in answeredWrongList if question.body != questionObj.body]
+
+                                if answeredCorretFlg == True:
+                                    if questionObj.body not in [question.body for question in answeredCorrectList]: 
+                                        answeredCorrectList.append(questionObj)
+                                else:
+                                    if questionObj.body not in [question.body for question in answeredWrongList]: 
+                                        answeredWrongList.append(questionObj)
+
+                                currQuestionsAnsweredPerSubject.answeredCorrect = answeredCorrectList
+                                currQuestionsAnsweredPerSubject.answeredWrong = answeredWrongList
+                                questionsAnsweredPerSubject[j] = currQuestionsAnsweredPerSubject
+                                questionsAnsweredPerCourse[i].questionsAnsweredPerSubject = questionsAnsweredPerSubject
+
+                                break
+                        
+                        if foundSubjectFlg == False:
+                            subjectName = subject
+                            answeredCorrect = []
+                            answeredWrong = []
+                            if answeredCorretFlg == True:
+                                answeredCorrect.append(questionObj)
+                            else:
+                                answeredWrong.append(questionObj)
+                            
+                            newQuestionsAnsweredPerSubject = QuestionsAnsweredPerSubject(subjectName=subjectName, answeredCorrect = answeredCorrect, answeredWrong = answeredWrong)
+                            questionsAnsweredPerCourse[i].questionsAnsweredPerSubject.append(newQuestionsAnsweredPerSubject)
+                    
+                        break
+                
+                if foundCourseFlg == False:
+                    subjectName = subject
+                    answeredCorrect = []
+                    answeredWrong = []
+                    if answeredCorretFlg == True:
+                        answeredCorrect.append(questionObj)
+                    else:
+                        answeredWrong.append(questionObj)
+
+                    newQuestionsAnsweredPerSubject = QuestionsAnsweredPerSubject(subjectName=subjectName, answeredCorrect = answeredCorrect, answeredWrong = answeredWrong)
+                    questionsAnsweredPerSubject = [newQuestionsAnsweredPerSubject]
+                    courseName = courseObj.name
+
+                    newQuestionsAnsweredPerCourse = QuestionsAnsweredPerCourse(courseName = courseName, questionsAnsweredPerSubject = questionsAnsweredPerSubject)
+                    questionsAnsweredPerCourse.append(newQuestionsAnsweredPerCourse)
+
+            except Exception as e:
+               return JsonResponse(
+                {
+                        "Exception": str(e)
+                    },
+                status=500
+            ) 
+        
+        Student.objects.filter(username=username).update(questionsAnsweredPerCourse=questionsAnsweredPerCourse)
+
+        return JsonResponse({ "Status": "results submitted" }, status=200)
+    else:
+        return JsonResponse(
+            {
+                    "Status": "submitResults() only accepts POST requests",
+                },
+            status=500
+        )
+   

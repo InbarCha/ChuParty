@@ -53,7 +53,7 @@ def createStudent(requestBody):
         if 'school' in requestBody.keys():
             school = requestBody["school"]
 
-        newStudent = Student(username=username, relevantCourses=coursesList, school=school, examsGradesList=examsGradesListFinal)
+        newStudent = Student(username=username, relevantCourses=coursesList, school=school, examsGradesList=examsGradesListFinal, questionsAnsweredPerCourse = [])
         newStudent.save()
 
         return (True, newStudent)
