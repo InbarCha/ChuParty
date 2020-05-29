@@ -3007,8 +3007,21 @@ def submitResults(request):
             ) 
         
         # handle saving of examID and examGrade
+        currExamGradesObj = ExamGradesObj(examID=examID, examGrade = examGrade)
+        studentExamsGradesList = studentObj.examsGradesList
 
+        examGradeObjFlg = False
+        for i in range(len(studentExamsGradesList)):
+            if examID == studentExamsGradesList[i].examID:
+                examGradeObjFlg = True
+                studentExamsGradesList[i].examGrade = examGrade
+        
+        if examGradeObjFlg == False:
+            studentExamsGradesList.append(currExamGradesObj)
+        
+        Student.objects.filter(username=username).update(examsGradesList=studentExamsGradesList)
 
+        # handle saving of questions answered correctly and incorrectly
         for item in items:
             answers = item["answers"]
             correctAnswer = item["correctAnswer"]
