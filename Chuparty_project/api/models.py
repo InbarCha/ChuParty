@@ -161,10 +161,40 @@ class Exam(models.Model):
         return json_dict
 
 
+class QuestionSubmitted(models.Model):
+    answers = models.ListField(
+        models.CharField(max_length=50),
+        max_length = 5
+    )
+    correctAnswer = models.IntegerField()
+    difficulty = models.IntegerField()
+    body = models.CharField(max_length=100)
+    selectedAnswers = models.ListField(
+        models.IntegerField()
+    )
+    subject = models.CharField(max_length=30)
+
+    def as_json(self):
+        ret_json = dict()
+        ret_json["answers"] = self.answers
+        ret_json["correctAnswer"] = self.correctAnswer
+        ret_json["body"] = self.body
+        ret_json["selectedAnswers"] = self.selectedAnswers
+        ret_json["subject"] = self.subject
+        ret_json["difficulty"] = self.difficulty
+
+        return ret_json
+
+    class Meta:
+        managed = False
+
 class ExamGradesObj(models.Model):
     examID = models.CharField(max_length=50)
     examGrade = models.IntegerField()
     dateSolved = models.DateField()
+    questionsSubmitted = models.ArrayField(
+        model_container=QuestionSubmitted
+    )
 
     objects = models.DjongoManager()
 
@@ -173,7 +203,9 @@ class ExamGradesObj(models.Model):
         ret_json["examID"] = self.examID
         ret_json["examGrade"] = self.examGrade 
         ret_json["dateSolved"] = self.dateSolved
-
+        if self.questionsSubmitted is not None:
+            ret_json["questionsSubmitted"] = [questionSubmitted.as_json() for questionSubmitted in self.questionsSubmitted]
+        
         return ret_json
 
     class Meta:

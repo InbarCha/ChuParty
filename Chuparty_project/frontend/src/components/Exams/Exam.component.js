@@ -16,9 +16,21 @@ export class Exam extends Component {
     if (localStorage["logged_type"] === "Lecturer") {
       this.props.parentClickHandler("LECTURER_QUESTIONS_PAGE");
     }
+    if (localStorage["logged_type"] === "Student") {
+      let examsSolved = JSON.parse(localStorage["logged_exams_solved"]);
+      for (var i = 0; i < examsSolved.length; i++) {
+        if (examsSolved[i]["examID"] == activeExamID) {
+          localStorage["activeSubmittedItems"] = JSON.stringify(
+            examsSolved[i]["questionsSubmitted"]
+          );
+          this.props.parentClickHandler("TEST_RESULTS");
+        }
+      }
+    }
   };
 
   takeExam = (event) => {
+    event.stopPropagation();
     localStorage["activeExamID"] = Object.keys(this.props.exam)[0];
     this.props.parentClickHandler("TEST");
   };
@@ -91,7 +103,7 @@ export class Exam extends Component {
               {" " + questions.length}
             </div>
             {localStorage["logged_type"] === "Student" && (
-              <div className="TakeExam" onClick={this.takeExam}>
+              <div className="TakeExam" onClick={(e) => this.takeExam(e)}>
                 <span className="btn btn-light">התחל מבחן!</span>
               </div>
             )}

@@ -17,7 +17,9 @@ export default class TestResult extends Component {
 
   async componentDidMount() {
     await this.setCorrectAnswers();
-    this.sendResults();
+    if (this.props.sendResultsFlg !== false) {
+      this.sendResults();
+    }
   }
 
   sendResults() {
@@ -41,6 +43,8 @@ export default class TestResult extends Component {
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
+        let examsSolved = data["Exams Solved"];
+        localStorage["logged_exams_solved"] = JSON.stringify(examsSolved);
       })
       .catch((err) => {
         console.error("error while submitting results", err);

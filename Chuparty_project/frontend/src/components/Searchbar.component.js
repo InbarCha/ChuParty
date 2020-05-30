@@ -51,6 +51,7 @@ export default class Home extends Component {
             localStorage.removeItem("activeExamName");
             localStorage.removeItem("activeExamDate");
             localStorage.removeItem("logged_exams_solved");
+            localStorage.removeItem("activeSubmittedItems");
             this.props.setLoggedIn(false);
             this.props.parentClickHandler("NON_AUTHENTICATED");
           }

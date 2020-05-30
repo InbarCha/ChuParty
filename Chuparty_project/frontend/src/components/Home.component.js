@@ -15,6 +15,7 @@ import Profile from "./Auth/Profile.component";
 import NonAuthenticated from "./Auth/NonAuthenticatedcomponent";
 import EditProfile from "./Auth/EditProfile.component";
 import LecturerQuestionsPage from "./Questions/LecturerQuestionsPage.component";
+import TestResult from "./TestResult.component";
 
 export default class Home extends Component {
   _isMounted = false;
@@ -170,6 +171,18 @@ export default class Home extends Component {
           this.setState({
             currentContentView: (
               <EditProfile parentClickHandler={this.onSideBarClick} />
+            ),
+          });
+        }
+        break;
+      case "TEST_RESULTS":
+        let submittedItems = JSON.parse(localStorage["activeSubmittedItems"]);
+        console.log(submittedItems);
+
+        if (submittedItems !== undefined && submittedItems !== null) {
+          this.setState({
+            currentContentView: (
+              <TestResult items={submittedItems} sendResultsFlg={false} />
             ),
           });
         }

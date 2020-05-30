@@ -1446,7 +1446,7 @@ def generateExam(request):
         for studentLevelPerSubject in studentLevelInSubjects:
             currQuestions = [question for question in questionsFromCourseAndSubjectsList if question.subject.name == studentLevelPerSubject[0] \
                                and question.difficulty > studentLevelPerSubject[1] and question.body not in [question.body for question in questionsStudentSolved]]
-                               
+
             # sort by difficulty - smaller difficulties (closer to the student's difficulty level) first
             currQuestions = sorted(currQuestions, key=operator.attrgetter('difficulty')) 
 
@@ -3031,7 +3031,9 @@ def deleteUser(request):
 submitResults()
 POST Body request:
 {
-	"username": inbarcha
+	"username": inbarcha,
+    "examGrade": 30,
+    "examID": examID,
     "items":[
         {
             answers: (5) ["132.13.168.0/22", "132.13.160.0/21", "132.13.168.0/21", "132.13.175.0/26", "0.0.0.0/0"]
@@ -3068,17 +3070,10 @@ def submitResults(request):
                     },
                 status=500
             ) 
-        
-        # handle saving of examID and examGrade
-        now = datetime.now()
-        dateObj = datetime.strptime(str(now.year) + "-" + str(now.month) + "-" + str(now.day), "%Y-%m-%d").date()
-        currExamGradesObj = ExamGradesObj(examID=examID, examGrade = examGrade, dateSolved=dateObj)
-        studentExamsGradesList = studentObj.examsGradesList
-        studentExamsGradesList.append(currExamGradesObj)
-        
-        Student.objects.filter(username=username).update(examsGradesList=studentExamsGradesList)
 
         # handle saving of questions answered correctly and incorrectly
+        questionsSubmitted = []
+
         for item in items:
             answers = item["answers"]
             correctAnswer = item["correctAnswer"]
@@ -3086,6 +3081,10 @@ def submitResults(request):
             questionBody = item["question"]
             selectedAnswer = item["selectedAnswers"][0]
             subject = item["subject"]
+
+            currQuestionSubmitted = QuestionSubmitted(answers = answers, correctAnswer = correctAnswer, difficulty = difficulty,
+                    body = questionBody, selectedAnswers=item["selectedAnswers"], subject=subject)
+            questionsSubmitted.append(currQuestionSubmitted)
 
             answeredCorretFlg = (correctAnswer == selectedAnswer)
 
@@ -3171,10 +3170,24 @@ def submitResults(request):
                     },
                 status=500
             ) 
-        
-        Student.objects.filter(username=username).update(questionsAnsweredPerCourse=questionsAnsweredPerCourse)
 
-        return JsonResponse({ "Status": "results submitted" }, status=200)
+        # handle saving of examID and examGrade
+        now = datetime.now()
+        dateObj = datetime.strptime(str(now.year) + "-" + str(now.month) + "-" + str(now.day) + " " + str(now.hour) + ":" + str(now.minute), "%Y-%m-%d %H:%M").date()
+        
+        currExamGradesObj = ExamGradesObj(examID=examID, examGrade = examGrade, dateSolved=dateObj, questionsSubmitted=questionsSubmitted)
+        studentExamsGradesList = studentObj.examsGradesList
+        studentExamsGradesList.append(currExamGradesObj)
+        
+        Student.objects.filter(username=username).update(questionsAnsweredPerCourse=questionsAnsweredPerCourse, examsGradesList=studentExamsGradesList)
+
+        return JsonResponse(
+            { 
+                "Exams Solved": [examGrade.as_json() for examGrade in studentExamsGradesList],
+                "Status": "results submitted" 
+            },
+            status=200
+        )
     else:
         return JsonResponse(
             {
