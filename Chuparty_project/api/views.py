@@ -1437,7 +1437,10 @@ def generateExam(request):
 
         # how many questions from each subject?
         if len(studentLevelInSubjects) < numberOfQuestions:
-            numQuestionsFromEachSubject = int(numberOfQuestions / len(studentLevelInSubjects))
+            if len(studentLevelInSubjects) == 0:
+                numQuestionsFromEachSubject = 0
+            else:
+                numQuestionsFromEachSubject = int(numberOfQuestions / len(studentLevelInSubjects))
         elif len(studentLevelInSubjects) >= numberOfQuestions:
             numQuestionsFromEachSubject = 1
         

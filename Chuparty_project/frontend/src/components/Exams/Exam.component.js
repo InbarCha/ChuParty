@@ -49,10 +49,12 @@ export class Exam extends Component {
     let subjects = this.props.exam[examID]["subjects"];
     let examGrade = "";
 
-    let examsSolved = JSON.parse(localStorage["logged_exams_solved"]);
-    for (var i = 0; i < examsSolved.length; i++) {
-      if (examsSolved[i]["examID"] == examID) {
-        examGrade = examsSolved[i]["examGrade"];
+    if (localStorage["logged_exams_solved"] !== undefined) {
+      let examsSolved = JSON.parse(localStorage["logged_exams_solved"]);
+      for (var i = 0; i < examsSolved.length; i++) {
+        if (examsSolved[i]["examID"] == examID) {
+          examGrade = examsSolved[i]["examGrade"];
+        }
       }
     }
 

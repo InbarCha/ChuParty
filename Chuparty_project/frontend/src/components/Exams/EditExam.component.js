@@ -49,10 +49,9 @@ export class EditExam extends Component {
     e.stopPropagation();
 
     if (!this.state.loading) {
-      this.setState({ loading: true });
-
       //TODO: change to message-boxן
       if (window.confirm("Are you sure you want to delete this exam?")) {
+        this.setState({ loading: true });
         let exam = this.props.exam_orig;
         let examID = Object.keys(exam)[0];
 
