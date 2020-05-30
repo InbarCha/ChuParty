@@ -41,7 +41,7 @@ def createQuestion(requestBody):
             course['subjects'] = list()
             appendSubjectToCourse = True
 
-        elif subject not in course['subjects']:
+        elif subject.name not in [subject["name"] for subject in course['subjects']]:
             appendSubjectToCourse = True
         #--------------------------------------
         if appendSubjectToCourse == True:

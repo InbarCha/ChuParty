@@ -110,6 +110,7 @@ export default class Courses extends Component {
   }
 
   deleteFromMyCourses = async (e, index) => {
+    this.setState({ checkV: false });
     let courseName = Object.keys(this.state.courses[index])[0];
     let courses = this.state.courses;
     // let local_courses = localStorage["logged_courses"].split(",");
@@ -158,6 +159,7 @@ export default class Courses extends Component {
   };
 
   changeCourseComponent = (index, component) => {
+    this.setState({ checkV: false });
     let sonComponents = this.state.sonComponents;
     let course_orig = "";
     let course_copy = "";
@@ -250,6 +252,7 @@ export default class Courses extends Component {
   }
 
   deleteFromSonComponents = (index) => {
+    this.setState({ checkV: false });
     let courses = this.state.courses;
     let sonComponents = this.state.sonComponents;
 
@@ -274,6 +277,7 @@ export default class Courses extends Component {
     let courses = this.state.courses;
     let all_courses = this.state.all_courses;
     this.setState({
+      checkV: false,
       courses: [...courses, course],
       all_courses: [...all_courses, course],
       sonComponents: sonComponents,

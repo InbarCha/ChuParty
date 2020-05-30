@@ -294,6 +294,17 @@ export class AddQuestion extends Component {
         console.log(data);
         this.props.addQuestionToSonComponents(data["Returned Question"]);
         this.setState({ loading: false });
+
+        let activeCourseSubjects = localStorage["activeCourseSubjects"].split(
+          ","
+        );
+        if (activeCourseSubjects.indexOf(this.state.subject) < 0) {
+          activeCourseSubjects = [
+            ...activeCourseSubjects.filter((elm) => elm !== ""),
+            this.state.subject,
+          ];
+          localStorage["activeCourseSubjects"] = activeCourseSubjects;
+        }
       })
       .then(() => {
         this.editExamWithNewQuestion();
