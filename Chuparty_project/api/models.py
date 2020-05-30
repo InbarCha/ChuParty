@@ -1,7 +1,9 @@
 from djongo import models
 from django import forms
 from enum import Enum
+from datetime import datetime
 from django.core.exceptions import ValidationError
+import operator
 import uuid
 
 
@@ -162,8 +164,17 @@ class Exam(models.Model):
 class ExamGradesObj(models.Model):
     examID = models.CharField(max_length=50)
     examGrade = models.IntegerField()
+    dateSolved = models.DateField()
 
-    objects = models.DjongoManager() 
+    objects = models.DjongoManager()
+
+    def as_json(self):
+        ret_json = dict()
+        ret_json["examID"] = self.examID
+        ret_json["examGrade"] = self.examGrade 
+        ret_json["dateSolved"] = self.dateSolved
+
+        return ret_json
 
     class Meta:
         managed = False
@@ -184,7 +195,6 @@ class QuestionsAnsweredPerCourse(models.Model):
     questionsAnsweredPerSubject = models.ArrayField(
         model_container=QuestionsAnsweredPerSubject
     )
-
     class Meta:
         managed = False
 
@@ -216,10 +226,16 @@ class Student(models.Model):
         json_dict = dict()
         json_dict["username"] = self.username
         json_dict["school"] = self.school
-        json_dict['relevantCourses'] = [course["name"] for course in self.relevantCourses]
+        json_dict['relevantCourses'] = self.relevantCourses
+        json_dict['examsGradesList'] = list()
+
+        myExamsGrades = list(self.examsGradesList)
+        # TODO: uncomment after deleting from the DB the examsGrades in "inbarcha" in which the date wasn't saved
+        # myExamsGrades = sorted(myExamsGrades, key=operator.attrgetter('dateSolved'), reverse = True)
+        for examGrade in myExamsGrades:
+            json_dict['examsGradesList'].append(examGrade.as_json())
 
         return json_dict
-
 
 class Lecturer(models.Model):
     username = models.CharField(max_length=30, default='inbar')

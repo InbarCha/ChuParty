@@ -1445,7 +1445,11 @@ def generateExam(request):
         questionsListSlice = []
         for studentLevelPerSubject in studentLevelInSubjects:
             currQuestions = [question for question in questionsFromCourseAndSubjectsList if question.subject.name == studentLevelPerSubject[0] \
-                                and question.body not in [question.body for question in questionsStudentSolved]]
+                               and question.difficulty > studentLevelPerSubject[1] and question.body not in [question.body for question in questionsStudentSolved]]
+                               
+            # sort by difficulty - smaller difficulties (closer to the student's difficulty level) first
+            currQuestions = sorted(currQuestions, key=operator.attrgetter('difficulty')) 
+
             questionsListSlice += currQuestions[:numQuestionsFromEachSubject]
         
         # if there aren't enough questions, pick more from questionsFromCourseAndSubjectsList (only chosen subjects)
@@ -2620,16 +2624,21 @@ def logIn(request):
                 student = Student.objects.get(username=username)
                 courses = student.relevantCourses
                 schools = [student.school]
+
+                examsSolved = student.as_json()["examsGradesList"]
+
                 userType = "Student"
             elif Lecturer.objects.filter(username=username).count() > 0:
                 lecturer = Lecturer.objects.get(username=username)
                 courses = lecturer.coursesTeaching
                 schools = lecturer.schools
+                examsSolved = "None"
                 userType = "Lecturer"
             elif Admin.objects.filter(username=username).count() > 0:
                 userType = "Admin"
                 schools = "None"
                 courses = "None"
+                examsSolved = "None"
             else: 
                 userType = "No User Type"
 
@@ -2643,6 +2652,7 @@ def logIn(request):
                     "type": userType,
                     "courses": courses,
                     "schools": schools,
+                    "examsSolved": examsSolved
                 }
             )
 
@@ -3060,17 +3070,11 @@ def submitResults(request):
             ) 
         
         # handle saving of examID and examGrade
-        currExamGradesObj = ExamGradesObj(examID=examID, examGrade = examGrade)
+        now = datetime.now()
+        dateObj = datetime.strptime(str(now.year) + "-" + str(now.month) + "-" + str(now.day), "%Y-%m-%d").date()
+        currExamGradesObj = ExamGradesObj(examID=examID, examGrade = examGrade, dateSolved=dateObj)
         studentExamsGradesList = studentObj.examsGradesList
-
-        examGradeObjFlg = False
-        for i in range(len(studentExamsGradesList)):
-            if examID == studentExamsGradesList[i].examID:
-                examGradeObjFlg = True
-                studentExamsGradesList[i].examGrade = examGrade
-        
-        if examGradeObjFlg == False:
-            studentExamsGradesList.append(currExamGradesObj)
+        studentExamsGradesList.append(currExamGradesObj)
         
         Student.objects.filter(username=username).update(examsGradesList=studentExamsGradesList)
 

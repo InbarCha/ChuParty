@@ -79,6 +79,11 @@ export class Login extends Component {
             if (data["schools"] !== undefined) {
               localStorage["activeSchool"] = data["schools"][0];
             }
+            if (data["examsSolved"] !== "None") {
+              localStorage["logged_exams_solved"] = JSON.stringify(
+                data["examsSolved"]
+              );
+            }
 
             this.props.setLoggedIn(true);
 

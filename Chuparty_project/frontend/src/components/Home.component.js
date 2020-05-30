@@ -140,6 +140,7 @@ export default class Home extends Component {
             <Login
               parentClickHandler={this.onSideBarClick}
               setLoggedIn={this.setLoggedIn}
+              saveExamsSolved={this.saveExamsSolved}
             />
           ),
         });
@@ -176,6 +177,10 @@ export default class Home extends Component {
       default:
         console.log("no clickMsg handler for:", clickMsg);
     }
+  };
+
+  saveExamsSolved = (examsSolved) => {
+    this.setState({ examsSolved: examsSolved });
   };
 
   setLoggedIn = (flg) => {

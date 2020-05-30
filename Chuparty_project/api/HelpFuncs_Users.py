@@ -117,7 +117,7 @@ Parameters:
 Returns:
     an array of tuples holding the student level in each subject: [("DNS", 2), ("TCP", 5)]
 Algorithm:
-    the studentObj holds an array which holds the level of the student for every subject, in every course.
+    the studentObj holds an array which holds the level of the student in every subject, in every course.
     for example:
         studentObj.questionsAnsweredPerCourse = [
             {
@@ -141,21 +141,23 @@ Algorithm:
         ]
 
     The algorithm pulls the relevent document for the currect course.
-    Then, for every relevant subjects (from the subjectsArr):
+    Then, for every relevant subject (from the subjectsArr parameters):
         it creates a list of the difficulty levels of all the questions the student answered correctly.
         it creates a list of the difficulty levels of all the questions the student answered wrongly.
         ----------------
-        it calculates the mean of all the easy quetions answered correct (difficulty < 5),
-            and the mean of all the hard questions answered correct (difficulty >=5)
-            then calculates the weighted mean average between those two means,
-            giving more weight to the hard questions answered correctly
-        it calculates the mean of all the easy quetions answered wrong (difficulty < 5),
-            and the mean of all the hard questions answered wrong (difficulty >=5)
-            then calculates the weighted mean average between those two means,
-            giving more weight to the hard questions answered wrong
+        it calculates the mean of all the easy quetions answered correctly (difficulty < 5),
+        and the mean of all the hard questions answered correctly (difficulty >=5)
+        then calculates the weighted mean between those two means (==> correctMean variable)
+        giving more weight to the mean of the hard questions answered correctly.
+        ---------------
+        it calculates the mean of all the easy quetions answered wrongly (difficulty < 5),
+        and the mean of all the hard questions answered wrongly (difficulty >=5)
+        then calculates the weighted mean between those two means (==> wrongMean variable)
+        giving more weight to the mean of hard questions answered wrongly
+        ----------------
         the total mean is calculated as max(0, correctMean - wrongMean)
         ----------------
-        it pushes to the return array a tuple: (relevant subject, student level in that subject)t
+        it pushes to the return array a tuple: (relevant subject, student level in that subject)
 '''
 ########################################################
 def calculateStudentLevelInSubjects(subjectsArr, courseObj, studentObj):

@@ -383,6 +383,11 @@ hr {
   font-size: large;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
 }
+.already_solved {
+  color: rgb(62, 197, 62);
+  font-size: medium;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+}
 .new_course_img {
   width: 50%;
   height: 50%;

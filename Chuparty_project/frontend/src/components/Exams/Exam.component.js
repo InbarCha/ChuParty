@@ -35,6 +35,14 @@ export class Exam extends Component {
     let writers = this.props.exam[examID]["writers"];
     let questions = this.props.exam[examID]["questions"];
     let subjects = this.props.exam[examID]["subjects"];
+    let examGrade = "";
+
+    let examsSolved = JSON.parse(localStorage["logged_exams_solved"]);
+    for (var i = 0; i < examsSolved.length; i++) {
+      if (examsSolved[i]["examID"] == examID) {
+        examGrade = examsSolved[i]["examGrade"];
+      }
+    }
 
     let newExam = (
       <div className={"model col-centered"} dir="RTL" onClick={this.chooseExam}>
@@ -53,6 +61,13 @@ export class Exam extends Component {
             <div className="model_name_text">
               {examName} <br /> {examDate}
             </div>
+            {examGrade !== "" && (
+              <React.Fragment>
+                <div className="already_solved">
+                  פתרת מבחן זה בעבר - ציון אחרון: {examGrade}
+                </div>
+              </React.Fragment>
+            )}
           </div>
           <div className="details_container">
             <div className="detail_container">
