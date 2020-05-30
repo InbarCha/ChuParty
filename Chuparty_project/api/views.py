@@ -7,6 +7,7 @@ from django.middleware.csrf import get_token
 import json
 from django.http import JsonResponse
 import operator
+import time
 from random import shuffle
 from datetime import datetime
 from urllib.parse import unquote
@@ -3176,9 +3177,14 @@ def submitResults(request):
 
         # handle saving of examID and examGrade
         now = datetime.now()
-        dateObj = datetime.strptime(str(now.year) + "-" + str(now.month) + "-" + str(now.day) + " " + str(now.hour) + ":" + str(now.minute), "%Y-%m-%d %H:%M").date()
+        dateObj = datetime.strptime(str(now.year) + "-" + str(now.month) + "-" + str(now.day), "%Y-%m-%d").date()
+
+        hourFormatted = "{:02d}".format(now.hour)
+        minutedFormatted = "{:02d}".format(now.minute)
+        currentTime = hourFormatted + ":" + minutedFormatted
         
-        currExamGradesObj = ExamGradesObj(examID=examID, examGrade = examGrade, dateSolved=dateObj, questionsSubmitted=questionsSubmitted)
+        currExamGradesObj = ExamGradesObj(examID=examID, examGrade = examGrade, dateSolved=dateObj, questionsSubmitted=questionsSubmitted,
+                                            courseName=courseObj.name, timeSolved=currentTime)
         studentExamsGradesList = studentObj.examsGradesList
         studentExamsGradesList.append(currExamGradesObj)
         

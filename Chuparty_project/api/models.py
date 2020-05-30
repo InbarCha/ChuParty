@@ -191,6 +191,8 @@ class QuestionSubmitted(models.Model):
 class ExamGradesObj(models.Model):
     examID = models.CharField(max_length=50)
     examGrade = models.IntegerField()
+    courseName = models.CharField(max_length=30)
+    timeSolved = models.CharField(max_length=30)
     dateSolved = models.DateField()
     questionsSubmitted = models.ArrayField(
         model_container=QuestionSubmitted
@@ -202,6 +204,8 @@ class ExamGradesObj(models.Model):
         ret_json = dict()
         ret_json["examID"] = self.examID
         ret_json["examGrade"] = self.examGrade 
+        ret_json["courseName"] = self.courseName
+        ret_json["timeSolved"] = self.timeSolved
         ret_json["dateSolved"] = self.dateSolved
         if self.questionsSubmitted is not None:
             ret_json["questionsSubmitted"] = [questionSubmitted.as_json() for questionSubmitted in self.questionsSubmitted]
