@@ -412,6 +412,8 @@ export class EditQuestion extends Component {
           type="number"
           defaultValue={this.state.difficulty || ""}
           name={"question_difficulty_edit"}
+          min={1}
+          max={10}
           dir="RTL"
           className="question_difficulty_edit_input"
           disabled={this.state.loading || this.state.loading_parent}

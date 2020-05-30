@@ -397,6 +397,8 @@ export class AddQuestion extends Component {
           defaultValue={this.state.difficulty || ""}
           name={"question_difficulty_edit"}
           className="question_difficulty_edit_input"
+          min={1}
+          max={10}
           disabled={this.state.loading}
           dir="RTL"
           onChange={(e) => this.difficultyChanged(e)}

@@ -1383,9 +1383,15 @@ and generates an exam out of it.
 
 POST body:
 {
-    "numberOfQuestions": 10
-    "course": "Computer Networks"
+    "username": "inbarcha",
+    "numberOfQuestions": 10,
+    "course": "Computer Networks",
+    "subjects": [
+        "שכבת התעבורה", "תכנותי"
+    ]
 }
+if "subjects" is not specified, the subjects will be chosen at random
+the preference is given to questions that haven't already been solved by the student
 '''
 ##################################################
 @csrf_exempt
@@ -1395,21 +1401,68 @@ def generateExam(request):
         body = parseRequestBody(request)
 
         # name
-        if 'numberOfQuestions' not in body.keys() or 'course' not in body.keys():
-            return JsonResponse({"Status": "Can't Generate Exam - 'numberOfQuestions' / 'course' not specified"}, status=500)
+        if 'username' not in body.keys() or 'numberOfQuestions' not in body.keys() or 'course' not in body.keys():
+            return JsonResponse({"Status": "Can't Generate Exam - 'username' / 'numberOfQuestions' / 'course' not specified"}, status=500)
+        username = body['username']
         numberOfQuestions = body['numberOfQuestions']
         course = body['course']
+
         if Course.objects.filter(name=course).count() > 0:
             courseObj = Course.objects.get(name=course)
         else:
             return JsonResponse({
                 "Status": f"Course {course} Doesn't Exist"
             })
+        
+        if Student.objects.filter(username=username).count() > 0:
+            studentObj = Student.objects.get(username=username)
+        else:
+            return JsonResponse({
+                "Status": f"User {username} Is Not a Student"
+            })
+        
+        if 'subjects' in body.keys():
+            subjects = body["subjects"]
+        else:
+            subjects = [subject.name for subject in courseObj.subjects]
 
-        # pick the number of questions as specified, from the specified course
-        questionsList = list(Question.objects.filter(course=courseObj))
-        shuffle(questionsList)
-        questionsListSlice = questionsList[:numberOfQuestions]
+        studentLevelInSubjects = calculateStudentLevelInSubjects(subjects, courseObj, studentObj)
+        questionsStudentSolved = getAllQuestionstTheStudentSolvedFromCourse(studentObj, courseObj)
+
+        # pick the number of questions as specified, from the specified courses and subjects, 
+        # choosing questions from every subject with difficulty level slightly higher than the level
+        # of the student in that subject
+        questionsFromCouresList = list(Question.objects.filter(course=courseObj))
+        questionsFromCourseAndSubjectsList = [questionObj for questionObj in questionsFromCouresList if questionObj.subject.name in subjects]
+
+        # how many questions from each subject?
+        if len(studentLevelInSubjects) < numberOfQuestions:
+            numQuestionsFromEachSubject = int(numberOfQuestions / len(studentLevelInSubjects))
+        elif len(studentLevelInSubjects) >= numberOfQuestions:
+            numQuestionsFromEachSubject = 1
+        
+        # pick the questions - giving preference to questions the user didn't already solve
+        questionsListSlice = []
+        for studentLevelPerSubject in studentLevelInSubjects:
+            currQuestions = [question for question in questionsFromCourseAndSubjectsList if question.subject.name == studentLevelPerSubject[0] \
+                                and question.body not in [question.body for question in questionsStudentSolved]]
+            questionsListSlice += currQuestions[:numQuestionsFromEachSubject]
+        
+        # if there aren't enough questions, pick more from questionsFromCourseAndSubjectsList (only chosen subjects)
+        if len(questionsListSlice) < numberOfQuestions:
+            for question in questionsFromCourseAndSubjectsList:
+                if question.body not in questionsListSlice:
+                    questionsListSlice.append(question)
+                if (len(questionsListSlice) == numberOfQuestions):
+                    break
+        
+        # if there aren't enough questions, pick more from questionsFromCouresList (all subjects)
+        if len(questionsListSlice) < numberOfQuestions:
+            for question in questionsFromCouresList:
+                if question.body not in questionsListSlice:
+                    questionsListSlice.append(question)
+                if (len(questionsListSlice) == numberOfQuestions):
+                    break
 
         # exam name and date
         now = datetime.now()

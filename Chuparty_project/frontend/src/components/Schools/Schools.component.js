@@ -205,14 +205,11 @@ export default class Schools extends Component {
 
   getSchoolsArr() {
     return (
-      <React.Fragment>
-        <div className="page_title"> Schools </div>
+      <div dir="RTL">
+        <div className="page_title"> בתי ספר </div>
         {this.state.activeSchool !== "" && (
           <React.Fragment>
             <div className="active_model_title">
-              <span style={{ fontStyle: "italic", fontSize: "x-large" }}>
-                Select School:{" "}
-              </span>
               <span className="active_model">{this.state.activeSchool}</span>
             </div>
           </React.Fragment>
@@ -228,7 +225,7 @@ export default class Schools extends Component {
           )}
           <Row>{this.state.sonComponents}</Row>
         </Container>
-      </React.Fragment>
+      </div>
     );
   }
 
@@ -237,8 +234,8 @@ export default class Schools extends Component {
       this.state.schools !== null ? (
         this.getSchoolsArr()
       ) : (
-        <div className="col-centered models_loading">
-          <div className="loading_title"> Loading Schools... </div>
+        <div className="col-centered models_loading" dir="RTL">
+          <div className="loading_title"> טוען בתי ספר... </div>
           <RotateLoader css={override} size={50} />
         </div>
       );

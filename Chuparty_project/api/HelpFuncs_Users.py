@@ -1,5 +1,6 @@
 from api.models import *
 from api.HelpFuncs_Courses import *
+import statistics, math
 
 ########################################################
 # createStudent
@@ -104,3 +105,122 @@ def createLecturer(requestBody):
         newLecturer.save()
 
         return (True, newLecturer)
+
+
+########################################################
+'''
+calculateStudentLevelInSubjects
+help function
+Parameters:
+    subjectsArr: the array of subjects for which the student level needs to be calculated
+    studentObj: the student objects as pulled from the DB
+Returns:
+    an array of tuples holding the student level in each subject: [("DNS", 2), ("TCP", 5)]
+Algorithm:
+    the studentObj holds an array which holds the level of the student for every subject, in every course.
+    for example:
+        studentObj.questionsAnsweredPerCourse = [
+            {
+                courseName: "Computer Networks",
+                questionsAnsweredPerSubject: [
+                    {
+                        "subjectName": "DNS",
+                        "answeredCorrect": [{...}, {...}] //questions objects
+                        "answeredWrong": [{...}, {...}] //questions objects
+                    },
+                    {
+                        "subjectName": "TCP",
+                        "answeredCorrect": [{...}, {...}] //questions objects
+                        "answeredWrong": [{...}, {...}] //questions objects
+                    }
+                ]
+            },
+            {
+                ...... //another course
+            }
+        ]
+
+    The algorithm pulls the relevent document for the currect course.
+    Then, for every relevant subjects (from the subjectsArr):
+        it creates a list of the difficulty levels of all the questions the student answered correctly.
+        it creates a list of the difficulty levels of all the questions the student answered wrongly.
+        ----------------
+        it calculates the mean of all the easy quetions answered correct (difficulty < 5),
+            and the mean of all the hard questions answered correct (difficulty >=5)
+            then calculates the weighted mean average between those two means,
+            giving more weight to the hard questions answered correctly
+        it calculates the mean of all the easy quetions answered wrong (difficulty < 5),
+            and the mean of all the hard questions answered wrong (difficulty >=5)
+            then calculates the weighted mean average between those two means,
+            giving more weight to the hard questions answered wrong
+        the total mean is calculated as max(0, correctMean - wrongMean)
+        ----------------
+        it pushes to the return array a tuple: (relevant subject, student level in that subject)t
+'''
+########################################################
+def calculateStudentLevelInSubjects(subjectsArr, courseObj, studentObj):
+    resArr = []
+
+    releventCourseAnsweredList = [questionsAnsweredPerCourse for questionsAnsweredPerCourse in studentObj.questionsAnsweredPerCourse \
+                            if questionsAnsweredPerCourse.courseName == courseObj.name]
+
+    if releventCourseAnsweredList: # not empty
+        questionsAnsweredPerCourse_curr = releventCourseAnsweredList[0]
+
+        relevantSubjectsAnsweredList = [questionsAnsweredPerSubject for questionsAnsweredPerSubject in questionsAnsweredPerCourse_curr.questionsAnsweredPerSubject \
+                                    if questionsAnsweredPerSubject.subjectName in subjectsArr]
+
+        if relevantSubjectsAnsweredList: # not empty
+            for subjectQuestionsAnswered in relevantSubjectsAnsweredList:
+                # answered correct
+                easyDiffLvlQuestionsAnsweredCorrect = [question.difficulty for question in subjectQuestionsAnswered.answeredCorrect if question.difficulty < 5]
+                if len(easyDiffLvlQuestionsAnsweredCorrect) == 0:
+                    easyDiffLvlQuestionsAnsweredCorrect.append(0)
+                hardDiffLvlQuestionsAnsweredCorrect = [question.difficulty for question in subjectQuestionsAnswered.answeredCorrect if question.difficulty >= 5]
+                if len(hardDiffLvlQuestionsAnsweredCorrect) == 0:
+                    hardDiffLvlQuestionsAnsweredCorrect.append(0)
+
+                meanEasyCorrect = statistics.mean(easyDiffLvlQuestionsAnsweredCorrect)
+                meanHardCorrect = statistics.mean(hardDiffLvlQuestionsAnsweredCorrect)
+
+                meanCorrect = (0.4 * meanEasyCorrect) + (0.6 * meanHardCorrect) 
+
+                # answered wrong
+                easyDiffLvlQuestionsAnsweredWrong = [question.difficulty for question in subjectQuestionsAnswered.answeredWrong if question.difficulty < 5]
+                if len(easyDiffLvlQuestionsAnsweredWrong) == 0:
+                    easyDiffLvlQuestionsAnsweredWrong.append(0)
+                hardDiffLvlQuestionsAnsweredWrong = [question.difficulty for question in subjectQuestionsAnswered.answeredWrong if question.difficulty >= 5]
+                if len(hardDiffLvlQuestionsAnsweredWrong) == 0:
+                    hardDiffLvlQuestionsAnsweredWrong.append(0)
+
+                meanEasyWrong = statistics.mean(easyDiffLvlQuestionsAnsweredWrong)
+                meanHardWrong = statistics.mean(hardDiffLvlQuestionsAnsweredWrong)
+
+                meanWrong = (0.4 * meanEasyWrong) + (0.6 * meanHardWrong)
+
+                # total mean
+                totalMean = max(0, round(meanCorrect - meanWrong))
+
+                resArr.append((subjectQuestionsAnswered.subjectName, totalMean))
+
+    return resArr
+
+
+########################################################
+# getAllQuestionstTheStudentSolved(username)
+# help function
+########################################################
+def getAllQuestionstTheStudentSolvedFromCourse(studentObj, courseObj):
+    retList = []
+
+    releventCourseAnsweredList = [questionsAnsweredPerCourse for questionsAnsweredPerCourse in studentObj.questionsAnsweredPerCourse \
+                            if questionsAnsweredPerCourse.courseName == courseObj.name]
+    
+    if releventCourseAnsweredList: # not empty
+        questionsAnsweredPerCourse_curr = releventCourseAnsweredList[0]
+
+        for obj in questionsAnsweredPerCourse_curr.questionsAnsweredPerSubject:
+            retList += obj.answeredCorrect + obj.answeredWrong
+
+    return retList
+    
