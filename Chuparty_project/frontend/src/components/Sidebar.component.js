@@ -63,7 +63,7 @@ export default class Home extends Component {
         )}
         <div
           className="side_item"
-          onClick={(e) => this.state.parentClickHandler("FEEDBACK")}
+          onClick={(e) => this.state.parentClickHandler("STATISTICS")}
         >
           <i className="material-icons">message</i>
         </div>

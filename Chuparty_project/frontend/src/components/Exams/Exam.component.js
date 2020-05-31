@@ -19,7 +19,7 @@ export class Exam extends Component {
     if (localStorage["logged_type"] === "Student") {
       let examsSolved = JSON.parse(localStorage["logged_exams_solved"]);
       for (var i = 0; i < examsSolved.length; i++) {
-        if (examsSolved[i]["examID"] == activeExamID) {
+        if (examsSolved[i]["examID"] === activeExamID) {
           localStorage["activeSubmittedItems"] = JSON.stringify(
             examsSolved[i]["questionsSubmitted"]
           );
@@ -52,7 +52,7 @@ export class Exam extends Component {
     if (localStorage["logged_exams_solved"] !== undefined) {
       let examsSolved = JSON.parse(localStorage["logged_exams_solved"]);
       for (var i = 0; i < examsSolved.length; i++) {
-        if (examsSolved[i]["examID"] == examID) {
+        if (examsSolved[i]["examID"] === examID) {
           examGrade = examsSolved[i]["examGrade"];
         }
       }

@@ -5,7 +5,7 @@ import Sidebar from "./Sidebar.component";
 import Schools from "./Schools/Schools.component";
 import Courses from "./Courses/Courses.component";
 import Exams from "./Exams/Exams.component";
-import Feedback from "./Feedback.component";
+import Statistics from "./Statistics/Statistics.component";
 import Test from "./Test.component";
 import Admin from "./Admin.component";
 import Questions from "./Questions/Questions.component";
@@ -105,8 +105,8 @@ export default class Home extends Component {
       case "TEST":
         this.setState({ currentContentView: <Test /> });
         break;
-      case "FEEDBACK":
-        this.setState({ currentContentView: <Feedback /> });
+      case "STATISTICS":
+        this.setState({ currentContentView: <Statistics /> });
         break;
       case "ADMIN":
         this.setState({

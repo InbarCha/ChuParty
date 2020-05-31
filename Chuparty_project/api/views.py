@@ -2626,22 +2626,25 @@ def logIn(request):
             # check if user is Student, lecturer or admin
             if Student.objects.filter(username=username).count() > 0:
                 student = Student.objects.get(username=username)
+                studentJson = student.as_json()
                 courses = student.relevantCourses
                 schools = [student.school]
-
-                examsSolved = student.as_json()["examsGradesList"]
+                questionsAnswered = studentJson["questionsAnsweredPerCourse"]
+                examsSolved = studentJson["examsGradesList"]
 
                 userType = "Student"
             elif Lecturer.objects.filter(username=username).count() > 0:
                 lecturer = Lecturer.objects.get(username=username)
                 courses = lecturer.coursesTeaching
                 schools = lecturer.schools
+                questionsAnswered = "None"
                 examsSolved = "None"
                 userType = "Lecturer"
             elif Admin.objects.filter(username=username).count() > 0:
                 userType = "Admin"
                 schools = "None"
                 courses = "None"
+                questionsAnswered = "None"
                 examsSolved = "None"
             else: 
                 userType = "No User Type"
@@ -2656,7 +2659,8 @@ def logIn(request):
                     "type": userType,
                     "courses": courses,
                     "schools": schools,
-                    "examsSolved": examsSolved
+                    "examsSolved": examsSolved,
+                    "questionsAnswered": questionsAnswered
                 }
             )
 

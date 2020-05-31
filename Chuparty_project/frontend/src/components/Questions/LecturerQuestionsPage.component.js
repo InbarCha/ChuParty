@@ -13,7 +13,6 @@ export class LecturerQuestionsPage extends Component {
       fileChosen: null,
       examName: localStorage["activeExamName"],
       examDate: localStorage["activeExamDate"],
-      activeExamsID: localStorage["activeExamID"],
       activeCourse: localStorage["activeCourse"],
     };
   }

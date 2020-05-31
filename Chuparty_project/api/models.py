@@ -223,6 +223,21 @@ class QuestionsAnsweredPerSubject(models.Model):
     answeredWrong = models.ArrayField(
         model_container=Question
     )
+
+    def as_json(self):
+        json_dict = dict()
+        json_dict["subjectName"] = self.subjectName
+
+        json_dict["answeredCorrect"] = list()
+        for question in self.answeredCorrect:
+            json_dict["answeredCorrect"].append(question.as_json())
+
+        json_dict["answeredWrong"] = list()
+        for question in self.answeredWrong:
+            json_dict["answeredWrong"].append(question.as_json())
+        
+        return json_dict
+
     class Meta:
         managed = False
 
@@ -231,6 +246,17 @@ class QuestionsAnsweredPerCourse(models.Model):
     questionsAnsweredPerSubject = models.ArrayField(
         model_container=QuestionsAnsweredPerSubject
     )
+
+    def as_json(self):
+        json_dict = dict()
+        json_dict["courseName"] = self.courseName
+
+        json_dict["questionsAnsweredPerSubject"] = list()
+        for questionAnswered in self.questionsAnsweredPerSubject:
+            json_dict["questionsAnsweredPerSubject"].append(questionAnswered.as_json())
+
+        return json_dict
+
     class Meta:
         managed = False
 
@@ -263,13 +289,16 @@ class Student(models.Model):
         json_dict["username"] = self.username
         json_dict["school"] = self.school
         json_dict['relevantCourses'] = self.relevantCourses
-        json_dict['examsGradesList'] = list()
 
+        json_dict['examsGradesList'] = list()
         myExamsGrades = list(self.examsGradesList)
-        # TODO: uncomment after deleting from the DB the examsGrades in "inbarcha" in which the date wasn't saved
-        # myExamsGrades = sorted(myExamsGrades, key=operator.attrgetter('dateSolved'), reverse = True)
+        myExamsGrades = sorted(myExamsGrades, key=operator.attrgetter('dateSolved', 'timeSolved'), reverse = True)
         for examGrade in myExamsGrades:
             json_dict['examsGradesList'].append(examGrade.as_json())
+
+        json_dict['questionsAnsweredPerCourse'] = list()
+        for questionsAnswered in self.questionsAnsweredPerCourse:
+            json_dict["questionsAnsweredPerCourse"].append(questionsAnswered.as_json())
 
         return json_dict
 

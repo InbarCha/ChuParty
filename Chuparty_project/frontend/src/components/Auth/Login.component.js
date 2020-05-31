@@ -84,6 +84,11 @@ export class Login extends Component {
                 data["examsSolved"]
               );
             }
+            if (data["questionsAnswered"] !== "None") {
+              localStorage["logged_questions_answered"] = JSON.stringify(
+                data["questionsAnswered"]
+              );
+            }
 
             this.props.setLoggedIn(true);
 

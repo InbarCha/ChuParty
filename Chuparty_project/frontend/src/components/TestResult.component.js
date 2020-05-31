@@ -57,7 +57,7 @@ export default class TestResult extends Component {
     let _correct = items
       .map((elm) => {
         if (elm.selectedAnswers.length === 1) {
-          return elm.correctAnswer == elm.selectedAnswers[0] ? 1 : 0;
+          return elm.correctAnswer === elm.selectedAnswers[0] ? 1 : 0;
         } else if (elm.correctAnswer instanceof Array) {
           if (elm.correctAnswer.length === elm.selectedAnswers.length) {
             for (let i = 0; i < elm.correctAnswer.length; i++) {
@@ -101,7 +101,7 @@ export default class TestResult extends Component {
               {elm.answers.map((answer, j) => {
                 let cls = "answer";
                 if (elm.correctAnswer === j) cls += " correctAnswer";
-                if (elm.selectedAnswers.indexOf(j) != -1)
+                if (elm.selectedAnswers.indexOf(j) !== -1)
                   cls += " selectedAnswer";
                 return <p className={cls}>{answer}</p>;
               })}
