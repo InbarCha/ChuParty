@@ -227,20 +227,6 @@ def getAllQuestionstTheStudentSolvedFromCourse(studentObj, courseObj):
     return retList
 
 ########################################################
-# calculateSuccessNumsPerSubject(questionsAnsweredPerCourse)
-# help function
-########################################################
-def calculateSuccessNumsPerSubject(questionsAnsweredPerCourse): 
-    ret_list = []
-
-    for questionsAnsweredPerSubject in questionsAnsweredPerCourse.questionsAnsweredPerSubject:
-        numAnsweredCorrect = len(questionsAnsweredPerSubject.answeredCorrect)
-        numAnsweredWrong = len(questionsAnsweredPerSubject.answeredWrong)
-        ret_list.append((questionsAnsweredPerSubject.subjectName, numAnsweredCorrect / (numAnsweredWrong + numAnsweredCorrect)))
-    
-    return ret_list
-
-########################################################
 # calculateSuccessRatesForCourse(courseName)
 # help function
 '''
@@ -291,4 +277,30 @@ def calculateSuccessRatesForCourse(courseName):
         temp_dict[key] = int(finalVal)
                 
     return temp_dict
+
+
+########################################################
+# calculateSuccessRatesForCourse(courseName)
+########################################################
+def calculateAverageGradeForCourse(courseName):
+    allStudents = Student.objects.all()
+
+    allStudentsAvgGradeInCourse = []
+    for student in allStudents:
+        studentExamsGradesList = student.examsGradesList
+
+        gradesListForCourse = []
+        for examSolved in studentExamsGradesList:
+            if examSolved.courseName == courseName:
+                gradesListForCourse.append(examSolved.examGrade)
+        
+        if len(gradesListForCourse) != 0:
+            allStudentsAvgGradeInCourse.append(sum(gradesListForCourse) / len(gradesListForCourse))
+        else:
+            allStudentsAvgGradeInCourse.append(0)
+    
+    if len(allStudentsAvgGradeInCourse) == 0:
+        return 0
+    else:
+        return int(sum(allStudentsAvgGradeInCourse) / len(allStudentsAvgGradeInCourse))
 

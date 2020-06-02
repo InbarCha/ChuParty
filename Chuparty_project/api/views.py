@@ -3213,35 +3213,40 @@ def submitResults(request):
 
 ######################################################
 '''
-getAllStudentsSuccessRates()
+getStudentsStatistics()
 GET
-ret_list = [
+ret_list = 
     {
-        "courseName": "רשתות תקשורת"
-        "successRatesPerSubject":{
+        "רשתות תקשורת": 
+        {
             "DNS": 40, //%
             "TCP": 50 //%
         }
     }
-]
+
 '''
 #####################################################
-def getAllStudentsSuccessRatesPerCourse(request):
+def getStudentsStatistics(request):
     if request.method == "GET":
         courseNamesList = [course.name for course in Course.objects.all()]
 
-        ret_dict = dict()
+        ret_dict_success_rates = dict()
         for courseName in courseNamesList:
             temp_ret_dict = calculateSuccessRatesForCourse(courseName)
             if len(temp_ret_dict.keys()) > 0:
-                ret_dict[courseName] = temp_ret_dict
+                ret_dict_success_rates[courseName] = temp_ret_dict
 
-        return JsonResponse(ret_dict)
+        ret_dict_avg_grade = dict()
+        for courseName in courseNamesList:
+            avgGradeForCourse = calculateAverageGradeForCourse(courseName)
+            ret_dict_avg_grade[courseName] = avgGradeForCourse
+        
+        return JsonResponse({"Students Success Rates": ret_dict_success_rates, "Students Average Grade": ret_dict_avg_grade})
 
     else:
         return JsonResponse(
             {
-                    "Status": "getAllStudentsSuccessRates() only accepts GET requests",
+                    "Status": "getStudentsStatistics() only accepts GET requests",
                 },
             status=500
         )
