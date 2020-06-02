@@ -61,15 +61,19 @@ export default class Home extends Component {
             </div>
           </React.Fragment>
         )}
-        <div
-          className="side_item"
-          onClick={(e) => this.state.parentClickHandler("STATISTICS")}
-        >
-          <i className="material-icons">message</i>
-        </div>
-        <div className="side_description">
-          <span>סטטיסטיקה</span>
-        </div>
+        {localStorage["logged_type"] !== "Admin" && (
+          <React.Fragment>
+            <div
+              className="side_item"
+              onClick={(e) => this.state.parentClickHandler("STATISTICS")}
+            >
+              <i className="material-icons">message</i>
+            </div>
+            <div className="side_description">
+              <span>סטטיסטיקה</span>
+            </div>
+          </React.Fragment>
+        )}
         {localStorage["logged_type"] === "Admin" && (
           <React.Fragment>
             <div

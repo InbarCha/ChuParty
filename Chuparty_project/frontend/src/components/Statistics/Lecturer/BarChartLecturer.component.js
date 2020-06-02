@@ -128,6 +128,13 @@ export class BarChartLecturer extends Component {
             },
             ticks: {
               beginAtZero: true,
+              callback: function (value) {
+                if (value < 1) {
+                  return (value * 100).toFixed(0) + "%"; // convert it to percentage
+                } else {
+                  return value.toFixed(0) + "%"; // convert it to percentage
+                }
+              },
             },
             scaleLabel: {
               display: true,
