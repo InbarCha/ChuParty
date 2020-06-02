@@ -121,7 +121,7 @@ export class Login extends Component {
     return (
       <div>
         <div dir="RTL" className="page_title_unauth">
-          ברוכים הבאים לChuparty!{" "}
+          ברוכים הבאים לChuParty!{" "}
         </div>
         <hr />
         <Row>
