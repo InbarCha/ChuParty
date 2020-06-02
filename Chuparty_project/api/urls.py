@@ -55,6 +55,7 @@ urlpatterns = [
     path('getLecturers', views.getLecturers),
     path('getLecturerByUsername', views.getLecturerByUsername),
     path('deleteLecturer', views.deleteLecturer),
+    path ('getAllStudentsSuccessRatesPerCourse',views.getAllStudentsSuccessRatesPerCourse),
 
     # admin
     path('setAdmin', views.setAdmin),

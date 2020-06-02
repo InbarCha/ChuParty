@@ -225,4 +225,70 @@ def getAllQuestionstTheStudentSolvedFromCourse(studentObj, courseObj):
             retList += obj.answeredCorrect + obj.answeredWrong
 
     return retList
+
+########################################################
+# calculateSuccessNumsPerSubject(questionsAnsweredPerCourse)
+# help function
+########################################################
+def calculateSuccessNumsPerSubject(questionsAnsweredPerCourse): 
+    ret_list = []
+
+    for questionsAnsweredPerSubject in questionsAnsweredPerCourse.questionsAnsweredPerSubject:
+        numAnsweredCorrect = len(questionsAnsweredPerSubject.answeredCorrect)
+        numAnsweredWrong = len(questionsAnsweredPerSubject.answeredWrong)
+        ret_list.append((questionsAnsweredPerSubject.subjectName, numAnsweredCorrect / (numAnsweredWrong + numAnsweredCorrect)))
     
+    return ret_list
+
+########################################################
+# calculateSuccessRatesForCourse(courseName)
+# help function
+'''
+{
+    "courseName": "רשתות תקשורת",
+    "successRatesPerSubject": {
+        "DNS": 2, 
+        "TCP": 4
+    }
+}
+'''
+########################################################
+def calculateSuccessRatesForCourse(courseName):
+    allStudents = Student.objects.all()
+
+    # python dict
+    # ("DNS":
+    #     [
+    #       (2, 3), // 2 - correct, 3 - wrong for 1st student
+    #       (3, 4) // 3 - correct, 4 - wrong for 2nd student
+    #     ],
+    #  "TCP": [
+    #   ....
+    #   ]
+    # )
+    temp_dict = dict()
+
+    for student in allStudents:
+        studentQuestionsAnsweredPerCourse = student.questionsAnsweredPerCourse
+
+        for course in studentQuestionsAnsweredPerCourse:
+            if course.courseName == courseName:
+                studentQuestionsAnsweredPerSubject = course.questionsAnsweredPerSubject
+
+                for subject in studentQuestionsAnsweredPerSubject:
+                    numCorrect = len(subject.answeredCorrect)
+                    numWrong = len(subject.answeredWrong)
+
+                    if subject.subjectName in temp_dict.keys():
+                        temp_dict[subject.subjectName].append((numCorrect, numWrong))
+                    else:
+                        temp_dict[subject.subjectName] = [(numCorrect, numWrong)]
+        
+    for key in temp_dict.keys():
+        currentTuplesList = temp_dict[key]
+        tempList = [int((tuple[0] / (tuple[0] + tuple[1])) * 100) for tuple in currentTuplesList] # turn tuple into success rate
+        finalVal = sum(tempList) / len(tempList) # average success rate
+        temp_dict[key] = int(finalVal)
+                
+    return temp_dict
+

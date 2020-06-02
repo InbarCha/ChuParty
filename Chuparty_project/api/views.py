@@ -3197,6 +3197,7 @@ def submitResults(request):
         return JsonResponse(
             { 
                 "Exams Solved": [examGrade.as_json() for examGrade in studentExamsGradesList],
+                "Questions Answered": [questionsAnsweredPerCourseObj.as_json() for questionsAnsweredPerCourseObj in questionsAnsweredPerCourse],
                 "Status": "results submitted" 
             },
             status=200
@@ -3209,3 +3210,38 @@ def submitResults(request):
             status=500
         )
    
+
+######################################################
+'''
+getAllStudentsSuccessRates()
+GET
+ret_list = [
+    {
+        "courseName": "רשתות תקשורת"
+        "successRatesPerSubject":{
+            "DNS": 40, //%
+            "TCP": 50 //%
+        }
+    }
+]
+'''
+#####################################################
+def getAllStudentsSuccessRatesPerCourse(request):
+    if request.method == "GET":
+        courseNamesList = [course.name for course in Course.objects.all()]
+
+        ret_dict = dict()
+        for courseName in courseNamesList:
+            temp_ret_dict = calculateSuccessRatesForCourse(courseName)
+            if len(temp_ret_dict.keys()) > 0:
+                ret_dict[courseName] = temp_ret_dict
+
+        return JsonResponse(ret_dict)
+
+    else:
+        return JsonResponse(
+            {
+                    "Status": "getAllStudentsSuccessRates() only accepts GET requests",
+                },
+            status=500
+        )

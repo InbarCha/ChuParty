@@ -30,91 +30,95 @@ class GrowthGraph extends React.Component {
   }
 
   setDataline = (filter) => {
-    let activeCourse = this.state.activeCourse;
-    if (activeCourse === undefined) {
-      let logged_courses = localStorage["logged_courses"].split(",");
-      console.log(logged_courses);
-      if (logged_courses.length > 0) {
-        activeCourse = logged_courses[0];
+    if (localStorage["logged_exams_solved"] !== undefined) {
+      let activeCourse = this.state.activeCourse;
+      if (activeCourse === undefined) {
+        let logged_courses = localStorage["logged_courses"].split(",");
+        console.log(logged_courses);
+        if (logged_courses.length > 0) {
+          activeCourse = logged_courses[0];
+        }
       }
-    }
 
-    let logged_exams_solved = JSON.parse(localStorage["logged_exams_solved"]);
-    let curr_course_logged_exams_solved = [
-      ...logged_exams_solved.filter(
-        (elm, index) => elm["courseName"] === activeCourse
-      ),
-    ];
+      let logged_exams_solved = JSON.parse(localStorage["logged_exams_solved"]);
+      let curr_course_logged_exams_solved = [
+        ...logged_exams_solved.filter(
+          (elm, index) => elm["courseName"] === activeCourse
+        ),
+      ];
 
-    let curr_dataline = {
-      labels: [],
-      datasets: [
-        {
-          label: activeCourse,
-          fill: true,
-          lineTension: 0.3,
-          backgroundColor: "rgba(184, 185, 210, .3)",
-          borderColor: "rgb(35, 26, 136)",
-          borderCapStyle: "butt",
-          borderDash: [],
-          borderDashOffset: 0.0,
-          borderJoinStyle: "miter",
-          pointBorderColor: "rgb(35, 26, 136)",
-          pointBackgroundColor: "rgb(255, 255, 255)",
-          pointBorderWidth: 10,
-          pointHoverRadius: 5,
-          pointHoverBackgroundColor: "rgb(0, 0, 0)",
-          pointHoverBorderColor: "rgba(220, 220, 220, 1)",
-          pointHoverBorderWidth: 2,
-          pointRadius: 1,
-          ymax: 100,
-          ymin: 0,
-          pointHitRadius: 10,
-          data: [],
-        },
-      ],
-    };
+      let curr_dataline = {
+        labels: [],
+        datasets: [
+          {
+            label: activeCourse,
+            fill: true,
+            lineTension: 0.3,
+            backgroundColor: "rgba(184, 185, 210, .3)",
+            borderColor: "rgb(35, 26, 136)",
+            borderCapStyle: "butt",
+            borderDash: [],
+            borderDashOffset: 0.0,
+            borderJoinStyle: "miter",
+            pointBorderColor: "rgb(35, 26, 136)",
+            pointBackgroundColor: "rgb(255, 255, 255)",
+            pointBorderWidth: 10,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: "rgb(0, 0, 0)",
+            pointHoverBorderColor: "rgba(220, 220, 220, 1)",
+            pointHoverBorderWidth: 2,
+            pointRadius: 1,
+            ymax: 100,
+            ymin: 0,
+            pointHitRadius: 10,
+            data: [],
+          },
+        ],
+      };
 
-    curr_course_logged_exams_solved.forEach((elm, index) => {
-      let dateSolved = elm["dateSolved"];
-      let timeSolved = elm["timeSolved"];
-      let examGrade = elm["examGrade"];
+      curr_course_logged_exams_solved.forEach((elm, index) => {
+        let dateSolved = elm["dateSolved"];
+        let timeSolved = elm["timeSolved"];
+        let examGrade = elm["examGrade"];
 
-      let startDate =
-        this.state.startDate.getFullYear() +
-        "-" +
-        (this.state.startDate.getMonth() + 1) +
-        "-" +
-        this.state.startDate.getDate();
-      console.log(startDate);
-      let stateDateObj = new Date(startDate);
+        let startDate =
+          this.state.startDate.getFullYear() +
+          "-" +
+          (this.state.startDate.getMonth() + 1) +
+          "-" +
+          this.state.startDate.getDate();
+        console.log(startDate);
+        let stateDateObj = new Date(startDate);
 
-      let endDate =
-        this.state.endDate.getFullYear() +
-        "-" +
-        (this.state.endDate.getMonth() + 1) +
-        "-" +
-        this.state.endDate.getDate();
-      console.log(endDate);
-      let endDateObj = new Date(endDate);
+        let endDate =
+          this.state.endDate.getFullYear() +
+          "-" +
+          (this.state.endDate.getMonth() + 1) +
+          "-" +
+          this.state.endDate.getDate();
+        console.log(endDate);
+        let endDateObj = new Date(endDate);
 
-      if (filter) {
-        let dateSolvedObj = new Date(dateSolved + "T00:00:00");
-        console.log(dateSolvedObj);
-        console.log(stateDateObj);
-        console.log(endDateObj);
-        console.log("--------------");
-        if (dateSolvedObj >= stateDateObj && dateSolvedObj <= endDateObj) {
+        if (filter) {
+          let dateSolvedObj = new Date(dateSolved + "T00:00:00");
+          console.log(dateSolvedObj);
+          console.log(stateDateObj);
+          console.log(endDateObj);
+          console.log("--------------");
+          if (dateSolvedObj >= stateDateObj && dateSolvedObj <= endDateObj) {
+            curr_dataline.labels.push(
+              "(" + dateSolved + " " + timeSolved + ")"
+            );
+            curr_dataline.datasets[0].data.push(examGrade);
+          }
+        } else {
           curr_dataline.labels.push("(" + dateSolved + " " + timeSolved + ")");
           curr_dataline.datasets[0].data.push(examGrade);
         }
-      } else {
-        curr_dataline.labels.push("(" + dateSolved + " " + timeSolved + ")");
-        curr_dataline.datasets[0].data.push(examGrade);
-      }
-    });
+      });
 
-    this.setState({ dataLine: curr_dataline });
+      this.setState({ dataLine: curr_dataline });
+    }
   };
 
   changeCompActiveCourse = async (e, course) => {

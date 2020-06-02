@@ -41,61 +41,63 @@ export class BarChart extends React.Component {
     );
   }
 
-  setDataline = (correct) => {
-    let activeCourse = this.state.activeCourse;
-    if (activeCourse === undefined) {
-      let logged_courses = localStorage["logged_courses"].split(",");
-      console.log(logged_courses);
-      if (logged_courses.length > 0) {
-        activeCourse = logged_courses[0];
-      }
-    }
-
-    let logged_questions_answered = JSON.parse(
-      localStorage["logged_questions_answered"]
-    );
-    let curr_course_logged_questions_answered = [
-      ...logged_questions_answered.filter(
-        (elm, index) => elm["courseName"] === activeCourse
-      ),
-    ];
-
-    let curr_dataline = {
-      labels: [],
-      datasets: [
-        {
-          label: activeCourse,
-          data: [],
-          borderWidth: 2,
-          backgroundColor: [],
-          borderWidth: 2,
-          borderColor: [],
-        },
-      ],
-    };
-
-    curr_course_logged_questions_answered.forEach((elm, index) => {
-      elm["questionsAnsweredPerSubject"].forEach((elm, index) => {
-        let subjectName = elm["subjectName"];
-        let numAnsweredCorrect = elm["answeredCorrect"].length;
-        let numAnsweredWrong = elm["answeredWrong"].length;
-
-        let numToPush = 0;
-        if (numAnsweredCorrect !== 0 || numAnsweredWrong !== 0) {
-          numToPush =
-            numAnsweredCorrect / (numAnsweredWrong + numAnsweredCorrect);
+  setDataline = () => {
+    if (localStorage["logged_questions_answered"] !== undefined) {
+      let activeCourse = this.state.activeCourse;
+      if (activeCourse === undefined) {
+        let logged_courses = localStorage["logged_courses"].split(",");
+        console.log(logged_courses);
+        if (logged_courses.length > 0) {
+          activeCourse = logged_courses[0];
         }
+      }
 
-        curr_dataline.labels.push(subjectName);
-        curr_dataline.datasets[0].data.push(numToPush);
+      let logged_questions_answered = JSON.parse(
+        localStorage["logged_questions_answered"]
+      );
+      let curr_course_logged_questions_answered = [
+        ...logged_questions_answered.filter(
+          (elm, index) => elm["courseName"] === activeCourse
+        ),
+      ];
 
-        let color = this.generateColor();
-        curr_dataline.datasets[0].backgroundColor.push(color);
-        curr_dataline.datasets[0].borderColor.push(color);
+      let curr_dataline = {
+        labels: [],
+        datasets: [
+          {
+            label: activeCourse,
+            data: [],
+            borderWidth: 2,
+            backgroundColor: [],
+            borderWidth: 2,
+            borderColor: [],
+          },
+        ],
+      };
+
+      curr_course_logged_questions_answered.forEach((elm, index) => {
+        elm["questionsAnsweredPerSubject"].forEach((elm, index) => {
+          let subjectName = elm["subjectName"];
+          let numAnsweredCorrect = elm["answeredCorrect"].length;
+          let numAnsweredWrong = elm["answeredWrong"].length;
+
+          let numToPush = 0;
+          if (numAnsweredCorrect !== 0 || numAnsweredWrong !== 0) {
+            numToPush =
+              numAnsweredCorrect / (numAnsweredWrong + numAnsweredCorrect);
+          }
+
+          curr_dataline.labels.push(subjectName);
+          curr_dataline.datasets[0].data.push(numToPush);
+
+          let color = this.generateColor();
+          curr_dataline.datasets[0].backgroundColor.push(color);
+          curr_dataline.datasets[0].borderColor.push(color);
+        });
       });
-    });
 
-    this.setState({ dataBar: curr_dataline });
+      this.setState({ dataBar: curr_dataline });
+    }
   };
 
   render() {

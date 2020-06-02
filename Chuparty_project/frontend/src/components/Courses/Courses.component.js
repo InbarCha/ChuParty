@@ -322,14 +322,22 @@ export default class Courses extends Component {
         return Object.keys(course)[0];
       });
 
+      console.log(courses_names_copy);
+      console.log(courses_names);
       //fiter out from logged courses every course which exists in courses_copy but not in courses
       logged_courses = logged_courses.filter(
         (elm) =>
           !(
-            courses_names_copy.indexOf(elm) > 0 &&
+            courses_names_copy.indexOf(elm) >= 0 &&
             courses_names.indexOf(elm) < 0
           )
       );
+
+      if (courses_names.length === 0) {
+        logged_courses = logged_courses.filter(
+          (elm, index) => !(courses_names_copy.indexOf(elm) >= 0)
+        );
+      }
 
       if (logged_courses.length > 0) {
         courses_names = [

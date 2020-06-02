@@ -45,6 +45,11 @@ export default class TestResult extends Component {
         console.log(data);
         let examsSolved = data["Exams Solved"];
         localStorage["logged_exams_solved"] = JSON.stringify(examsSolved);
+
+        let questionsAnswered = data["Questions Answered"];
+        localStorage["logged_questions_answered"] = JSON.stringify(
+          questionsAnswered
+        );
       })
       .catch((err) => {
         console.error("error while submitting results", err);

@@ -109,6 +109,7 @@ export default class Admin extends Component {
                   localStorage.removeItem("logged_exams_solved");
                   localStorage.removeItem("activeSubmittedItems");
                   localStorage.removeItem("logged_questions_answered");
+                  localStorage.removeItem("student_success_rates");
                   this.props.setLoggedIn(false);
                   this.props.parentClickHandler("NON_AUTHENTICATED");
                 }
