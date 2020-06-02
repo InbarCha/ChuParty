@@ -14,7 +14,7 @@ export class NonAauthenticated extends Component {
   render() {
     return (
       <div dir="RTL">
-        <div className="page_title_unauth">ברוכים הבאים לChuparty! </div>
+        <div className="page_title_unauth">ברוכים הבאים לChuParty! </div>
         <hr />
         <div className="unauth_description">
           המערכת המספקת את היכולת לתרגל את הקורסים שלכם,
