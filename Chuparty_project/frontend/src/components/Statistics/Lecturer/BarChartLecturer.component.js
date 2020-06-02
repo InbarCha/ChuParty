@@ -153,7 +153,7 @@ export class BarChartLecturer extends Component {
           <h3 className="mt-5" dir="RTL" style={{ textAlign: "center" }}>
             <MDBBadge color="primary">
               {" "}
-              אחוז ממוצע השאלות שנענו נכון לכל נושא - לכלל הסטודנטים - בקורס{" "}
+              ממוצע השאלות שנענו נכון לכל נושא באחוזים - לכלל הסטודנטים - בקורס{" "}
               {activeCourse}
             </MDBBadge>
           </h3>
