@@ -49,6 +49,8 @@ export default class Statistics extends Component {
             console.error("error while student successRates:", err)
           );
       }
+    } else if (localStorage["logged_type"] === "Student") {
+      this.setState({ loaded_data: true });
     }
   }
 
