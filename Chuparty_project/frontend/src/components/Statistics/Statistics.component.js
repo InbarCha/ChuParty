@@ -98,13 +98,13 @@ export default class Statistics extends Component {
         } else if (localStorage["logged_type"] === "Lecturer") {
           res = (
             <React.Fragment>
-              <HorizontalBarChart
-                studentAvgGrades={this.state.student_avg_grades}
+              <BarChartLecturer
+                studentSuccessRates={this.state.student_success_rates}
               />
               <br /> <br />
               <hr />
-              <BarChartLecturer
-                studentSuccessRates={this.state.student_success_rates}
+              <HorizontalBarChart
+                studentAvgGrades={this.state.student_avg_grades}
               />
             </React.Fragment>
           );
