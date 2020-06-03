@@ -31,14 +31,15 @@ const override = css`
 `;
 
 export default class Exams extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       exams: null,
       activeCourse: localStorage["activeCourse"],
       sonComponents: [],
       generateExamNumOfQuestions: 10,
       loading: false,
+      searchStr: props.filterBy || ""
     };
   }
 
@@ -56,27 +57,47 @@ export default class Exams extends Component {
     }
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.filterBy !== prevProps.filterBy) {
+      let lowerCaseFilter = this.props.filterBy.toLowerCase();
+      console.log(`searching for ${lowerCaseFilter}`);
+      this.setState({ searchStr: lowerCaseFilter })
+    }
+    if (prevState.searchStr != this.state.searchStr)
+      this.SetSonComponents();
+  }
+
   SetSonComponents = () => {
-    let sonComponents = [];
+    if (this.state.exams !== null) {
+      let exams = this.state.exams.filter(e => {
+        if (!e) return;
+        const elmName = Object.keys(e)[0];
+        console.log(e);
+        return elmName.indexOf(this.state.searchStr) !== -1
+          || e[elmName].writers.find(e => e.toLowerCase().indexOf(this.state.searchStr) !== -1)
+          || e[elmName].subjects.find(e => e.toLowerCase().indexOf(this.state.searchStr) !== -1)
+      });
+      let sonComponents = [];
 
-    this.state.exams.forEach((elm, index) => {
-      let newExam = "";
-      if (elm !== "" && (elm !== null) & (elm !== undefined)) {
-        newExam = (
-          <Exam
-            bounce={false}
-            key={index}
-            index={index}
-            parentClickHandler={this.props.parentClickHandler}
-            exam={this.state.exams[index]}
-            changeExamComponent={this.changeExamComponent}
-          />
-        );
-      }
-      sonComponents.push(newExam);
-    });
+      exams.forEach((elm, index) => {
+        let newExam = "";
+        if (elm !== "" && (elm !== null) & (elm !== undefined)) {
+          newExam = (
+            <Exam
+              bounce={false}
+              key={index}
+              index={index}
+              parentClickHandler={this.props.parentClickHandler}
+              exam={exams[index]}
+              changeExamComponent={this.changeExamComponent}
+            />
+          );
+        }
+        sonComponents.push(newExam);
+      });
 
-    this.setState({ sonComponents: sonComponents });
+      this.setState({ sonComponents: sonComponents });
+    }
   };
 
   createDeepCopyExam = (exam) => {
@@ -322,13 +343,13 @@ export default class Exams extends Component {
             )}
             {(localStorage["logged_type"] === "Admin" ||
               localStorage["logged_type"] === "Lecturer") && (
-              <span
-                className="material-icons add_course_icon"
-                onClick={this.addExam}
-              >
-                add
-              </span>
-            )}
+                <span
+                  className="material-icons add_course_icon"
+                  onClick={this.addExam}
+                >
+                  add
+                </span>
+              )}
             <Row>{this.state.sonComponents}</Row>
           </Container>
         </div>
@@ -338,6 +359,7 @@ export default class Exams extends Component {
           <RotateLoader css={override} size={50} loading={this.state.loading} />
         </div>
       ) : (
+<<<<<<< HEAD
         <div dir="RTL">
           <div className="page_title"> שאלות </div>
           <div className="active_model_title">
@@ -349,6 +371,19 @@ export default class Exams extends Component {
           </div>
         </div>
       );
+=======
+            <React.Fragment dir="RTL">
+              <div className="page_title"> Questions </div>
+              <div className="active_model_title">
+                <span
+                  style={{ fontStyle: "italic", fontSize: "x-large", color: "red" }}
+                >
+                  בעיה בטעינת מבחנים: לא נבחר קורס
+            </span>
+              </div>
+            </React.Fragment>
+          );
+>>>>>>> 46e2b9c... search exams
     return res;
   }
 }
