@@ -85,7 +85,10 @@ export default class Home extends Component {
       case "EXAMS":
         this.setState({
           currentContentView: (
-            <Exams parentClickHandler={this.onSideBarClick} />
+            <Exams
+              parentClickHandler={this.onSideBarClick}
+              filterBy={this.state.searchStr}
+            />
           ),
         });
         break;
