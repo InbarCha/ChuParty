@@ -359,7 +359,6 @@ export default class Exams extends Component {
           <RotateLoader css={override} size={50} loading={this.state.loading} />
         </div>
       ) : (
-<<<<<<< HEAD
         <div dir="RTL">
           <div className="page_title"> שאלות </div>
           <div className="active_model_title">
@@ -371,19 +370,6 @@ export default class Exams extends Component {
           </div>
         </div>
       );
-=======
-            <React.Fragment dir="RTL">
-              <div className="page_title"> Questions </div>
-              <div className="active_model_title">
-                <span
-                  style={{ fontStyle: "italic", fontSize: "x-large", color: "red" }}
-                >
-                  בעיה בטעינת מבחנים: לא נבחר קורס
-            </span>
-              </div>
-            </React.Fragment>
-          );
->>>>>>> 46e2b9c... search exams
     return res;
   }
 }
