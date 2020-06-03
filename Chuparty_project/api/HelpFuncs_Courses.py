@@ -39,7 +39,10 @@ def createCourseOrAddSubject(courseJson):
         newCourse = Course(name=courseName, subjects=subjectsList, school=school)
         newCourse.save()
 
-        schoolObj = School.objects.get(name=school)
+        if School.objects.filter(name=school).count() > 0:
+            schoolObj = School.objects.get(name=school)
+        else: 
+            schoolObj = School(name=school,courses=[])
         coursesList = schoolObj.courses
         coursesList.append(courseName)
         School.objects.filter(name=school).update(courses=coursesList)

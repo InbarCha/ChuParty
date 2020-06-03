@@ -31,7 +31,9 @@ export class LecturerQuestionsPage extends Component {
   render() {
     let res =
       this.state.activeExamsID !== undefined &&
-      this.state.activeExamsID !== null ? (
+      this.state.activeExamsID !== null &&
+      this.state.activeCourse !== undefined &&
+      this.state.activeCourse !== null ? (
         <Container fluid className="model_items_container">
           <div className="page_title" dir="RTL">
             {" "}
@@ -122,7 +124,7 @@ export class LecturerQuestionsPage extends Component {
             <span
               style={{ fontStyle: "italic", fontSize: "x-large", color: "red" }}
             >
-              לא נבחר אף מבחן
+              לא נבחר אף קורס / מבחן
             </span>
           </div>
         </div>

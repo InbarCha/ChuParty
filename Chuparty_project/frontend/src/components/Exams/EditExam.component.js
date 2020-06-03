@@ -313,10 +313,14 @@ export class EditExam extends Component {
                   })}
                 </div>
                 <div className="detail_container">
-                  <span style={{ fontStyle: "italic" }}>נושאי המבחן:</span>
-                  {subjects.map((subject, index) => {
-                    return <div key={index}>{subject}</div>;
-                  })}
+                  {subjects.length > 0 && (
+                    <React.Fragment>
+                      <span style={{ fontStyle: "italic" }}>נושאי המבחן:</span>
+                      {subjects.map((subject, index) => {
+                        return <div key={index}>{subject}</div>;
+                      })}
+                    </React.Fragment>
+                  )}
                 </div>
                 <div className="detail_container">
                   <span style={{ fontStyle: "italic" }}>
