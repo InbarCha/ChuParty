@@ -28,7 +28,9 @@
     "react-slick": "^0.26.1",
     "react-spinners": "^0.8.3",
     "react-uuid": "^1.0.2",
-    "styled-components": "^5.1.0"
+    "styled-components": "^5.1.0",
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1"
   },
   "scripts": {
     "start": "react-scripts start",

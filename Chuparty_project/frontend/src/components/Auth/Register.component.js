@@ -14,6 +14,15 @@ import {
 } from "mdbreact";
 import Checkbox from "@material-ui/core/Checkbox";
 import Select from "react-select";
+import nacl from "tweetnacl";
+import utils from "tweetnacl-util";
+
+const encodeBase64 = utils.encodeBase64;
+
+// Our nonce must be a 24 bytes Buffer (or Uint8Array)
+const nonce = nacl.randomBytes(24);
+// Our secret key must be a 32 bytes Buffer (or Uint8Array)
+const secretKey = Buffer.from("12345678123456781234567812345678", "utf8");
 
 const REGISTER_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
@@ -190,9 +199,18 @@ export class Register extends Component {
         (this.state.checkedLecturer && schools !== ""))
     ) {
       this.setState({ registerWarning: "" });
+
+      // Make sure your data is also a Buffer of Uint8Array
+      const secretData = Buffer.from(password, "utf8");
+      const encrypted = nacl.secretbox(secretData, nonce, secretKey);
+      const passwordEncrypted = `${encodeBase64(nonce)}:${encodeBase64(
+        encrypted
+      )}`;
+      console.log(passwordEncrypted);
+
       let request_body = {
         username: username,
-        password: password,
+        password: passwordEncrypted,
         first_name: first_name,
         last_name: last_name,
         email: email,

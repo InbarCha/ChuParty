@@ -7,6 +7,8 @@ from django.middleware.csrf import get_token
 import json
 from django.http import JsonResponse
 import operator
+from base64 import b64decode
+from nacl.secret import SecretBox
 import time
 from random import shuffle
 from datetime import datetime
@@ -19,14 +21,7 @@ from api.HelpFuncs_Exams import *
 from api.HelpFuncs_General import *
 from api.HelpFuncs_Users import *
 
-
-# TODO: take care of case-senstitive issues (for example in MongoDB queries)
-
-# TODO: Think of a better way to handle document IDs.
-#      For example, two courses with the same name could exist (that belong to different schools),
-#      so handling course name as its ID is not good enough
-#      NEEDED? or will every school have its own DB?
-
+secret_key = '12345678123456781234567812345678'
 
 ##################################################
 '''
@@ -2593,7 +2588,6 @@ def isLoggedIn(request):
             status=500
         )
 
-
 ######################################################
 '''
 logIn()
@@ -2617,8 +2611,17 @@ def logIn(request):
                 }
             )
         username = body["username"]
-        password = body["password"]
-        user = authenticate(request, username=username, password=password)
+
+        passwordEncrypted = body["password"]
+        passwordEncryptedAll = passwordEncrypted.split(":")
+        nonce = b64decode(passwordEncryptedAll[0])
+        encryptedPassword = b64decode(passwordEncryptedAll[1])
+
+        # We create a SecretBox, making sure that out secret_key is in bytes
+        box = SecretBox(bytes(secret_key, encoding='utf8'))
+        passwordDecrypted = box.decrypt(encryptedPassword, nonce).decode('utf-8')
+
+        user = authenticate(request, username=username, password=passwordDecrypted)
 
         if user is not None:
             login(request, user)
@@ -2721,14 +2724,23 @@ def register(request):
 
         first_name = body["first_name"]
         last_name = body["last_name"]
-        password = body["password"]
+
+        passwordEncrypted = body["password"]
+        passwordEncryptedAll = passwordEncrypted.split(":")
+        nonce = b64decode(passwordEncryptedAll[0])
+        encryptedPassword = b64decode(passwordEncryptedAll[1])
+
+        # We create a SecretBox, making sure that out secret_key is in bytes
+        box = SecretBox(bytes(secret_key, encoding='utf8'))
+        passwordDecrypted = box.decrypt(encryptedPassword, nonce).decode('utf-8')
+
         email = body['email']
         accountType = body['type']
         school = body["school"]
         schools = body["schools"]
 
         user = User(username=username, first_name=first_name, last_name=last_name, email=email)
-        user.set_password(password)
+        user.set_password(passwordDecrypted)
         user.save()
 
         ret_json = {
