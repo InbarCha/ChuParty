@@ -306,41 +306,6 @@ export default class Exams extends Component {
             </div>
           )}
           <Container fluid className="model_items_container">
-            {localStorage["logged_type"] === "Student" && (
-              <Row className="narrow_row">
-                <Col className="text-center">
-                  <MDBDropdown>
-                    <MDBDropdownToggle caret color="info">
-                      {"בחר מספר שאלות במבחן "}
-                    </MDBDropdownToggle>
-                    <MDBDropdownMenu basic>
-                      <MDBDropdownItem
-                        onClick={(e) => this.changeNumOfQuestions(e, 10)}
-                      >
-                        10
-                      </MDBDropdownItem>
-                      <MDBDropdownItem
-                        onClick={(e) => this.changeNumOfQuestions(e, 12)}
-                      >
-                        12
-                      </MDBDropdownItem>
-                    </MDBDropdownMenu>
-                  </MDBDropdown>
-                  <MDBBtn
-                    color="info"
-                    type="submit"
-                    onClick={this.generateExam}
-                  >
-                    ג'נרט מבחן
-                  </MDBBtn>
-                  <RotateLoader
-                    css={override}
-                    size={30}
-                    loading={this.state.loading}
-                  />
-                </Col>
-              </Row>
-            )}
             {(localStorage["logged_type"] === "Admin" ||
               localStorage["logged_type"] === "Lecturer") && (
                 <span
