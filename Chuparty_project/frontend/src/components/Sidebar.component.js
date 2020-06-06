@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-export default class Home extends Component {
+export default class Sidebar extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -10,6 +10,19 @@ export default class Home extends Component {
   render() {
     return (
       <div className="sidebar">
+        {localStorage["activeCourse"] && localStorage["logged_type"] === "Student" && (
+          <React.Fragment>
+            <div
+              className="side_item"
+              onClick={(e) => this.state.parentClickHandler("COURSE_HOME")}
+            >
+              <i className="material-icons">home</i>
+            </div>
+            <div className="side_description">
+              <span>עמוד הקורס</span>
+            </div>
+          </React.Fragment>
+        )}
         {(localStorage["logged_type"] === "Admin" ||
           localStorage["logged_type"] === "Lecturer") && (
           <React.Fragment>
@@ -67,7 +80,7 @@ export default class Home extends Component {
               className="side_item"
               onClick={(e) => this.state.parentClickHandler("STATISTICS")}
             >
-              <i className="material-icons">message</i>
+              <i className="material-icons">poll</i>
             </div>
             <div className="side_description">
               <span>סטטיסטיקה</span>
