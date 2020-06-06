@@ -64,7 +64,7 @@ export default class Home extends Component {
   }
 
   onSideBarClick = (clickMsg) => {
-    console.log(clickMsg);
+    // console.log(clickMsg);
     switch (clickMsg) {
       case "HOME":
         this.setState({
@@ -190,7 +190,7 @@ export default class Home extends Component {
         break;
       case "TEST_RESULTS":
         let submittedItems = JSON.parse(localStorage["activeSubmittedItems"]);
-        console.log(submittedItems);
+        // console.log(submittedItems);
 
         if (submittedItems !== undefined && submittedItems !== null) {
           this.setState({
@@ -201,7 +201,7 @@ export default class Home extends Component {
         }
         break;
       default:
-        console.log("no clickMsg handler for:", clickMsg);
+        // console.log("no clickMsg handler for:", clickMsg);
     }
   };
 
@@ -214,7 +214,7 @@ export default class Home extends Component {
   };
 
   filterBy(str) {
-    console.log(`filtering by ${str}`);
+    // console.log(`filtering by ${str}`);
     this.setState({ searchStr: str });
     this.setState({
       currentContentView: React.cloneElement(this.state.currentContentView, {

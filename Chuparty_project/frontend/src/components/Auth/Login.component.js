@@ -49,7 +49,7 @@ export class Login extends Component {
 
   login = (e) => {
     e.preventDefault();
-    console.log("login");
+    // console.log("login");
 
     let username = this.state.username;
     let password = this.state.password;
@@ -68,7 +68,7 @@ export class Login extends Component {
       const passwordEncrypted = `${encodeBase64(nonce)}:${encodeBase64(
         encrypted
       )}`;
-      console.log(passwordEncrypted);
+      // console.log(passwordEncrypted);
 
       let request_body = {
         username: username,
@@ -82,7 +82,7 @@ export class Login extends Component {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log(data);
+          // console.log(data);
           this.setState({ isWaiting: false });
 
           if (data["isLoggedIn"] === true) {

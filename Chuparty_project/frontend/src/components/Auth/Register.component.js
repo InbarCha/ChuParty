@@ -206,7 +206,7 @@ export class Register extends Component {
       const passwordEncrypted = `${encodeBase64(nonce)}:${encodeBase64(
         encrypted
       )}`;
-      console.log(passwordEncrypted);
+      // console.log(passwordEncrypted);
 
       let request_body = {
         username: username,
@@ -220,7 +220,7 @@ export class Register extends Component {
       };
       this.setState({ isWaiting: true });
 
-      console.log(request_body);
+      // console.log(request_body);
 
       fetch(REGISTER_ROUTE, {
         method: "POST",
@@ -228,7 +228,7 @@ export class Register extends Component {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log(data);
+          // console.log(data);
           this.setState({ isWaiting: false });
 
           if (data["isRegistered"] === true) {
