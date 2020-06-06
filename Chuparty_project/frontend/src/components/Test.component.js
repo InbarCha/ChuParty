@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import RotateLoader from "react-spinners/ClipLoader";
+import { css } from "@emotion/core";
 import QuestionsCarousel from "./QuestionsCarousel.component";
 import TestResult from "./TestResult.component";
 
@@ -6,6 +8,11 @@ const EXAM_BY_ID_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/getExamByID?examID="
     : "/api/getExamByID?examID=";
+
+const override = css`
+  display: block;
+  margin: 0 auto;
+`;
 
 export default class Test extends Component {
   constructor(props) {
@@ -65,8 +72,9 @@ export default class Test extends Component {
     let res;
     if (this.state.loading)
       res = (
-        <div>
-          <h1>LOADING</h1>
+        <div className="col-centered models_loading" dir="RTL">
+          <div className="loading_title"> טוען מבחן... </div>
+          <RotateLoader css={override} size={50} />
         </div>
       );
     else if (this.state.afterTest) res = <div>{this.showResults()}</div>;

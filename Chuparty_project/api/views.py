@@ -1419,6 +1419,7 @@ def generateExam(request):
         
         if 'subjects' in body.keys():
             subjects = body["subjects"]
+            print(f"subjects are: {subjects}")
         else:
             subjects = [subject.name for subject in courseObj.subjects]
 

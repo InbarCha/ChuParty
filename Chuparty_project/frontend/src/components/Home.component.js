@@ -16,6 +16,7 @@ import NonAuthenticated from "./Auth/NonAuthenticatedcomponent";
 import EditProfile from "./Auth/EditProfile.component";
 import LecturerQuestionsPage from "./Questions/LecturerQuestionsPage.component";
 import TestResult from "./TestResult.component";
+import CourseHome from "./Courses/CourseHome.component";
 
 export default class Home extends Component {
   _isMounted = false;
@@ -110,6 +111,15 @@ export default class Home extends Component {
         break;
       case "STATISTICS":
         this.setState({ currentContentView: <Statistics /> });
+        break;
+      case "COURSE_HOME":
+        this.setState({
+          currentContentView: <CourseHome
+            parentClickHandler={this.onSideBarClick}
+            activeCourse={localStorage.getItem("activeCourse")}
+            activeCourseSubjects={localStorage["activeCourseSubjects"]}
+          />
+        });
         break;
       case "ADMIN":
         this.setState({
