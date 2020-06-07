@@ -10,19 +10,20 @@ export default class Sidebar extends Component {
   render() {
     return (
       <div className="sidebar">
-        {localStorage["activeCourse"] && localStorage["logged_type"] === "Student" && (
-          <React.Fragment>
-            <div
-              className="side_item"
-              onClick={(e) => this.state.parentClickHandler("COURSE_HOME")}
-            >
-              <i className="material-icons">home</i>
-            </div>
-            <div className="side_description">
-              <span>עמוד הקורס</span>
-            </div>
-          </React.Fragment>
-        )}
+        {localStorage["activeCourse"] &&
+          localStorage["logged_type"] === "Student" && (
+            <React.Fragment>
+              <div
+                className="side_item"
+                onClick={(e) => this.state.parentClickHandler("COURSE_HOME")}
+              >
+                <i className="material-icons">home</i>
+              </div>
+              <div className="side_description">
+                <span>עמוד הקורס</span>
+              </div>
+            </React.Fragment>
+          )}
         {(localStorage["logged_type"] === "Admin" ||
           localStorage["logged_type"] === "Lecturer") && (
           <React.Fragment>
@@ -55,25 +56,6 @@ export default class Sidebar extends Component {
         <div className="side_description">
           <span>מבחנים</span>
         </div>
-        {localStorage["logged_type"] !== "Student" && (
-          <React.Fragment>
-            <div
-              className="side_item"
-              onClick={(e) => {
-                if (localStorage["logged_type"] === "Lecturer") {
-                  this.state.parentClickHandler("LECTURER_QUESTIONS_PAGE");
-                } else {
-                  this.state.parentClickHandler("QUESTIONS");
-                }
-              }}
-            >
-              <i className="material-icons">question_answer</i>
-            </div>
-            <div className="side_description">
-              <span>שאלות</span>
-            </div>
-          </React.Fragment>
-        )}
         {localStorage["logged_type"] !== "Admin" && (
           <React.Fragment>
             <div

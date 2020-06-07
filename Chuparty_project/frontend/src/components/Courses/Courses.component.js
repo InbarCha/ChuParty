@@ -132,8 +132,12 @@ export default class Courses extends Component {
     localStorage["activeCourse"] = courseName;
     localStorage["activeCourseSubjects"] = courseSubjects;
     this.setState({ activeCourse: courseName });
-    // this.props.parentClickHandler("EXAMS");
-    this.props.parentClickHandler("COURSE_HOME");
+
+    if (localStorage["logged_type"] === "Student") {
+      this.props.parentClickHandler("COURSE_HOME");
+    } else {
+      this.props.parentClickHandler("EXAMS");
+    }
   };
 
   changedCourse = (course, index) => {

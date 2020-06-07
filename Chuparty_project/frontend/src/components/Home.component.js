@@ -14,7 +14,6 @@ import Register from "./Auth/Register.component";
 import Profile from "./Auth/Profile.component";
 import NonAuthenticated from "./Auth/NonAuthenticatedcomponent";
 import EditProfile from "./Auth/EditProfile.component";
-import LecturerQuestionsPage from "./Questions/LecturerQuestionsPage.component";
 import TestResult from "./TestResult.component";
 import CourseHome from "./Courses/CourseHome.component";
 
@@ -96,13 +95,6 @@ export default class Home extends Component {
       case "QUESTIONS":
         this.setState({ currentContentView: <Questions edit={false} /> });
         break;
-      case "LECTURER_QUESTIONS_PAGE":
-        this.setState({
-          currentContentView: (
-            <LecturerQuestionsPage parentClickHandler={this.onSideBarClick} />
-          ),
-        });
-        break;
       case "QUESTIONS_EDIT":
         this.setState({ currentContentView: <Questions edit={true} /> });
         break;
@@ -114,11 +106,13 @@ export default class Home extends Component {
         break;
       case "COURSE_HOME":
         this.setState({
-          currentContentView: <CourseHome
-            parentClickHandler={this.onSideBarClick}
-            activeCourse={localStorage.getItem("activeCourse")}
-            activeCourseSubjects={localStorage["activeCourseSubjects"]}
-          />
+          currentContentView: (
+            <CourseHome
+              parentClickHandler={this.onSideBarClick}
+              activeCourse={localStorage.getItem("activeCourse")}
+              activeCourseSubjects={localStorage["activeCourseSubjects"]}
+            />
+          ),
         });
         break;
       case "ADMIN":
@@ -201,7 +195,7 @@ export default class Home extends Component {
         }
         break;
       default:
-        // console.log("no clickMsg handler for:", clickMsg);
+      // console.log("no clickMsg handler for:", clickMsg);
     }
   };
 

@@ -14,7 +14,7 @@ export class Exam extends Component {
     localStorage["activeExamName"] = this.props.exam[activeExamID]["name"];
     localStorage["activeExamDate"] = this.props.exam[activeExamID]["date"];
     if (localStorage["logged_type"] === "Lecturer") {
-      this.props.parentClickHandler("LECTURER_QUESTIONS_PAGE");
+      this.props.parentClickHandler("QUESTIONS");
     }
     if (localStorage["logged_type"] === "Student") {
       let examsSolved = JSON.parse(localStorage["logged_exams_solved"]);
