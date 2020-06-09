@@ -247,6 +247,7 @@ export class Register extends Component {
             localStorage["logged_email"] = data["email"];
             localStorage["logged_type"] = data["type"];
             localStorage["logged_schools"] = data["schools"];
+            localStorage["login_time"] = Date.now();
             if (data["schools"] !== undefined) {
               localStorage["activeSchool"] = data["schools"][0];
             }

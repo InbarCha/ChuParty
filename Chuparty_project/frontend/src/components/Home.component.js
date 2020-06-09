@@ -17,6 +17,11 @@ import EditProfile from "./Auth/EditProfile.component";
 import TestResult from "./TestResult.component";
 import CourseHome from "./Courses/CourseHome.component";
 
+const LOGOUT_ROUTE =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/logOut"
+    : "/api/logOut";
+
 export default class Home extends Component {
   _isMounted = false;
 
@@ -34,10 +39,13 @@ export default class Home extends Component {
   }
 
   componentDidMount() {
-    if (
-      localStorage["loggedUsername"] !== "" &&
-      localStorage["loggedUsername"] !== undefined
-    ) {
+    if (!localStorage["login_time"] || (Date.now() - localStorage["login_time"] >= 441764440000)) { // 2 weeks
+      this.logout();
+    } else if (localStorage["login_time"]) {
+      // TODO: check if the user still exists
+    } if (localStorage["loggedUsername"] !== "" &&
+      localStorage["loggedUsername"] !== undefined &&
+      localStorage["login_time"]) {
       this.setState({ isLoggedIn: true });
       if (
         localStorage["activeSchool"] !== "" &&
@@ -60,6 +68,41 @@ export default class Home extends Component {
         });
       }
     }
+  }
+
+  logout() {
+    fetch(LOGOUT_ROUTE)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data["isLoggedOut"] === true) {
+          localStorage.removeItem("loggedUsername");
+          localStorage.removeItem("logged_first_name");
+          localStorage.removeItem("logged_last_name");
+          localStorage.removeItem("logged_email");
+          localStorage.removeItem("logged_type");
+          localStorage.removeItem("logged_courses");
+          localStorage.removeItem("logged_schools");
+          localStorage.removeItem("activeSchool");
+          localStorage.removeItem("activeCourse");
+          localStorage.removeItem("activeExamID");
+          localStorage.removeItem("email_to_edit_as_admin");
+          localStorage.removeItem("editUserAsAdmin");
+          localStorage.removeItem("username_to_edit_as_admin");
+          localStorage.removeItem("first_name_to_edit_as_admin");
+          localStorage.removeItem("last_name_to_edit_as_admin");
+          localStorage.removeItem("asAdmin_originalUsername");
+          localStorage.removeItem("activeCourseSubjects");
+          localStorage.removeItem("activeExamName");
+          localStorage.removeItem("activeExamDate");
+          localStorage.removeItem("logged_exams_solved");
+          localStorage.removeItem("student_success_rates");
+          localStorage.removeItem("logged_questions_answered");
+          localStorage.removeItem("activeSubmittedItems");
+          this.setLoggedIn(false);
+          this.onSideBarClick("NON_AUTHENTICATED");
+        }
+      })
+      .catch((err) => console.error("error while logging out:", err));
   }
 
   onSideBarClick = (clickMsg) => {
