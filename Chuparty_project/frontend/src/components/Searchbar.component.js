@@ -54,6 +54,7 @@ export default class Home extends Component {
             localStorage.removeItem("student_success_rates");
             localStorage.removeItem("logged_questions_answered");
             localStorage.removeItem("activeSubmittedItems");
+            localStorage.removeItem("login_time");
             this.props.setLoggedIn(false);
             this.props.parentClickHandler("NON_AUTHENTICATED");
           }

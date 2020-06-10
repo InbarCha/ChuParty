@@ -43,17 +43,27 @@ export default class Home extends Component {
   }
 
   componentDidMount() {
-    if (!localStorage["login_time"] || (Date.now() - localStorage["login_time"] >= 441764440000)) { // 2 weeks
+    if (
+      !localStorage["login_time"] ||
+      (localStorage["login_time"] !== undefined &&
+        Date.now() - localStorage["login_time"] >= 441764440000)
+    ) {
+      // 2 weeks
       this.logout();
     } else if (localStorage["login_time"]) {
       // check if user was not deleted
       fetch(GET_USER_ROUTE + `?username=${localStorage["loggedUsername"]}`)
-        .then(res => res.json())
-        .then(data => { if (data.Status != "User Exists") this.logout(); else console.log(data.Status) })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.Status != "User Exists") this.logout();
+          else console.log(data.Status);
+        });
     }
-    if (localStorage["loggedUsername"] !== "" &&
+    if (
+      localStorage["loggedUsername"] !== "" &&
       localStorage["loggedUsername"] !== undefined &&
-      localStorage["login_time"]) {
+      localStorage["login_time"]
+    ) {
       this.setState({ isLoggedIn: true });
       if (
         localStorage["activeSchool"] !== "" &&
@@ -115,10 +125,17 @@ export default class Home extends Component {
 
   onSideBarClick = (clickMsg) => {
     // check if user still exists in the background whenever we navigate
-    if (clickMsg != "LOGIN" && clickMsg != "REGISTER" && clickMsg != "NON_AUTHENTICATED")
+    if (
+      clickMsg != "LOGIN" &&
+      clickMsg != "REGISTER" &&
+      clickMsg != "NON_AUTHENTICATED"
+    )
       fetch(GET_USER_ROUTE + `?username=${localStorage["loggedUsername"]}`)
-        .then(res => res.json())
-        .then(data => { if (data.Status != "User Exists") this.logout(); else console.log(data.Status) })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.Status != "User Exists") this.logout();
+          else console.log(data.Status);
+        });
     // console.log(clickMsg);
     switch (clickMsg) {
       case "HOME":
