@@ -3003,6 +3003,29 @@ def getAllUsers(request):
 
 ######################################################
 '''
+getUserByUsername()
+GET
+/api/getUserByUsername?username=inbarcha
+'''
+#####################################################
+def getUserByUsername(request):
+    if request.method == "GET":
+        username = request.GET.get("username")
+        if User.objects.filter(username=username).count() > 0:
+            return JsonResponse({"Status": "User Exists"})
+        else:
+            return JsonResponse({"Status": "User Doesn't Exist"})
+
+    else:  # request.method isn't GET
+        return JsonResponse(
+            {
+                        "Status": "getUserByUsername() only accepts GET requests",
+                    },
+            status=500
+            )
+
+######################################################
+'''
 deleteUser()
 GET
 '''

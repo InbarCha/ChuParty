@@ -72,6 +72,7 @@ urlpatterns = [
     path('editUser', views.editUser),
     path('getAllUsers', views.getAllUsers),
     path('deleteUser', views.deleteUser),
+    path('getUserByUsername', views.getUserByUsername),
 
     # test
     path('submitResults', views.submitResults)
