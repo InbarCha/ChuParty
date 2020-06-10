@@ -115,9 +115,10 @@ export default class Home extends Component {
 
   onSideBarClick = (clickMsg) => {
     // check if user still exists in the background whenever we navigate
-    fetch(GET_USER_ROUTE + `?username=${localStorage["loggedUsername"]}`)
-      .then(res => res.json())
-      .then(data => { if (data.Status != "User Exists") this.logout(); else console.log(data.Status) })
+    if (clickMsg != "LOGIN" && clickMsg != "REGISTER" && clickMsg != "NON_AUTHENTICATED")
+      fetch(GET_USER_ROUTE + `?username=${localStorage["loggedUsername"]}`)
+        .then(res => res.json())
+        .then(data => { if (data.Status != "User Exists") this.logout(); else console.log(data.Status) })
     // console.log(clickMsg);
     switch (clickMsg) {
       case "HOME":
