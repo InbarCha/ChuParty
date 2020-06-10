@@ -21,6 +21,10 @@ const LOGOUT_ROUTE =
   !process.env.NODE_ENV || process.env.NODE_ENV === "development"
     ? "http://localhost:8000/api/logOut"
     : "/api/logOut";
+const GET_USER_ROUTE =
+  !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    ? "http://localhost:8000/api/getUserByUsername"
+    : "/api/getUserByUsername";
 
 export default class Home extends Component {
   _isMounted = false;
@@ -42,8 +46,12 @@ export default class Home extends Component {
     if (!localStorage["login_time"] || (Date.now() - localStorage["login_time"] >= 441764440000)) { // 2 weeks
       this.logout();
     } else if (localStorage["login_time"]) {
-      // TODO: check if the user still exists
-    } if (localStorage["loggedUsername"] !== "" &&
+      // check if user was not deleted
+      fetch(GET_USER_ROUTE + `?username=${localStorage["loggedUsername"]}`)
+        .then(res => res.json())
+        .then(data => { if (data.Status != "User Exists") this.logout(); else console.log(data.Status) })
+    }
+    if (localStorage["loggedUsername"] !== "" &&
       localStorage["loggedUsername"] !== undefined &&
       localStorage["login_time"]) {
       this.setState({ isLoggedIn: true });
@@ -106,6 +114,10 @@ export default class Home extends Component {
   }
 
   onSideBarClick = (clickMsg) => {
+    // check if user still exists in the background whenever we navigate
+    fetch(GET_USER_ROUTE + `?username=${localStorage["loggedUsername"]}`)
+      .then(res => res.json())
+      .then(data => { if (data.Status != "User Exists") this.logout(); else console.log(data.Status) })
     // console.log(clickMsg);
     switch (clickMsg) {
       case "HOME":
