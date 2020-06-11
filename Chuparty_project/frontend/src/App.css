@@ -739,3 +739,6 @@ span.grade {}
     text-decoration: underline;
     -webkit-text-stroke: thin;
 }
+.rec.rec-slider div {
+    outline: none;
+}
