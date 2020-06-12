@@ -44,9 +44,9 @@ export default class Home extends Component {
 
   componentDidMount() {
     if (
-      !localStorage["login_time"] ||
-      (localStorage["login_time"] !== undefined &&
-        Date.now() - localStorage["login_time"] >= 441764440000)
+      !localStorage["login_time"] &&
+      localStorage["login_time"] !== undefined &&
+      Date.now() - localStorage["login_time"] >= 441764440000
     ) {
       // 2 weeks
       this.logout();
