@@ -182,10 +182,15 @@ def calculateStudentLevelInSubjects(subjectsArr, courseObj, studentObj):
                 if len(hardDiffLvlQuestionsAnsweredCorrect) == 0:
                     hardDiffLvlQuestionsAnsweredCorrect.append(0)
 
-                meanEasyCorrect = statistics.mean(easyDiffLvlQuestionsAnsweredCorrect)
-                meanHardCorrect = statistics.mean(hardDiffLvlQuestionsAnsweredCorrect)
+                meanEasyCorrect = math.ceil(statistics.mean(easyDiffLvlQuestionsAnsweredCorrect))
+                meanHardCorrect = math.ceil(statistics.mean(hardDiffLvlQuestionsAnsweredCorrect))
 
-                meanCorrect = (0.4 * meanEasyCorrect) + (0.6 * meanHardCorrect) 
+                if meanEasyCorrect == 0: 
+                    meanCorrect = meanHardCorrect
+                elif meanHardCorrect == 0:
+                    meanCorrect = meanEasyCorrect
+                else:
+                    meanCorrect = (0.2 * meanEasyCorrect) + (0.8 * meanHardCorrect) 
 
                 # answered wrong
                 easyDiffLvlQuestionsAnsweredWrong = [question.difficulty for question in subjectQuestionsAnswered.answeredWrong if question.difficulty < 5]
@@ -195,15 +200,27 @@ def calculateStudentLevelInSubjects(subjectsArr, courseObj, studentObj):
                 if len(hardDiffLvlQuestionsAnsweredWrong) == 0:
                     hardDiffLvlQuestionsAnsweredWrong.append(0)
 
-                meanEasyWrong = statistics.mean(easyDiffLvlQuestionsAnsweredWrong)
-                meanHardWrong = statistics.mean(hardDiffLvlQuestionsAnsweredWrong)
+                meanEasyWrong = math.ceil(statistics.mean(easyDiffLvlQuestionsAnsweredWrong))
+                meanHardWrong = math.ceil(statistics.mean(hardDiffLvlQuestionsAnsweredWrong))
 
-                meanWrong = (0.4 * meanEasyWrong) + (0.6 * meanHardWrong)
+                if meanEasyWrong == 0: 
+                    meanWrong = meanHardWrong
+                elif meanHardWrong == 0:
+                    meanWrong = meanEasyWrong
+                else:
+                    meanWrong = (0.2 * meanEasyWrong) + (0.8 * meanHardWrong)
 
                 # total mean
-                totalMean = max(0, round(meanCorrect - meanWrong))
+                if meanWrong > meanCorrect:
+                    diff = meanWrong - meanCorrect
+                    totalMean = max(0, math.ceil(meanCorrect - diff))
+                else:
+                    totalMean = max(0, math.ceil(meanCorrect - diff))
 
                 resArr.append((subjectQuestionsAnswered.subjectName, totalMean))
+    else:
+        for subject in subjectsArr:
+            resArr.append((subject, 0))
 
     return resArr
 

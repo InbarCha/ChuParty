@@ -1424,6 +1424,7 @@ def generateExam(request):
             subjects = [subject.name for subject in courseObj.subjects]
 
         studentLevelInSubjects = calculateStudentLevelInSubjects(subjects, courseObj, studentObj)
+        print(studentLevelInSubjects)
         questionsStudentSolved = getAllQuestionstTheStudentSolvedFromCourse(studentObj, courseObj)
 
         # pick the number of questions as specified, from the specified courses and subjects, 
@@ -1455,7 +1456,7 @@ def generateExam(request):
         # if there aren't enough questions, pick more from questionsFromCourseAndSubjectsList (only chosen subjects)
         if len(questionsListSlice) < numberOfQuestions:
             for question in questionsFromCourseAndSubjectsList:
-                if question.body not in questionsListSlice:
+                if question.body not in [question.body for question in questionsListSlice]:
                     questionsListSlice.append(question)
                 if (len(questionsListSlice) == numberOfQuestions):
                     break
@@ -1463,7 +1464,7 @@ def generateExam(request):
         # if there aren't enough questions, pick more from questionsFromCouresList (all subjects)
         if len(questionsListSlice) < numberOfQuestions:
             for question in questionsFromCouresList:
-                if question.body not in questionsListSlice:
+                if question.body not in [question.body for question in questionsListSlice]:
                     questionsListSlice.append(question)
                 if (len(questionsListSlice) == numberOfQuestions):
                     break
@@ -3209,7 +3210,8 @@ def submitResults(request):
 
             except Exception as e:
                return JsonResponse(
-                {
+                {   
+                    "body": questionBody,
                         "Exception": str(e)
                     },
                 status=500

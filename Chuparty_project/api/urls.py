@@ -75,5 +75,5 @@ urlpatterns = [
     path('getUserByUsername', views.getUserByUsername),
 
     # test
-    path('submitResults', views.submitResults)
+    path('submitResults', views.submitResults),
 ]
