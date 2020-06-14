@@ -1423,7 +1423,10 @@ def generateExam(request):
         else:
             subjects = [subject.name for subject in courseObj.subjects]
 
-        studentLevelInSubjects = calculateStudentLevelInSubjects(subjects, courseObj, studentObj)
+        try:
+            studentLevelInSubjects = calculateStudentLevelInSubjects(subjects, courseObj, studentObj)
+        except Exception as e:
+            print(e)
         print(studentLevelInSubjects)
         questionsStudentSolved = getAllQuestionstTheStudentSolvedFromCourse(studentObj, courseObj)
 

@@ -215,7 +215,7 @@ def calculateStudentLevelInSubjects(subjectsArr, courseObj, studentObj):
                     diff = meanWrong - meanCorrect
                     totalMean = max(0, math.ceil(meanCorrect - diff))
                 else:
-                    totalMean = max(0, math.ceil(meanCorrect - diff))
+                    totalMean = max(0, math.ceil(meanCorrect - meanWrong))
 
                 resArr.append((subjectQuestionsAnswered.subjectName, totalMean))
     else:
