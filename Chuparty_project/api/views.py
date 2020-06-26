@@ -380,9 +380,6 @@ def editCourse(request):
                         newSubjectsList.append(subjectObj)
                         addedToSubjectsFlg = True
 
-                        addSubjectToCourseInQuestions(name, subjectObj)
-                        addSubjectToCourseInExams(name, subjectObj)
-
             # delete subjects from course
             if 'DeleteFromSubjects' in body.keys():
                 newSubjectsList = courseObj.subjects
@@ -401,9 +398,6 @@ def editCourse(request):
                             filter(lambda subject: subject.name != subjectObj.name, newSubjectsList))
                         courseObj.subjects = newSubjectsList
                         deletedFromSubjectsFlg = True
-
-                        deleteSubjectFromCourseInQuestions(name, subjectObj)
-                        deleteSubjectFromCourseInExams(name, subjectObj)
 
             # update course's subjects list
             if addedToSubjectsFlg == True or deletedFromSubjectsFlg == True:

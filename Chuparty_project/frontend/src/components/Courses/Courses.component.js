@@ -260,6 +260,8 @@ export default class Courses extends Component {
     this.setState({ checkV: false });
     let courses = this.state.courses;
     let sonComponents = this.state.sonComponents;
+    let all_courses = this.state.all_courses;
+    let course_name = Object.keys(courses[index])[0];
 
     console.log(sonComponents.length - 1);
     console.log(index);
@@ -272,7 +274,15 @@ export default class Courses extends Component {
       courses.pop();
     }
 
-    this.setState({ courses: courses, sonComponents: sonComponents });
+    all_courses = all_courses.filter(
+      (course) => Object.keys(course)[0] !== course_name
+    );
+
+    this.setState({
+      courses: courses,
+      sonComponents: sonComponents,
+      all_courses: all_courses,
+    });
   };
 
   addCourseToSonComponents = (course) => {
